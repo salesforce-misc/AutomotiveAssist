@@ -1,0 +1,46 @@
+Journey_ID,Domain,Journey_Title,Journey_Type,Setup_Subtype,Pre_Requisites,Business_Process,Detailed_Scenarios,Features_Mapped,Personas,Complexity,Data_Shape,Frequency,Priority,Setup_Required,Expected_Outcome,Integration_Points,Performance_Requirements,Author,Notes
+Auto_Appraisal_Config_UJ,Automotive Cloud - Appraisal Management,Trade-in / Appraisal Management Org Configuration,Setup,Configuration,"Automotive Cloud licensed; Person Accounts enabled (sandbox-first if not yet on); Account / Product / Asset record-type splits already in place (Business + Person on Account; Vehicle + Parts on Product and Asset); Lead and Opportunity standard objects available; Salesforce Scheduler licensed (for Inspection Visit step); Approvals feature enabled; OmniStudio licensed for OmniScript / FlexCard delivery","PSL & License → Org Preference enable → User Permission grant → Profiles / Permission Sets → Record Types & Page Layouts → Approval Process → OmniStudio assets → Status Picklists & Flow → Compact Layouts & Filter Columns → Telemetry / TDs whitelisting → ARC last (no ARC change for this feature)","Scenario Overview: An OEM / Dealer Admin enables the new Appraisal Management add-on for Automotive Cloud per the Epic (R254). All toggles are reversible except Person Accounts (already on as a prerequisite); flag is org-pref + user-permission gated until the standalone add-on license ships in a later release.
+
+Step-by-Step:
+1. [OEM Admin] Navigate Setup → Company Information → confirm Automotive Cloud licenses are active.
+2. [OEM Admin] Setup → User Management → Permission Set Licenses → confirm 'Automotive Foundation User' is assigned to the dealer org user pool. (Per Epic Licensing Impacts: a dedicated add-on license is planned post-254; for 254 a User Permission + Org Preference is used.)
+3. [OEM Admin] Setup → Feature Settings → Automotive → toggle 'Appraisal Management' Org Preference ON. [Reversible.]
+4. [OEM Admin] Setup → Permission Sets → create / clone 'Appraisal_Dealer_Sales_Executive' PS; assign User Permission 'Manage Appraisal' (new in 254).
+5. [OEM Admin] Permission Sets → 'Appraisal_Finance_Manager' PS; grant approval-step access for Final Appraisal Price approval.
+6. [OEM Admin] Permission Sets → 'Appraisal_Service_Advisor' PS; grant access to Inspection Visit + Appraisal Item read/write.
+7. [OEM Admin] Permission Sets → 'Appraisal_External_Community_User' PS for Partner / Customer Community access (Epic 10 — process Appraisal as external user).
+8. [OEM Admin] Setup → Object Manager → Appraisal → Record Types: 'Vehicle Appraisal', 'Asset Appraisal' (Battery / Equipment / Generic). Both must exist; Vehicle is the 254 P0 path.
+9. [OEM Admin] Object Manager → Appraisal Item → Record Types: 'Vehicle Appraisal Item', 'Asset Appraisal Item'.
+10. [OEM Admin] Object Manager → Appraisal → Page Layouts per RT: General Information / Additional Information / Price Information / System Information sections per Epic 'Sections Information'.
+11. [OEM Admin] Object Manager → Appraisal Item → Page Layouts per RT (Vehicle vs Asset): General Information, Registration Details, Address Information, Vehicle Features and Conditions, Additional Information, Price Information, System Information.
+12. [OEM Admin] Object Manager → Appraisal Item Add-on → Page Layout (Information section: Name | Appraisal Item, Type | Unit Price).
+13. [OEM Admin] Object Manager → Appraisal Item Provider Valuation → Page Layout (Provider Name | Appraisal Item, Valuation Date Time, Average / Rough / Clean Condition Value).
+14. [OEM Admin] Object Manager → Appraisal Adjustment → Page Layout (Name | Type, Appraisal | Appraisal Item, Description | Comments, Adjustment Value | Adjusted By).
+15. [OEM Admin] Setup → Process Automation → Approval Processes → create 'Appraisal Final Price Approval' on Appraisal: Submitter = Dealer Sales Executive, Approver = Finance Manager (default) or designated Approving Authority. Final step: Approve → Field Update → Final Appraisal Price = Adjusted Appraisal Price; Reject → Status = Rejected.
+16. [OEM Admin] Setup → OmniStudio → import Appraisal OmniScripts (vehicle flow + asset flow) and FlexCards (Appraisal record + Appraisal Item record). Confirm Vehicle OmniScript supports clone-and-reuse (Extensibility requirement).
+17. [OEM Admin] Object Manager → Appraisal → Picklists: Interest Type ('Valuation', 'Sales', 'Trade-in'); Appraisal Status (per partner-defined transitions or manual); Make / Model / Year / Style picklists wired to Vehicle / Vehicle Definition.
+18. [OEM Admin] Object Manager → Appraisal Item → Picklists: Exterior Colour, Condition, Mileage UoM, Owner (number of hand-offs).
+19. [OEM Admin] Object Manager → Appraisal Adjustment → Picklist 'Adjustment Type' (Markup, Discount, Reconditioning Cost, Dents and Scratches, Mark-up Profit Margin).
+20. [OEM Admin] Object Manager → Appraisal → Compact Layout (TBD per Epic — placeholder).
+21. [OEM Admin] Object Manager → Appraisal → Search Layouts / Filter Columns (TBD per Epic — placeholder).
+22. [OEM Admin] Setup → Sharing Settings → confirm OWD on Appraisal / Appraisal Item / Appraisal Adjustment / Appraisal Item Add-on / Appraisal Item Provider Valuation = Private; sharing inherits from related Lead / Opportunity / Account / Asset.
+23. [OEM Admin] Object Manager → Lead → add 'Appraisal' related list (Enhanced List with Name, Status, Unique Reference Record, Is Active, Final Appraisal Value).
+24. [OEM Admin] Object Manager → Opportunity → add 'Appraisal' related list (per TD-0209987 whitelisting).
+25. [OEM Admin] Object Manager → Account → add 'Appraisal' related list (per TD-0209989 whitelisting).
+26. [OEM Admin] Object Manager → Asset → add 'Appraisal' related list (per TD-0209992 whitelisting).
+27. [OEM Admin] Object Manager → Vehicle → add 'Appraisal Item' related list / Appraisal entry button on Vehicle page.
+28. [OEM Admin] Setup → Generic Visit framework → enable trade-in entity for GV Visit framework (per TD-0213024) so Inspection Visit (Epic 11) can attach Appraisal context.
+29. [OEM Admin] Setup → Document Checklist Items / Action Plans → whitelist Action Plan, ActionPlanItem, DocumentChecklistItem for trade-in entities (per TD-0213023).
+30. [OEM Admin] Setup → OmniAssessmentTask whitelisting (per TD-0213027) to allow assessments inside the appraisal flow.
+31. [OEM Admin] Setup → Assessment whitelisting for entities (per TD-0213025).
+32. [OEM Admin] Setup → Experience Cloud → Dealer / Partner Community → activate Appraisal pages and OmniScripts for community-user profile (Epic 10 — 254 stretch / 256 confirmed).
+33. [OEM Admin] Setup → Mobile App → confirm no impact (Appraisal is OmniStudio-on-web; mobile out of scope per project rule that OmniStudio is web-only).
+34. [OEM Admin] Setup → Audit Trail → confirm enabled (Appraisal Status transitions and approvals will appear in standard audit trail).
+35. [OEM Admin] ARC: no graph definition change required for Appraisal in 254. Confirm ARC is still last in any future setup change.
+36. [Validation] [OEM Admin] Run /auto:audit → expect 0 errors against Appraisal Management; run /auto:health-check on the org.","Permission Set Licenses, Permission Sets, Org Preferences (Appraisal Management), User Permissions (Manage Appraisal), Record Types (Vehicle / Asset on Appraisal & Appraisal Item), Page Layouts, Compact Layouts (TBD), Approval Processes, OmniStudio (OmniScript + FlexCard), Picklist Value Sets, Sharing / OWD, Generic Visit Framework whitelisting, Document Checklist / Action Plan whitelisting, OmniAssessmentTask & Assessment whitelisting, Experience Cloud Pages, Audit Trail","OEM Admin (primary); Dealer Admin (secondary)","Single OEM, Single Brand - P0
+Multi-Brand OEM, Single Region - P1
+Multi-Brand OEM, Multi-Region (currency / language variants) - P2
+
+Internal Dealer Org only - P0
+Dealer + Partner Community - P1
+Dealer + Customer Community - P2","Small","Once per org (rerun in sandbox before each release upgrade)",P0,"Automotive Foundation 254+; Person Accounts already enabled; Product RT split (Vehicle/Parts) and Asset RT split (Vehicle/Parts) already configured (foundational prerequisites tracked separately).","Org is configured to run the Appraisal flow end-to-end for Vehicles (P0) and Assets (P0) with approval routing, OmniScript-driven UI, and the right RL surfaces on Lead / Opportunity / Account / Asset / Vehicle.","Approval routing notifications via email; OmniStudio runtime; Audit Trail; Generic Visit framework; Action Plan / Document Checklist Item; Experience Cloud (community profile); no ARC changes.","Configuration UI navigation < 3s per setting page; OmniScript publish / activate < 60s; Permission Set assignment to user < 10s.","auto-journey-architect","Sources: Trade-inAppraisal Management Epic Doc.pdf — Licensing Impacts, TDs (TD-0209987/89/91/92, TD-0213023/24/25/27), Sections Information, Approval Workflow notes. Org is read-only — Admin must apply these manually; this journey is the validation script. Person Accounts / Lightning Knowledge / Timeline are NOT toggled by this journey (out-of-scope but listed as prerequisites)."

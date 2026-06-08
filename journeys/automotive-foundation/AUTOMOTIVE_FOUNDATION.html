@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Altura Import Template — Automotive Foundation + Appraisal Management</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 2rem; background: #f8f9fa; color: #1a1a1a; }
+  h1 { color: #0176d3; margin-bottom: 0.3rem; }
+  h2 { color: #333; border-bottom: 2px solid #0176d3; padding-bottom: 0.3rem; margin-top: 2.5rem; }
+  h3 { color: #0176d3; margin-top: 1.5rem; }
+  .subtitle { color: #666; margin-bottom: 2rem; }
+  .tab-label { background: #0176d3; color: #fff; padding: 4px 12px; border-radius: 4px 4px 0 0; display: inline-block; font-weight: 600; font-size: 0.9rem; }
+  table { border-collapse: collapse; width: 100%; margin-bottom: 2rem; font-size: 0.85rem; }
+  th { background: #e8f4fd; color: #0176d3; font-weight: 600; text-align: left; padding: 8px 10px; border: 1px solid #d0d0d0; white-space: nowrap; }
+  td { padding: 6px 10px; border: 1px solid #e0e0e0; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+  tr:hover td { background: #f0f7ff; }
+  .required { color: #d32f2f; font-weight: bold; }
+  .optional { color: #888; font-style: italic; }
+  .note { background: #fff3cd; border-left: 4px solid #ffc107; padding: 10px 14px; margin: 1rem 0; font-size: 0.9rem; }
+  .info { background: #e8f4fd; border-left: 4px solid #0176d3; padding: 10px 14px; margin: 1rem 0; font-size: 0.9rem; }
+  .rule { background: #fce4ec; border-left: 4px solid #d32f2f; padding: 10px 14px; margin: 1rem 0; font-size: 0.9rem; }
+  code { background: #eee; padding: 2px 5px; border-radius: 3px; font-size: 0.85rem; }
+  .legend { display: flex; gap: 1.5rem; flex-wrap: wrap; margin: 1rem 0; }
+  .legend span { font-size: 0.85rem; }
+  .legend .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+  .dot-setup { background: #4caf50; }
+  .dot-txn { background: #2196f3; }
+  .dot-reporting { background: #9c27b0; }
+  .dot-integration { background: #607d8b; }
+  .dot-dim { background: #ff9800; }
+  .scenario-header td { background: #e8f4fd !important; font-weight: 600; }
+  .dim-table th { background: #fff3e0; color: #e65100; }
+  .dim-values-table th { background: #fff8e1; color: #f57f17; }
+  .constraint-table th { background: #e8f5e9; color: #2e7d32; }
+  .section-label { background: #f5f5f5; border: 1px solid #ddd; padding: 6px 12px; border-radius: 4px; display: inline-block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; color: #555; }
+</style>
+</head>
+<body>
+
+<h1>Altura Standard Import Template</h1>
+<p class="subtitle">Automotive Cloud — Foundation + Appraisal Management — Vertical &amp; Journey Onboarding</p>
+
+<div class="info">
+  <strong>Source:</strong> Combined import for Salesforce Automotive Cloud covering (a) the <em>Automotive Foundation</em> setup &amp; transaction journey sheets and (b) the <em>Trade-in / Appraisal Management</em> 4+1 journey suite (Configuration / Setup Data / Integration / Reporting / TUJ). Total 29 journeys (10 Setup + 17 Transaction + 1 Integration + 1 Reporting).
+</div>
+
+<div class="note">
+  <strong>Authoring vs Runtime:</strong> Flows, journeys, and scenarios are <em>authoring-layer</em> constructs (human organization of test intent). Test cases and chains are <em>runtime-layer</em> (executor composition). This template populates the authoring layer only — runtime composition happens later via the pipeline.
+</div>
+
+<h2><span class="tab-label">Tab 1</span> Vertical Setup</h2>
+
+<table id="tab1">
+<thead>
+<tr>
+  <th>vertical_name <span class="required">*</span></th>
+  <th>display_name</th>
+  <th>application <span class="required">*</span></th>
+  <th>parent_vertical</th>
+  <th>preferred_prefix</th>
+  <th>owner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Automotive</td>
+  <td>Automotive Cloud — Foundation &amp; Appraisal Management</td>
+  <td>Automotive Cloud (Foundation + Appraisal Add-on)</td>
+  <td>Industries</td>
+  <td>AUTO</td>
+  <td>auto-sdet@salesforce.com</td>
+</tr>
+</tbody>
+</table>
+
+<div class="info">
+  <code>wave_id</code> is auto-assigned by the import skill at ingest time. Do not include it in the template — this prevents collisions across concurrent imports.
+</div>
+
+<h2><span class="tab-label">Tab 2</span> Journeys <span class="required">(Required)</span></h2>
+
+<div class="legend">
+  <span><span class="dot dot-setup"></span> Setup (10)</span>
+  <span><span class="dot dot-txn"></span> Transaction (17)</span>
+  <span><span class="dot dot-integration"></span> Integration (1)</span>
+  <span><span class="dot dot-reporting"></span> Reporting (1)</span>
+</div>
+
+<table id="tab2">
+<thead>
+<tr>
+  <th>flow_name <span class="required">*</span></th>
+  <th>journey_name <span class="required">*</span></th>
+  <th>journey_type <span class="required">*</span></th>
+  <th>persona</th>
+  <th>priority</th>
+  <th>prerequisite</th>
+  <th>business_process</th>
+  <th>features</th>
+  <th>complexity</th>
+  <th>data_shape_notes</th>
+  <th>integration</th>
+  <th>integration_component</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Appraisal Management - Trade-in</td>
+  <td>Trade-in / Appraisal Management Org Configuration</td>
+  <td>setup</td>
+  <td>OEM Admin (primary); Dealer Admin (secondary)</td>
+  <td>P0</td>
+  <td>Automotive Cloud licensed; Person Accounts enabled (sandbox-first if not yet on); Account / Product / Asset record-type splits already in place (Business + Person on Account; Vehicle + Parts on Product and Asset); Lead and Opportunity standard objects available; Salesforce Scheduler licensed (for I…</td>
+  <td>PSL &amp; License → Org Preference enable → User Permission grant → Profiles / Permission Sets → Record Types &amp; Page Layouts → Approval Process → OmniStudio assets → Status Picklists &amp; Flow → Compact Layouts &amp; Filter Columns → Telemetry / TDs whitelisting → ARC last (no ARC change for this feature)</td>
+  <td>Permission Set Licenses, Permission Sets, Org Preferences (Appraisal Management), User Permissions (Manage Appraisal), Record Types (Vehicle / Asset on Appraisal &amp; Appraisal Item), Page Layouts, Compact Layouts (TBD), Approval Processes, OmniStudio (OmniScript + FlexCard), Picklist Value Sets, Shar…</td>
+  <td>Single OEM, Single Brand - P0
+Multi-Brand OEM, Single Region - P1
+Multi-Brand OEM, Multi-Region (currency / language variants) - P2
+
+Internal Dealer Org only - P0
+Dealer + Partner Community - P1
+Dealer + Customer Community - P2</td>
+  <td>Small</td>
+  <td>Yes</td>
+  <td>Approval routing notifications via email; OmniStudio runtime; Audit Trail; Generic Visit framework; Action Plan / Document Checklist Item; Experience Cloud (community profile); no ARC changes.</td>
+</tr>
+<tr>
+  <td>Appraisal Platform Setup</td>
+  <td>Appraisal Management - setup - Data (standalone, no provider valuations)</td>
+  <td>setup</td>
+  <td>System Administrator, Sales Manager</td>
+  <td>P0</td>
+  <td>Pre-requisites: 1. System Administrator logs in to Org having Appraisal Management - setup - configuration (standalone) - done</td>
+  <td>Setup an Automotive Cloud Appraisal org Personas Involved: 1. Salesforce System Administrator 2. Sales Manager</td>
+  <td></td>
+  <td>Create Appraisal record type variations :
+Trade-In
+Standalone-ICO
+Lease-Return
+Fleet
+
+Create Appraisal Item categories :
+Mechanical
+Body
+Interior
+Tires
+Frame
+Recon
+
+Create offer template variations :
+Single-line
+Itemized
+Fleet roll-up</td>
+  <td></td>
+  <td>No</td>
+  <td></td>
+</tr>
+<tr>
+  <td>Appraisal Platform Setup</td>
+  <td>Appraisal Management - setup - Data (with Provider Valuations + ARC)</td>
+  <td>setup</td>
+  <td>System Administrator, Sales Manager</td>
+  <td>P0</td>
+  <td>Pre-requisites: 1. System Administrator logs in to Org having Appraisal Management - setup - configuration (with Provider Valuations + ARC) - done</td>
+  <td>Setup an Automotive Cloud Appraisal org with multi-provider valuation and ARC Personas Involved: 1. Salesforce System Administrator 2. Sales Manager 3. F&amp;I Manager</td>
+  <td></td>
+  <td>Provider blend rule variations :
+Lowest of three
+Average of three
+Configurable weighted blend (e.g. KBB 40%, BB 30%, MMR 30%)
+
+ARC graph variations :
+Account -&gt; Asset -&gt; Appraisal
+Account -&gt; Opportunity -&gt; Appraisal -&gt; Asset
+Fleet -&gt; Fleet Asset -&gt; Appraisal</td>
+  <td></td>
+  <td>Yes</td>
+  <td>KBB, Black Book, Manheim MMR, NHTSA VIN decode</td>
+</tr>
+<tr>
+  <td>Appraisal Platform Setup</td>
+  <td>Appraisal Management - setup - configuration (standalone, no provider valuations, no ARC)</td>
+  <td>setup</td>
+  <td>System Administrator</td>
+  <td>P0</td>
+  <td>Pre-requisites: 1. System Administrator logs in to Org having Automotive Cloud required licenses</td>
+  <td>Setup an Automotive Cloud Appraisal org Personas Involved: 1. Salesforce System Administrator</td>
+  <td></td>
+  <td>License SKU Names :
+1. Automotive Cloud
+2. Automotive Cloud - HF OZ
+3. Automotive Cloud User Add-On
+4. Automotive Cloud User Add-On - HF OZ
+5. Sales Cloud / Service Cloud (host license)</td>
+  <td></td>
+  <td>No</td>
+  <td></td>
+</tr>
+<tr>
+  <td>Appraisal Platform Setup</td>
+  <td>Appraisal Management - setup - configuration (with Provider Valuations + ARC)</td>
+  <td>setup</td>
+  <td>System Administrator</td>
+  <td>P0</td>
+  <td>Pre-requisites: 1. System Administrator logs in to Org having Automotive Cloud + MuleSoft Anypoint required licenses</td>
+  <td>Setup an Automotive Cloud Appraisal org with multi-provider valuation and ARC graph Personas Involved: 1. Salesforce System Administrator</td>
+  <td></td>
+  <td>License SKU Names :
+1. Automotive Cloud
+2. Automotive Cloud - HF OZ
+3. Automotive Cloud User Add-On
+4. Automotive Cloud User Add-On - HF OZ
+5. MuleSoft Anypoint (Connected Service)
+6. Data Cloud (optional, for activation)
+7. Agentforce for Service / Sales (optional)</td>
+  <td></td>
+  <td>Yes</td>
+  <td>KBB, Black Book, Manheim MMR, NHTSA VIN decode (via MuleSoft Anypoint)</td>
+</tr>
+<tr>
+  <td>Appraisal Platform Setup</td>
+  <td>Trade-in / Appraisal Management Setup Data &amp; Reference Entities</td>
+  <td>setup</td>
+  <td>SDET (primary); Implementation Consultant (secondary)</td>
+  <td>P0</td>
+  <td>Auto_Appraisal_Config_UJ completed; Vehicle Definition reference data already loaded (MMY catalog); Business Brand &amp; Catalog already loaded; Code Sets exist for Condition / Exterior Colour / Mileage UoM / Owner; Auto_Vehicle_Data_UJ available so Vehicle records can be referenced by VIN# search.</td>
+  <td>Reference data → Master picklist value sets → Vehicle Definition / Product graph → Asset graph → Lead / Opportunity graph → Approval routing user graph → Community user graph → Telemetry baseline</td>
+  <td>Vehicle Definition, Vehicle, Asset, Asset Warranty, ProductRelatedComponent (AccessoryProduct), Lead + Lead Line Item, Opportunity + Opportunity Product, Account (Person + Business), Contact, User, Action Plan Templates, Document Checklist Items, Picklist Value Sets, Telemetry counters</td>
+  <td>Smoke - P0
+Regression - P1
+Performance - P2
+
+Vehicle-only data graph - P0
+Vehicle + Asset (Battery / Equipment) graph - P1
+Vehicle + Asset + Community user graph - P2</td>
+  <td>Small,Medium,Large</td>
+  <td>Yes</td>
+  <td>Source providers (read-only): existing Vehicle / Asset / Vehicle Definition data already in sandbox; no live external valuation calls during Setup Data step.</td>
+</tr>
+<tr>
+  <td>Automotive Foundation Setup</td>
+  <td>Automotive Foundation - Setup - Configuration (Org Preferences + PSLs + Profiles + Record Types + Page Layouts)</td>
+  <td>setup</td>
+  <td>Dealer Admin, OEM Admin, System Administrator</td>
+  <td>P0</td>
+  <td>Pre-requisites: 1. System Administrator logs in to Org having Automotive Cloud required licenses (SKU Automotive Cloud) 2. Person Accounts already enabled (or sandbox-first toggle planned) 3. Sandbox refreshed from production with no in-flight metadata changes</td>
+  <td>Setup an Automotive Cloud org foundation Personas Involved: 1. Salesforce System Administrator 2. OEM Admin 3. Dealer Admin</td>
+  <td>Automotive Cloud Foundation, Salesforce GO, Permission Set Licenses, Permission Sets, Profiles, Record Types, Page Layouts, Org Preferences</td>
+  <td>High</td>
+  <td></td>
+  <td>No</td>
+  <td></td>
+</tr>
+<tr>
+  <td>Automotive Foundation Setup</td>
+  <td>Automotive Foundation - Setup - Data (Reference + Master Data for Foundation Entities)</td>
+  <td>setup</td>
+  <td>Dealer Admin, OEM Admin, System Administrator</td>
+  <td>P0</td>
+  <td>Pre-requisites: 1. Automotive Foundation - Setup - Configuration completed 2. Person Accounts enabled 3. All record types and page layouts in place 4. Permission Sets assigned to seed-data user</td>
+  <td>Load reference and master data for Automotive Foundation entities Personas Involved: 1. Salesforce System Administrator 2. OEM Admin 3. Dealer Admin 4. Data Migration Specialist</td>
+  <td>Automotive Cloud Foundation, Vehicle, VehicleDefinition, Product2, Asset, Account, Contact, ServiceTerritory, OperatingHours, GeoCountry</td>
+  <td>High</td>
+  <td>Accounts: S=1,000 / M=5,000 / L=50,000 Person Accounts: S=2,000 / M=10,000 / L=100,000 Contacts: S=2,500 / M=12,500 / L=125,000 Product2 (Vehicle RT): S=200 / M=1,000 / L=10,000 Product2 (Parts RT): S=5,000 / M=25,000 / L=250,000 VehicleDefinition: S=200 / M=1,000 / L=10,000 Vehicle: S=500 / M=50,0…</td>
+  <td>No</td>
+  <td></td>
+</tr>
+<tr>
+  <td>Automotive Foundation Setup</td>
+  <td>Automotive Foundation - Setup - Integration (External Systems + APIs)</td>
+  <td>setup</td>
+  <td>System Administrator</td>
+  <td>P0</td>
+  <td>Pre-requisites: 1. Automotive Foundation - Setup - Configuration completed 2. Automotive Foundation - Setup - Data completed 3. Named Credentials and External Services enabled at org level 4. MuleSoft Anypoint org provisioned (if MuleSoft path)</td>
+  <td>Configure Foundation integrations (Identity Verification, Telematics, Field Service routing, Valuation Providers, MuleSoft, Document Generation) Personas Involved: 1. Salesforce System Administrator 2. Integration Architect 3. MuleSoft Developer</td>
+  <td>Named Credentials, External Services, Identity Verification, MuleSoft, Field Service Routing, Document Generation, Audit Trail</td>
+  <td>Medium</td>
+  <td></td>
+  <td>Yes</td>
+  <td>Identity Verification provider, MuleSoft Anypoint, Telematics gateway (per OEM), KBB/JD Power/Black Book/Manheim valuation APIs, Field Service Optimizer, Document Generation engine, OmniStudio Integr…</td>
+</tr>
+<tr>
+  <td>Automotive Foundation Setup</td>
+  <td>Automotive Foundation - Setup - Reporting (Reports + Dashboards + Agentforce + Telemetry + Audit)</td>
+  <td>setup</td>
+  <td>System Administrator</td>
+  <td>P0</td>
+  <td>Pre-requisites: 1. Automotive Foundation - Setup - Configuration completed 2. Automotive Foundation - Setup - Data completed 3. Automotive Foundation - Setup - Integration completed 4. CRM Analytics licensed (for P1+) 5. Agentforce for Automotive licensed (for P2+)</td>
+  <td>Configure post-go-live observability for Automotive Foundation Personas Involved: 1. Salesforce System Administrator 2. Reports &amp; Dashboards Owner 3. Agentforce Owner 4. Compliance Officer</td>
+  <td>Reports, Dashboards, CRM Analytics, Agentforce for Automotive, Advanced Account Forecasting, Audit Trail, Telemetry</td>
+  <td>Medium</td>
+  <td></td>
+  <td>Optional</td>
+  <td>CRM Analytics, Agentforce for Automotive, Einstein Studio, Tableau Unified Analytics (optional), Advanced Account Forecasting, Audit Trail, Telemetry pipeline</td>
+</tr>
+<tr>
+  <td>Appraisal Management - Trade-in</td>
+  <td>Appraisal Management - Appraisal to Vehicle and Asset Lending funding journey</td>
+  <td>txn</td>
+  <td>Sales Manager</td>
+  <td>P0</td>
+  <td>Appraisal Management - setup - configuration (with Provider Valuations + ARC) Appraisal Management - setup - Data (with Provider Valuations + ARC) both done; T1 Trade-in journey reaches locked-appraisal state</td>
+  <td>1. Locked Appraisal on a Trade-in Opportunity hands off appraised value + payoff to F&amp;I 2. Vehicle and Asset Lending creates Financial Account for the new vehicle, capturing rolled trade allowance, payoff, and any negative-equity delta 3. Credit application + soft-pull (consent-gated) -&gt; decision returned with rate / term / stipulations 4. F&amp;I builds funding contract; Appraisal becomes immutable …</td>
+  <td>Appraisal, Vehicle and Asset Lending, Financial Account, Asset, Asset Title, Compliance / Audit Trail</td>
+  <td>High</td>
+  <td>Hand-off variations : Positive equity (offer &gt; payoff) - P0 Zero equity - P0 Negative equity rolled (covered in T6 detail) - P0 Decision variations : Approved as submitted - P0 Approved with stipulations - P0 Counter-offer rate / term - P0 Declined - P0 Immutability : Locked appraisal cannot be edi…</td>
+  <td>Yes</td>
+  <td>Lender / loan origination system; credit bureau (consent-gated)</td>
+</tr>
+<tr>
+  <td>Appraisal Management - Trade-in</td>
+  <td>Appraisal Management - Customer self-service via Experience Cloud + Agentforce journey</td>
+  <td>txn</td>
+  <td>Inspector</td>
+  <td>P1</td>
+  <td>Appraisal Management - setup - configuration (with Provider Valuations + ARC) Appraisal Management - setup - Data (with Provider Valuations + ARC) both done; Experience Cloud site published; Agentforce topic deployed</td>
+  <td>1. Customer on Experience Cloud site initiates appraisal via Agentforce topic &quot;Vehicle Appraisal&quot; 2. Agentforce captures VIN, mileage, condition Q&amp;A; Einstein Summary generates plain-language offer explanation 3. Provider Valuations pulled real-time; preliminary offer shown 4. Customer books inspection via embedded Scheduler 5. Dealer inspector receives task; finalizes per Standalone-ICO flow Per…</td>
+  <td>Appraisal, Experience Cloud, Agentforce, Einstein Summary, Salesforce Scheduler</td>
+  <td>High</td>
+  <td>Agent grounding : Cites Provider Valuation row - P0 No hallucinated offer - P0 (negative) Guest PSL : Cannot read other appraisals - P0 (negative)</td>
+  <td>Yes</td>
+  <td>KBB, Black Book, Manheim MMR; Agentforce; Einstein</td>
+</tr>
+<tr>
+  <td>Appraisal Management - Trade-in</td>
+  <td>Appraisal Management - Lease maturity / lease return journey</td>
+  <td>txn</td>
+  <td>Sales Consultant, Inspector</td>
+  <td>P0</td>
+  <td>Appraisal Management - setup - configuration (with Provider Valuations + ARC) Appraisal Management - setup - Data (with Provider Valuations + ARC) both the above configured; lease Financial Account seeded</td>
+  <td>1. Financial Account lease-maturity date triggers task to dealer 60-90 days before maturity 2. Appraisal generated from Financial Account, pre-populated with grounded mileage cap and residual 3. Inspection captures excess wear / tear Appraisal Items vs. published lease return guide; excess mileage auto-calculated 4. Branching : Return -&gt; charges posted to Financial Account, Asset becomes Off-Leas…</td>
+  <td>Appraisal, Vehicle and Asset Lending, Financial Account, Provider Valuation</td>
+  <td>High</td>
+  <td>Branch variations : Return - P0 Buyout - P0 Re-lease - P0 Excess-mileage variations : Zero excess - P0 Within tolerance - P0 Over cap - P0 Promo variations : Pull-ahead applies - P1 Pull-ahead doesn&#x27;t apply - P1</td>
+  <td>Yes</td>
+  <td>OEM captive finance system; lease-return mileage / wear guide service</td>
+</tr>
+<tr>
+  <td>Appraisal Management - Trade-in</td>
+  <td>Appraisal Management - Mobile field appraisal journey</td>
+  <td>txn</td>
+  <td>Sales Manager</td>
+  <td>P0</td>
+  <td>Appraisal Management - setup - configuration (with Provider Valuations + ARC) Appraisal Management - setup - Data (with Provider Valuations + ARC) both done; mobile PSL assigned</td>
+  <td>1. Sales rep on mobile creates Appraisal from Lead at customer location 2. Photo capture (8 standard angles + odometer) attached to Appraisal Items 3. OBD scan via Vehicle Connected Services pulls fault codes if enrolled; otherwise manual 4. Offer presented and signed on device; vehicle pickup scheduled Persona : Mobile Sales Rep Sales Manager</td>
+  <td>Appraisal, Mobile App, Vehicle Connected Services, eSignature</td>
+  <td>Medium</td>
+  <td>Connectivity variations : Online - P0 Offline-then-sync - P0 Connected Services : Enrolled (auto OBD) - P1 Not enrolled (manual) - P0 Photo variations : Full set - P0 Partial - P0 (must warn)</td>
+  <td>Optional</td>
+  <td>Vehicle Connected Services telematics provider</td>
+</tr>
+<tr>
+  <td>Appraisal Management - Trade-in</td>
+  <td>Appraisal Management - Negative equity / subprime trade roll-in journey</td>
+  <td>txn</td>
+  <td>Sales Manager</td>
+  <td>P0</td>
+  <td>Appraisal Management - setup - configuration (with Provider Valuations + ARC) Appraisal Management - setup - Data (with Provider Valuations + ARC) both done; Trade-in flow in progress with negative equity</td>
+  <td>1. Appraisal yields offer &lt; lien payoff 2. Negative-equity delta passed to F&amp;I; Vehicle and Asset Lending creates new Financial Account with rolled balance 3. Fair-lending compliance check; LTV ratio calculated; flagged if &gt; policy 4. Lender stipulations (proof of income, residence) tracked as tasks 5. Funding contract issued; both Assets (old payoff, new vehicle) reconciled Persona : Sales Manag…</td>
+  <td>Appraisal, Vehicle and Asset Lending, Financial Account, Compliance / Audit Trail</td>
+  <td>High</td>
+  <td>LTV variations : Under cap - P0 Over cap - P0 (must block) Stipulation variations : 0 stipulations - P0 1 stipulation - P0 Multi - P1 Payoff quote variations : In-window - P0 Expired - P0 (must re-pull)</td>
+  <td>Yes</td>
+  <td>Lender / loan origination system; credit bureau (consent-gated)</td>
+</tr>
+<tr>
+  <td>Appraisal Management - Trade-in</td>
+  <td>Appraisal Management - OEM captive program / VIN eligibility journey</td>
+  <td>txn</td>
+  <td>Sales Consultant</td>
+  <td>P1</td>
+  <td>Appraisal Management - setup - configuration (with Provider Valuations + ARC) Appraisal Management - setup - Data (with Provider Valuations + ARC) both done; OEM program rules loaded</td>
+  <td>1. VIN decode identifies trade make 2. Rule engine matches against active OEM programs (loyalty, conquest, trade-assist) 3. Appraisal Item auto-added (e.g. &quot;OEM Loyalty Bonus +$1,000&quot;) 4. Program funding source reconciled; OEM claim record created 5. Customer signature captured (eSig) on appraisal disclosure 6. Bonus reverses if deal unwound within 30 days Persona : Sales Consultant F&amp;I Manager O…</td>
+  <td>Appraisal, Decision Table / BRE, eSignature, OEM Program (custom or via Rebate Mgmt)</td>
+  <td>Medium</td>
+  <td>Eligibility : Eligible VIN -&gt; bonus applies - P0 Ineligible VIN -&gt; no bonus - P0 (negative) Reversal : Within 30d - P0 After 30d - P0</td>
+  <td>Yes</td>
+  <td>OEM program portal / Rebate Management</td>
+</tr>
+<tr>
+  <td>Appraisal Management - Trade-in</td>
+  <td>Appraisal Management - Reconditioning / CPO candidate journey</td>
+  <td>txn</td>
+  <td>Inspector</td>
+  <td>P0</td>
+  <td>Appraisal Management - setup - configuration (with Provider Valuations + ARC) Appraisal Management - setup - Data (with Provider Valuations + ARC) both done; Service Console for Automotive enabled</td>
+  <td>1. Appraisal flags vehicle as CPO eligible based on year / mileage / brand rule 2. Inspection generates Repair Order line items linked to Asset; recon estimate = sum of Appraisal Items recon-type 3. CPO checklist (OEM-published) executed; failures generate additional Appraisal Items 4. Once recon complete, Asset Status = Inventory-CPO with retail price = blended provider valuation + recon + margi…</td>
+  <td>Appraisal, Asset, Service Console for Automotive, Work Order</td>
+  <td>High</td>
+  <td>CPO rule variations per OEM brand Recon overrun : &lt; 20% (auto) - P0 &gt; 20% (manager approval) - P0 Listing : CPO listed - P0 Ineligible - P0 (negative)</td>
+  <td>No</td>
+  <td></td>
+</tr>
+<tr>
+  <td>Appraisal Management - Trade-in</td>
+  <td>Appraisal Management - Standalone Instant Cash Offer (no purchase) journey</td>
+  <td>txn</td>
+  <td>Sales Manager, Inspector</td>
+  <td>P0</td>
+  <td>Appraisal Management - setup - configuration (with Provider Valuations + ARC) Appraisal Management - setup - Data (with Provider Valuations + ARC) both the above configured in the system; Experience Cloud site published</td>
+  <td>1. Customer submits appraisal request via Experience Cloud site 2. Lead created, qualified, standalone Appraisal generated (no Opportunity) 3. Provider Valuations pulled, preliminary offer emailed with 7-day voucher 4. Customer schedules in-person inspection via Salesforce Scheduler 5. Inspector adds condition Appraisal Items on mobile; if delta &gt; rule threshold, manager approval triggers 6. Cust…</td>
+  <td>Appraisal, Provider Valuation, Experience Cloud, Salesforce Scheduler, Sharing Sets, Mobile App</td>
+  <td>High</td>
+  <td>Submit channel variations : Experience Cloud - P0 Phone-in - P1 Walk-in - P1 Voucher variations : Valid - P0 Expired - P0 (negative) VIN mismatch at inspection - P0 (negative) Approval variations : Under threshold (auto) - P0 Over threshold (manager required) - P0</td>
+  <td>Yes</td>
+  <td>KBB, Black Book, Manheim MMR; payment gateway (ACH)</td>
+</tr>
+<tr>
+  <td>Appraisal Management - Trade-in</td>
+  <td>Appraisal Management - Trade-in on new vehicle purchase journey</td>
+  <td>txn</td>
+  <td>Sales Consultant, Sales Manager</td>
+  <td>P0</td>
+  <td>Appraisal Management - setup - configuration (with Provider Valuations + ARC) Appraisal Management - setup - Data (with Provider Valuations + ARC) both the above configured in the system</td>
+  <td>1. Sales Consultant opens Opportunity for new-vehicle purchase 2. Launches Appraisal from Opportunity, decodes trade VIN 3. Provider Valuations auto-pulled (KBB, Black Book, Manheim MMR) 4. Sales Consultant adds Appraisal Items for condition (tires, body, frame, interior, mechanical) 5. Sales Manager reviews, may override final offer with reason code, locks appraisal 6. Appraised value flows to O…</td>
+  <td>Appraisal, Provider Valuation, ARC, Vehicle and Asset Lending, Person Accounts</td>
+  <td>High</td>
+  <td>Appraisal create variations : Create via UI from Opportunity - P0 Create via API - P1 Mobile launcher - P0 Provider Valuation variations : 3 providers, blend rule lowest of three - P0 Weighted blend - P1 Single provider fallback when one is down - P0 Override variations : With reason code - P0 With…</td>
+  <td>Yes</td>
+  <td>KBB, Black Book, Manheim MMR, VIN decode</td>
+</tr>
+<tr>
+  <td>Appraisal Management - Trade-in</td>
+  <td>Appraisal Management - Wholesale / auction disposition journey</td>
+  <td>txn</td>
+  <td>Sales Manager</td>
+  <td>P0</td>
+  <td>Appraisal Management - setup - configuration (with Provider Valuations + ARC) Appraisal Management - setup - Data (with Provider Valuations + ARC) both done; T1 completed for source asset</td>
+  <td>1. Trade Asset created from Trade-in flow with recon-cost estimate Appraisal Items 2. True Cost-to-Market computed = appraised value + recon estimate + holding cost 3. Decision Table / BRE evaluates against dealer&#x27;s wholesale policy (age, miles, frame damage) 4. Manheim integration call submits vehicle to auction; lane + run number returned 5. Auction proceeds posted back; Asset disposed; gain / …</td>
+  <td>Appraisal, Asset, Decision Table / BRE, External Service (Manheim)</td>
+  <td>Medium</td>
+  <td>Wholesale rule variations : Age &gt; 10y, miles &gt; 150k - P0 Frame damage flag - P0 Manager force-wholesale - P1 Integration variations : Manheim 200 OK - P0 Manheim 5xx -&gt; retry - P0 Submit then cancel - P1</td>
+  <td>Yes</td>
+  <td>Manheim / ADESA via MuleSoft; Business Rule Engine; Decision Table</td>
+</tr>
+<tr>
+  <td>Appraisal Management - Trade-in</td>
+  <td>Automotive Foundation - Trade-in / Appraisal Initiation Journey (Lead/Opportunity → Appraisal → AppraisalItem → ProviderValuation → Adjustment → AddOn)</td>
+  <td>txn</td>
+  <td>Dealer Sales Executive, Finance Manager</td>
+  <td>P0</td>
+  <td>Automotive Foundation - Setup - Configuration Automotive Foundation - Setup - Data Automotive Foundation - Setup - Integration all three configured in the system</td>
+  <td>1. Dealer Sales Executive captures customer trade-in interest from Lead, Opportunity, Account, Vehicle Console, or Asset Console. 2. Sales Executive launches Appraisal flow (Vehicle or Asset variant) — populates Appraisal record with Interest Type (Trade-in / Valuation / Sale). 3. System creates AppraisalItem record for the vehicle/asset being appraised; auto-populates Make/Model/Year/Trim/VIN/Mi…</td>
+  <td>Automotive Cloud Foundation, Appraisal, Appraisal Item, Appraisal Item Add On, Appraisal Item Provider Valuation, Appraisal Adjustment, Vehicle, Asset, AssetWarranty, ProductRelatedComponent (AccessoryProduct), QuoteLineItemRelatedObject</td>
+  <td>Initiation source :
+From Lead - P0
+From Opportunity - P0
+From Account - P1
+From Vehicle Console - P1
+From Asset Console - P1
+From Partner Community (external user) - P0
+
+
+Provider fan-out :
+KBB only - P0
+KBB + JD Power - P0
+KBB + JD Power + Black Book + Manheim - P1
+
+
+Adjustment scenarios :
+No adjustment (provider price accepted) - P0
+Single adjustment (reconditioning) - P0
+Multi-adjustment (markup + discount + recon + dents) - P1
+% and absolute mixed - P1
+
+
+Quote linkage :
+Standalone Appraisal (no Quote) - P0
+Linked to Quote via QuoteLineItemRelatedObject - P1</td>
+  <td>Small org : 100 appraisals, 1-2 providers Medium org : 5,000 appraisals, 2-3 providers Large org : 50,000 appraisals, 4 providers</td>
+  <td>Yes</td>
+  <td>KBB Valuation API, JD Power Valuation API, Black Book Valuation API, Manheim Valuation API, OmniStudio Integration Procedure, Salesforce Approval Process, MuleSoft Anypoint (canonical broker), Identi…</td>
+</tr>
+<tr>
+  <td>Appraisal Management - Trade-in</td>
+  <td>Vehicle Trade-in Appraisal — Lead → Valuation → Approval → (Inspection / Inventory / Opportunity Line Item)</td>
+  <td>txn</td>
+  <td>Dealer Sales Executive (primary; initiator); Finance Manager (approver); Service Advisor (Inspection Visit, 256); Customer (asks for price; receives communication); Partner Community User (external initiator, Epic 10); System (valuation broker, approval Field Update, telemetry, dashboard refresh)</td>
+  <td>P0</td>
+  <td>Auto_Appraisal_Config_UJ + Auto_Appraisal_Data_UJ + Auto_Appraisal_Integration_UJ + Auto_Appraisal_Reporting_UJ all completed (or roll-up Setup_All).</td>
+  <td>Appraisal Interest Capture → VIN search / manual entry → Vehicle Condition + Features capture → External multi-provider valuation → Negotiation &amp; adjustments → Approval → Inspection Visit (256) → Inventory hand-off (256) → Opportunity / Lead Line Item link (256) → Reporting refresh</td>
+  <td>Appraisal, Appraisal Item, Appraisal Adjustment, Appraisal Accessories, Appraisal Item Add-on, Appraisal Item Provider Valuation, Vehicle, Asset, Asset Warranty, Lead + Lead Line Item, Opportunity + Opportunity Product, Account, OmniScript (Vehicle Appraisal flow), FlexCards (Appraisal + Appraisal …</td>
+  <td>Vehicle Trade-in from Lead, single provider, no inspection - P0 (R254)
+Vehicle Trade-in from Lead, multi-provider, with Inspection Visit + Inventory + Opportunity LI - P1 (R256)
+Asset Trade-in (Battery / Equipment) from Asset Console - P1
+Customer / Partner Community external initiator - P2
+Approval reject → re-adjust → re-submit loop - P1
+Negative path: VIN not found → manual entry - P0
+Negative path: provider 5xx → fallback to remaining providers - P1</td>
+  <td>Medium</td>
+  <td>Yes</td>
+  <td>External Valuation Providers (KBB / JD Power / Black Book / Manheim), Approval / Email, Generic Visit framework (256), Action Plan / Document Checklist (256), Field Service Inventory (256), Experienc…</td>
+</tr>
+<tr>
+  <td>Campaigns &amp; Marketing</td>
+  <td>Appraisal Management - Appraisal Outbound Event publish journey (Platform Event / CDC contract)</td>
+  <td>txn</td>
+  <td>Dealer Sales Executive</td>
+  <td>P0</td>
+  <td>Appraisal Management - setup - configuration (with Provider Valuations + ARC) Appraisal Management - setup - Data (with Provider Valuations + ARC) both done; Platform Event / CDC channel for Appraisal defined; mock subscriber wired</td>
+  <td>1. Appraisal lock transition fires Salesforce Platform Event (or Change Data Capture event) carrying the canonical appraisal payload 2. Subscribers (DMS connector, OEM portal, data lake, Data Cloud activation, etc.) consume the event externally; Salesforce only owns the publish surface 3. Lock-state immutability is enforced - subsequent edits to a locked Appraisal must not republish stale data; o…</td>
+  <td>Appraisal, Platform Events / Change Data Capture, Field-level Audit Trail</td>
+  <td>Medium</td>
+  <td>Trigger variations : Lock transition - P0 Reopen transition - P0 Manager-override adjustment on locked appraisal - P0 Payload variations : Full appraisal + items + provider valuations - P0 Sensitive-field redaction (PII / SSN never on event) - P0 (negative) Subscriber behavior (mocked) : Single sub…</td>
+  <td>Yes</td>
+  <td>Platform Events / Change Data Capture (Salesforce-owned surface only; downstream DMS / OEM / Data Cloud consumers mocked)</td>
+</tr>
+<tr>
+  <td>Campaigns &amp; Marketing</td>
+  <td>Automotive Foundation - Service Operations Journey (ServiceTerritory + Member + Location + WorkType + OperatingHours + Vehicle Downtime + Recall)</td>
+  <td>txn</td>
+  <td>Service Advisor</td>
+  <td>P0</td>
+  <td>Automotive Foundation - Setup - Configuration Automotive Foundation - Setup - Data Automotive Foundation - Setup - Integration all three configured in the system</td>
+  <td>1. Service Advisor receives request (customer or telemetry-driven) for service appointment, recall, or roadside assistance. 2. System queries ServiceTerritory + ServiceTerritoryLocation + ServiceTerritoryWorkType + ServiceTerritoryMember to find available Field Resource matching the work type and location. 3. OperatingHours + OperatingHoursHoliday + TimeSlot validate that the proposed appointment…</td>
+  <td>Automotive Cloud Foundation, ServiceTerritory, ServiceTerritoryLocation, ServiceTerritoryMember, ServiceTerritoryWorkType, OperatingHours, OperatingHoursHoliday, TimeSlot, Location, Asset, AssetMilestone, AssetDowntimePeriod, AssetWarranty, Information Authorization Request</td>
+  <td>Source of request :
+Customer-initiated (phone / portal / app) - P0
+Telematics-initiated (DTC, Connected Services event) - P0
+OEM-initiated recall - P0
+Scheduled milestone - P0
+
+
+Routing complexity :
+Single Territory, Single Member - P0
+Multi-Territory routing - P1
+Cross-territory backup coverage - P2
+Mobile service (resource travels to customer Location) - P1
+
+
+Identity Verification :
+Owner-initiated (no IDV) - P0
+Authorized driver (single-party IDV) - P0
+Third-party (multi-party IDV) - P1
+
+
+Holiday / hours edge cases :
+Standard working hours - P0
+Holiday rerouting - P1
+24/7 emergency - P2</td>
+  <td>Small org : 5 territories, 50 members, 100 work types Medium org : 100 territories, 500 members, 300 work types Large org : 1,000 territories, 5,000 members, 3,000 work types</td>
+  <td>Yes</td>
+  <td>Telematics gateway (DTC events), Field Service Optimizer, Salesforce Scheduler, Identity Verification provider, MuleSoft Anypoint (OEM recall feed), Document Generation engine</td>
+</tr>
+<tr>
+  <td>Connected Vehicle &amp; Fleet</td>
+  <td>Appraisal Management - Fleet / commercial trade-in (multi-asset) journey</td>
+  <td>txn</td>
+  <td>Sales Manager</td>
+  <td>P0</td>
+  <td>Appraisal Management - setup - configuration (with Provider Valuations + ARC) Appraisal Management - setup - Data (with Provider Valuations + ARC) both done; Fleet records seeded</td>
+  <td>1. Fleet record holds N Fleet Asset rows (e.g. 12 vans) 2. One master Appraisal with N Appraisal child records 3. Bulk VIN decode + bulk Provider Valuation; outliers flagged 4. Per-vehicle adjustments + fleet-level discount / upcharge 5. Single Opportunity with N trade allowances; payoff per vehicle to fleet lender Persona : Fleet Account Manager Sales Manager F&amp;I Manager</td>
+  <td>Appraisal, Fleet, Fleet Asset, Provider Valuation, Vehicle and Asset Lending</td>
+  <td>High</td>
+  <td>Fleet size variations : 12 vehicles - P0 50 vehicles - P0 200 vehicles - P0 (governor-limit safe) Outlier variations : With frame damage - P0 With lien complications - P0</td>
+  <td>Yes</td>
+  <td>KBB, Black Book, Manheim MMR; fleet lender</td>
+</tr>
+<tr>
+  <td>Dealer Operations</td>
+  <td>Appraisal Management - Multi-rooftop dealer group sharing journey</td>
+  <td>txn</td>
+  <td>Sales Manager</td>
+  <td>P0</td>
+  <td>Appraisal Management - setup - configuration (with Provider Valuations + ARC) Appraisal Management - setup - Data (with Provider Valuations + ARC) both done; multi-rooftop hierarchy seeded; CDS configured</td>
+  <td>1. Appraisal created at Store A captures vehicle 2. Asset visible to Store B inventory queue via Sharing Set on Asset RT=Vehicle 3. Compliant Data Sharing rules enforce store boundaries on customer PII 4. Store B places inventory transfer (Product Transfer / Request) 5. Internal transfer Appraisal step revalues for receiving store&#x27;s market 6. Store B retails the unit; profit allocation between st…</td>
+  <td>Appraisal, Asset Sharing, Compliant Data Sharing, Product Transfer / Request</td>
+  <td>High</td>
+  <td>Sharing rule variations : Same group - P0 Cross group - P0 External party (must deny) - P0 Profit allocation : Standard - P0 Bespoke per group - P1</td>
+  <td>No</td>
+  <td></td>
+</tr>
+<tr>
+  <td>Vehicle Lifecycle Management</td>
+  <td>Automotive Foundation - Vehicle Lifecycle 360 Journey (Account → Contact → Vehicle → Asset → Warranty → Milestone → Service Territory)</td>
+  <td>txn</td>
+  <td>Dealer Sales Executive, Service Advisor</td>
+  <td>P0</td>
+  <td>Automotive Foundation - Setup - Configuration Automotive Foundation - Setup - Data Automotive Foundation - Setup - Integration all three configured in the system</td>
+  <td>1. Dealer Sales Executive captures a customer (Person Account or Business Account + Contact) and ties them to a Vehicle/Asset record at sale. 2. System creates Asset (Vehicle RT) keyed to the Vehicle (VIN), links Account as owner via AssetAccountParticipant, links Contacts as drivers via AssetContactParticipant. 3. AssetWarranty is auto-generated from the Vehicle Product2 master warranty terms; A…</td>
+  <td>Automotive Cloud Foundation, Person Accounts, Vehicle, Asset, AssetWarranty, AssetMilestone, AssetRelationship, AssetDowntimePeriod, Asset Account Participant, Asset Contact Participant, ServiceTerritory, ServiceTerritoryMember, ServiceTerritoryLocation, ServiceTerritoryWorkType, OperatingHours, Ti…</td>
+  <td>Vehicle creation method :
+Create via UI - P0
+Create via API / Apex - P0
+Create from Quote (Trade-in/New Sale) - P0
+Bulk import (data load) - P1
+
+
+Asset participants :
+Single Owner - P0
+Joint Owner (2 Accounts) - P1
+Lessor + Lessee + Insurer (3+ Participants) - P1
+
+
+Warranty :
+Manufacturer Warranty only - P0
+Manufacturer + Extended - P0
+Multiple service contracts - P1
+
+
+Service Territory :
+Single Territory single Member - P0
+Multi-Territory routing - P1
+Cross-territory backup coverage - P2
+
+
+Identity Verification :
+Single-party (driver) - P0
+Multi-party (joint owners) - P1
+Skip IDV (low-risk transaction) - P2</td>
+  <td>Small org : 50 vehicles, 50 customers, 5 service territories Medium org : 50,000 vehicles, 100,000 customers, 100 service territories Large org : 500,000 vehicles, 1,000,000 customers, 1,000 service territories</td>
+  <td>Yes</td>
+  <td>Telematics gateway (Vehicle Connected Services), Identity Verification provider (LexisNexis / Onfido), Field Service Optimizer, MuleSoft Anypoint (OEM warranty + recall feeds), OmniStudio (scheduling…</td>
+</tr>
+<tr>
+  <td>Appraisal Management - Trade-in</td>
+  <td>Trade-in / Appraisal Management Integrations (Valuation Providers + Approval Routing + GV / Document Framework)</td>
+  <td>integration</td>
+  <td>Integration Owner (primary); SDET (verification); Partner Engineer (Valuation adapter)</td>
+  <td>P0</td>
+  <td>Auto_Appraisal_Config_UJ + Auto_Appraisal_Data_UJ completed; OmniStudio runtime healthy; External Services / Named Credentials enabled; MuleSoft / partner-built valuation adapter is the contract owner per Epic (&#x27;Integration with an external valuation system - To be built by Partner&#x27;).</td>
+  <td>Valuation Provider integration → Approval routing &amp; email → GV Visit framework integration → Document Checklist Items / Action Plan integration → Inventory hand-off integration → Lead / Opportunity Line Item conversion (256) → Telemetry / Audit hooks</td>
+  <td>Named Credentials, External Services, OmniStudio Integration Procedure, Approval Process, Email Service, Generic Visit Framework, Action Plan Template, Document Checklist Item, OmniAssessmentTask, Assessment, Field Service Inventory (for hand-off), Telemetry, Audit Trail, Experience Cloud Authentic…</td>
+  <td>Smoke - P0
+Regression with full multi-provider fan-out - P1
+Failure injection (5xx, malformed JSON, missing whitelist) - P2
+
+KBB only - P0
+KBB + JD Power - P0
+KBB + JD Power + Black Book + Manheim - P1</td>
+  <td>Medium</td>
+  <td>Yes</td>
+  <td>Partner Valuation Adapter (KBB / JD Power / Black Book / Manheim), Approval / Email, Generic Visit framework, Action Plan / DocumentChecklistItem, OmniAssessmentTask, Assessment, Field Service Invent…</td>
+</tr>
+<tr>
+  <td>Appraisal Management - Trade-in</td>
+  <td>Trade-in / Appraisal Management Reporting (Telemetry + Reports + Dashboards + Agentforce + Audit)</td>
+  <td>reporting</td>
+  <td>Telemetry Owner; Reports Owner; Dashboards Owner (CRM Analytics); Agentforce Owner; Sales Manager (forecast consumer); Compliance Owner</td>
+  <td>P0</td>
+  <td>Auto_Appraisal_Config_UJ + Auto_Appraisal_Data_UJ + Auto_Appraisal_Integration_UJ completed; Telemetry pipeline live; CRM Analytics (Analytics for Automotive) licensed if dashboards are in scope; Agentforce for Automotive licensed if agent surfaces are in scope.</td>
+  <td>Telemetry counters → Audit Trail → Native Reports → CRM Analytics dashboards (optional) → Agentforce for Automotive surfaces (optional) → Field Service Inventory rollup (256) → Forecasting &amp; Pipeline (Opportunity-linked Appraisals)</td>
+  <td>Telemetry pipeline, Audit Trail, Reports &amp; Dashboards builder, CRM Analytics (Analytics for Automotive), Agentforce for Automotive (Topics, Actions, Einstein Summary, Einstein Studio prompts), Advanced Account Forecasting, Field Service Inventory dashboards, Compliant Data Sharing</td>
+  <td>Native Reports only - P0
+Native Reports + CRM Analytics tab - P1
+Native Reports + CRM Analytics + Agentforce surfaces - P2
+Add TUA tab - P3</td>
+  <td>Medium</td>
+  <td>Yes</td>
+  <td>Telemetry pipeline, Audit Trail, CRM Analytics dataflow / recipe, Agentforce conversational layer + Einstein Studio, Advanced Account Forecasting, Field Service Inventory</td>
+</tr>
+</tbody>
+</table>
+
+<div class="info">
+  <strong><code>flow_name</code>:</strong> Declares the business flow this journey belongs to. The import skill creates the flow and membership in one pass — equivalent to an in-lined <code>/map-journeys</code>. Journeys sharing the same <code>flow_name</code> are grouped into a single <code>business_flow</code> with <code>flow_journeys</code> edges.
+</div>
+
+<div class="info">
+  <strong><code>persona</code>:</strong> Multi-persona OK at journey level. At scenario/ALT level, the rule is one persona per row.
+</div>
+
+<h2><span class="tab-label">Tab 3</span> Variant Dimensions <span class="dot dot-dim" style="margin-left:8px"></span></h2>
+<p>Derived from the Foundation + Appraisal "Valid Variations" / "Data Shape" columns. These dimensions drive scenario decomposition — each transaction journey is crossed with applicable dimension values to produce atomic test scenarios. Maps to <code>variant_dimensions</code> table in ADM.</p>
+
+<h3><span class="section-label">Section A</span> Dimension Catalog</h3>
+<table class="dim-table">
+<thead>
+<tr>
+  <th>dimension_name <span class="required">*</span></th>
+  <th>description</th>
+  <th>applies_to</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>account_type</code></td><td>Person Account vs Business Account customer model — drives Lead/Opportunity record-type and Compact Layout selection</td><td>Setup, Transaction</td></tr>
+<tr><td><code>vehicle_product_type</code></td><td>Vehicle classification — Passenger Vehicle, Commercial Vehicle, EV, ICE — drives Asset record-type, warranty terms, and service plans</td><td>Setup, Transaction, Reporting</td></tr>
+<tr><td><code>sales_channel</code></td><td>Actor + UI surface for sales/service — Internal CRM (Dealer/OEM), Partner Portal (Independent Dealer), Self-Service (Owner Community)</td><td>Transaction</td></tr>
+<tr><td><code>finance_model</code></td><td>Deal financial structure — Cash, Captive-Finance Loan, Lease, Subscription</td><td>Transaction</td></tr>
+<tr><td><code>service_event_type</code></td><td>Service trigger — Scheduled Maintenance, Warranty Repair, Recall, Roadside Assistance, Customer Pay</td><td>Transaction, Reporting</td></tr>
+<tr><td><code>connected_vehicle</code></td><td>Whether the vehicle is connected — drives telemetry availability, remote-diagnostics flows, and Agentforce surfaces</td><td>Transaction, Reporting</td></tr>
+<tr><td><code>appraisal_provider_mode</code></td><td>Valuation source for trade-in appraisal — Standalone (no providers), Single Provider, Multi-Provider Fan-out, ARC-enabled</td><td>Setup, Transaction, Integration</td></tr>
+<tr><td><code>appraisal_origin</code></td><td>Entry point for trade-in appraisal — Lead, Opportunity, Vehicle/Asset record, Community (External User)</td><td>Transaction</td></tr>
+<tr><td><code>inspection_visit</code></td><td>Whether physical inspection is performed via Generic Visit framework (R256 Epic 11)</td><td>Transaction</td></tr>
+<tr><td><code>inventory_handoff</code></td><td>Whether the appraised vehicle is added to Field Service Inventory (R256 Epic 13) and linked to Opportunity Line Item (R256 Epic 14)</td><td>Transaction</td></tr>
+</tbody>
+</table>
+
+<h3><span class="section-label">Section B</span> Dimension Values</h3>
+<table class="dim-values-table">
+<thead>
+<tr>
+  <th>dimension_name <span class="required">*</span></th>
+  <th>id <span class="required">*</span></th>
+  <th>label</th>
+  <th>priority</th>
+  <th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>account_type</code></td><td><code>person</code></td><td>Person Account</td><td>P0</td><td>Individual customer (B2C dealer flows)</td></tr>
+<tr><td><code>account_type</code></td><td><code>business</code></td><td>Business Account</td><td>P0</td><td>Fleet / commercial customer (B2B)</td></tr>
+
+<tr><td><code>vehicle_product_type</code></td><td><code>passenger_ice</code></td><td>Passenger Vehicle (ICE)</td><td>P0</td><td>Standard internal-combustion passenger vehicle</td></tr>
+<tr><td><code>vehicle_product_type</code></td><td><code>passenger_ev</code></td><td>Passenger Vehicle (EV)</td><td>P0</td><td>Battery electric / hybrid passenger vehicle — adds telemetry &amp; charging fields</td></tr>
+<tr><td><code>vehicle_product_type</code></td><td><code>commercial</code></td><td>Commercial Vehicle</td><td>P1</td><td>Commercial / fleet vehicles (truck, van, bus)</td></tr>
+<tr><td><code>vehicle_product_type</code></td><td><code>twoWheeler</code></td><td>Two-Wheeler</td><td>P2</td><td>Motorcycles / scooters</td></tr>
+
+<tr><td><code>sales_channel</code></td><td><code>internal_crm</code></td><td>Internal CRM (Dealer / OEM)</td><td>P0</td><td>Salesforce Lightning UI used by Dealer Sales Executive / CSR</td></tr>
+<tr><td><code>sales_channel</code></td><td><code>partner_portal</code></td><td>Partner / Independent Dealer Portal</td><td>P1</td><td>Experience Site partner portal</td></tr>
+<tr><td><code>sales_channel</code></td><td><code>self_service</code></td><td>Owner / Community Self-Service</td><td>P1</td><td>Community portal — used by Appraisal Epic 10 (process appraisal as external user)</td></tr>
+
+<tr><td><code>finance_model</code></td><td><code>cash</code></td><td>Cash Purchase</td><td>P0</td><td>Outright purchase, no financing</td></tr>
+<tr><td><code>finance_model</code></td><td><code>captive_loan</code></td><td>Captive Finance Loan</td><td>P0</td><td>OEM-captive lender loan with amortisation schedule</td></tr>
+<tr><td><code>finance_model</code></td><td><code>lease</code></td><td>Lease</td><td>P1</td><td>Operating / closed-end lease with residual value and trade-in mechanics</td></tr>
+<tr><td><code>finance_model</code></td><td><code>subscription</code></td><td>Subscription</td><td>P2</td><td>Vehicle-as-a-service subscription</td></tr>
+
+<tr><td><code>service_event_type</code></td><td><code>scheduled</code></td><td>Scheduled Maintenance</td><td>P0</td><td>Routine service at mileage / time interval</td></tr>
+<tr><td><code>service_event_type</code></td><td><code>warranty</code></td><td>Warranty Repair</td><td>P0</td><td>Defect repair under manufacturer warranty</td></tr>
+<tr><td><code>service_event_type</code></td><td><code>recall</code></td><td>Recall Campaign</td><td>P1</td><td>Mandatory or voluntary recall service</td></tr>
+<tr><td><code>service_event_type</code></td><td><code>roadside</code></td><td>Roadside Assistance</td><td>P1</td><td>Emergency on-road service via Roadside Assistance</td></tr>
+<tr><td><code>service_event_type</code></td><td><code>customer_pay</code></td><td>Customer-Pay Repair</td><td>P1</td><td>Out-of-warranty paid service</td></tr>
+
+<tr><td><code>connected_vehicle</code></td><td><code>connected</code></td><td>Connected Vehicle</td><td>P0</td><td>Vehicle emits telemetry — diagnostics &amp; Agentforce surfaces enabled</td></tr>
+<tr><td><code>connected_vehicle</code></td><td><code>not_connected</code></td><td>Non-Connected Vehicle</td><td>P0</td><td>Manual data capture only</td></tr>
+
+<tr><td><code>appraisal_provider_mode</code></td><td><code>standalone</code></td><td>Standalone (no providers)</td><td>P0</td><td>Dealer-only manual appraisal — no external valuation</td></tr>
+<tr><td><code>appraisal_provider_mode</code></td><td><code>single_provider</code></td><td>Single Valuation Provider</td><td>P1</td><td>One external provider via partner-built adapter (Epic 8)</td></tr>
+<tr><td><code>appraisal_provider_mode</code></td><td><code>multi_provider</code></td><td>Multi-Provider Fan-out</td><td>P0</td><td>Multiple providers compared side-by-side (Epic 8)</td></tr>
+<tr><td><code>appraisal_provider_mode</code></td><td><code>arc_enabled</code></td><td>ARC-Enabled</td><td>P2</td><td>Adapter-Routing Component routes per region/product</td></tr>
+
+<tr><td><code>appraisal_origin</code></td><td><code>from_lead</code></td><td>From Lead</td><td>P0</td><td>Appraisal initiated from Lead record (Epics 1, 3)</td></tr>
+<tr><td><code>appraisal_origin</code></td><td><code>from_opportunity</code></td><td>From Opportunity</td><td>P0</td><td>Appraisal initiated from Opportunity (Epic 1)</td></tr>
+<tr><td><code>appraisal_origin</code></td><td><code>from_vehicle</code></td><td>From Vehicle / Asset</td><td>P1</td><td>Appraisal initiated from existing Vehicle/Asset (Epics 5, 7)</td></tr>
+<tr><td><code>appraisal_origin</code></td><td><code>from_community</code></td><td>From Community / External User</td><td>P1</td><td>Appraisal processed by external community user (Epic 10)</td></tr>
+
+<tr><td><code>inspection_visit</code></td><td><code>none</code></td><td>No Inspection</td><td>P0</td><td>Appraisal completes without physical inspection</td></tr>
+<tr><td><code>inspection_visit</code></td><td><code>gv_inspection</code></td><td>Generic-Visit Inspection</td><td>P1</td><td>Inspection Visit scheduled via Salesforce Scheduler / GV framework (R256 Epic 11)</td></tr>
+
+<tr><td><code>inventory_handoff</code></td><td><code>no_handoff</code></td><td>No Inventory Hand-off</td><td>P0</td><td>Appraisal ends at approval — no FSL inventory creation</td></tr>
+<tr><td><code>inventory_handoff</code></td><td><code>fsl_inventory_oli</code></td><td>FSL Inventory + Opportunity Line Item</td><td>P1</td><td>Appraised vehicle added to Field Service Inventory and linked to OLI (R256 Epics 13, 14)</td></tr>
+
+</tbody>
+</table>
+
+<div class="note">
+  <strong><code>sales_channel</code> double duty:</strong> Like the Insurance template, this dimension selects both the portal context <em>and</em> the executing persona (<code>internal_crm</code> → Dealer Sales Exec / CSR, <code>partner_portal</code> → Partner User, <code>self_service</code> → Owner Community User). SMEs don't need to separately set persona on scenarios that already specify <code>sales_channel</code>.
+</div>
+
+<h2><span class="tab-label">Tab 4</span> Org Constraints</h2>
+<p>Org-level constraints determining which scenarios can run on which target orgs. Maps to <code>org_constraints</code> + <code>org_constraint_values</code> tables in ADM.</p>
+
+<table class="constraint-table">
+<thead>
+<tr>
+  <th>constraint_name</th>
+  <th>constraint_type</th>
+  <th>description</th>
+  <th>values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>org_data_size</code></td>
+  <td>org_profile</td>
+  <td>Overall org data volume — determines available object counts and concurrency profile</td>
+  <td>
+    <code>small</code> → 5K accounts, 50K vehicles, 100K cases, 5K annual deals<br>
+    <code>medium</code> → 50K accounts, 500K vehicles, 1M cases, 50K annual deals<br>
+    <code>large</code> → 500K accounts, 5M vehicles, 10M cases, 500K annual deals
+  </td>
+</tr>
+<tr>
+  <td><code>dealer_network_size</code></td>
+  <td>org_profile</td>
+  <td>Number of dealers / service territories configured — drives Lead routing and territory assignment complexity</td>
+  <td>
+    <code>small</code> → 10 dealers, 5 territories<br>
+    <code>medium</code> → 100 dealers, 25 territories<br>
+    <code>large</code> → 1,000 dealers, 250 territories
+  </td>
+</tr>
+<tr>
+  <td><code>vehicle_catalog_size</code></td>
+  <td>org_profile</td>
+  <td>MMY (Make/Model/Year) catalog depth — affects Vehicle Definition lookup and search performance</td>
+  <td>
+    <code>small</code> → 50 models / 5 years<br>
+    <code>medium</code> → 500 models / 10 years<br>
+    <code>large</code> → 5,000 models / 20 years (multi-OEM)
+  </td>
+</tr>
+<tr>
+  <td><code>person_accounts_enabled</code></td>
+  <td>feature_gate</td>
+  <td>Whether Person Accounts is on (irreversible). Required for B2C automotive flows and Appraisal Epic 10 community user.</td>
+  <td><code>true</code> / <code>false</code></td>
+</tr>
+<tr>
+  <td><code>scheduler_licensed</code></td>
+  <td>feature_gate</td>
+  <td>Salesforce Scheduler license — required for Inspection Visit (Appraisal R256 Epic 11) and service appointment scheduling</td>
+  <td><code>true</code> / <code>false</code></td>
+</tr>
+<tr>
+  <td><code>fsl_inventory_enabled</code></td>
+  <td>feature_gate</td>
+  <td>Field Service Inventory enabled — required for inventory hand-off (Appraisal R256 Epic 13)</td>
+  <td><code>true</code> / <code>false</code></td>
+</tr>
+<tr>
+  <td><code>omnistudio_licensed</code></td>
+  <td>feature_gate</td>
+  <td>OmniStudio licensed — required for OmniScript / FlexCard / IP delivery in Appraisal and Service flows</td>
+  <td><code>true</code> / <code>false</code></td>
+</tr>
+<tr>
+  <td><code>analytics_for_automotive</code></td>
+  <td>feature_gate</td>
+  <td>CRM Analytics for Automotive licensed — required for Reporting journeys with dashboard scope</td>
+  <td><code>true</code> / <code>false</code></td>
+</tr>
+<tr>
+  <td><code>agentforce_for_automotive</code></td>
+  <td>feature_gate</td>
+  <td>Agentforce for Automotive licensed — required for agent-surface Reporting/Service journeys</td>
+  <td><code>true</code> / <code>false</code></td>
+</tr>
+</tbody>
+</table>
+
+<h2><span class="tab-label">Tab 5</span> Scenarios &amp; Steps</h2>
+<p>Scenarios extracted from the source CSVs. Each scenario preserves the original walkthrough text. Dimension values are attached where the source clearly maps to a dimension; otherwise the SME or <code>map-journeys</code> step fills them in.</p>
+
+<div class="rule">
+  <strong>Source-first rule:</strong> These scenarios come directly from the source sheets. They are NOT generated by dimension crossing. Each scenario name and walkthrough is extracted from the "Scenarios" / "Detailed_Scenarios" columns.
+</div>
+
+<div class="note">
+  <strong>One persona per scenario.</strong> Each scenario row carries exactly one persona. Multi-persona journeys are decomposed at scenario level.
+</div>
+
+<table id="tab5">
+<thead>
+<tr>
+  <th>journey_name <span class="required">*</span></th>
+  <th>scenario_name <span class="required">*</span></th>
+  <th>persona <span class="required">*</span></th>
+  <th>priority</th>
+  <th>dimension_values</th>
+  <th>org_constraints</th>
+  <th>scenario_walkthrough</th>
+</tr>
+</thead>
+<tbody>
+
+<tr class="scenario-header"><td colspan="7">Trade-in / Appraisal Management Org Configuration (1 scenarios)</td></tr>
+<tr>
+  <td>Trade-in / Appraisal Management Org Configuration</td>
+  <td>An OEM / Dealer Admin enables the new Appraisal Management add-on for Automotive Cloud per the Epic (R254).</td>
+  <td>OEM Admin</td>
+  <td>P0</td>
+  <td><code>&quot;sales_channel&quot;: &quot;self_service&quot;, &quot;appraisal_provider_mode&quot;: &quot;standalone&quot;, &quot;appraisal_origin&quot;: &quot;from_community&quot;, &quot;inspection_visit&quot;: &quot;gv_inspection&quot;</code></td>
+  <td></td>
+  <td>Scenario Overview: An OEM / Dealer Admin enables the new Appraisal Management add-on for Automotive Cloud per the Epic (R254). All toggles are reversible except Person Accounts (already on as a prerequisite); flag is org-pref + user-permission gated until the standalone add-on license ships in a later release. Step-by-Step: 1. [OEM Admin] Navigate Setup → Company Information → confirm Automotive Cloud licenses are active. 2. [OEM Admin] Setup → User Management → Permission Set Licenses → confirm &#x27;Automotive Foundation User&#x27; is assigned to the dealer org user pool. (Per Epic Licensing Impacts: a dedicated add-on license is planned post-254; for 254 a User Permission + Org Preference is used.) 3. [OEM Admin] Setup → Feature Settings → Automotive → toggle &#x27;Appraisal Management&#x27; Org Preference ON. [Reversible.] 4. [OEM Admin] Setup → Permission Sets → create / clone &#x27;Appraisal_Dealer_Sales_…</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Appraisal Management - setup - Data (standalone, no provider valuations) (1 scenarios)</td></tr>
+<tr>
+  <td>Appraisal Management - setup - Data (standalone, no provider valuations)</td>
+  <td>1. Create 50 Vehicle Products and price book entries, 4 Business Brands, 10 Business Accounts, 20 Person Accounts</td>
+  <td>System Administrator</td>
+  <td>P0</td>
+  <td><code>&quot;appraisal_provider_mode&quot;: &quot;standalone&quot;</code></td>
+  <td></td>
+  <td>1. Create 50 Vehicle Products and price book entries, 4 Business Brands, 10 Business Accounts, 20 Person Accounts 2. Create 4 Appraisal record types - Trade-In, Standalone-ICO, Lease-Return, Fleet 3. Create 1 Appraisal Item category set with 30 default condition codes 4. Create 4 dealer-group accounts, 12 rooftop accounts, 25 dealership users 5. Create 50 Asset records (Vehicle RT) seeded across rooftops 6. Create / Upload 40 Appraisal records with status &quot;Draft / In Review&quot; - 10 per record type 7. Create 200 Appraisal Item rows (avg 5 per appraisal)</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Appraisal Management - setup - Data (with Provider Valuations + ARC) (1 scenarios)</td></tr>
+<tr>
+  <td>Appraisal Management - setup - Data (with Provider Valuations + ARC)</td>
+  <td>1. Create 100 Vehicle Products + 50 Parts Products + price book entries, 8 Business Brands, 20 Business Accounts, 200 Person Accounts</td>
+  <td>System Administrator</td>
+  <td>P0</td>
+  <td><code>&quot;appraisal_provider_mode&quot;: &quot;arc_enabled&quot;</code></td>
+  <td></td>
+  <td>1. Create 100 Vehicle Products + 50 Parts Products + price book entries, 8 Business Brands, 20 Business Accounts, 200 Person Accounts 2. Create 4 dealer-group accounts, 12 rooftop accounts, 50 dealership users 3. Create 4 Appraisal record types and 1 Provider Blend rule per record type 4. Create 30 default condition codes per Appraisal Item category 5. Create 200 Asset records (Vehicle RT, distributed across rooftops) 6. Create 50 Financial Account records (Vehicle and Asset Lending) for lease-return scenarios 7. Create / Upload 80 Appraisal records - 20 per record type - across statuses Draft / In Review / Manager Review / Locked / Funded 8. Create 400 Appraisal Item rows 9. Create 240 Provider Valuation rows (3 providers x 80 appraisals) 10. Create 80 OEM program rules (loyalty / conquest) 11. Seed ARC graph traversal data for Account -&gt; Asset -&gt; Appraisal -&gt; Opportunity -&gt; Asset paths</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Appraisal Management - setup - configuration (standalone, no provider valuations, no ARC) (1 scenarios)</td></tr>
+<tr>
+  <td>Appraisal Management - setup - configuration (standalone, no provider valuations, no ARC)</td>
+  <td>Complete the following steps to enable Appraisal Management (standalone) :</td>
+  <td>Sales Consultant</td>
+  <td>P0</td>
+  <td><code>&quot;appraisal_provider_mode&quot;: &quot;standalone&quot;</code></td>
+  <td></td>
+  <td>Complete the following steps to enable Appraisal Management (standalone) : Navigate to Setup 1. Go to Setup in Salesforce. 2. From the Quick Find box, search for and select Salesforce Go Access Feature Settings 1. Within Salesforce Go, navigate to Features. 2. Locate and select Automotive Cloud 3. Locate and select Appraisal Management Complete the guided setup by performing the following: 1. Enable the ORG Preference - Automotive Cloud + Appraisal Management 2. Assign required User PSLs (Permission Set Licenses) Sales Manager - Automotive Cloud Admin Appraisal Management Admin Sales Consultant - Automotive Cloud User Appraisal Management User Inspector - Appraisal Management User (mobile-enabled) 3. Create mandatory record types (with separate page layouts) : Product : Vehicle, Parts Asset : Vehicle, Parts 4. Create Appraisal record types : Trade-In, Standalone-ICO, Lease-Return, Fleet</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Appraisal Management - setup - configuration (with Provider Valuations + ARC) (1 scenarios)</td></tr>
+<tr>
+  <td>Appraisal Management - setup - configuration (with Provider Valuations + ARC)</td>
+  <td>Complete the following steps to enable Appraisal Management (with Provider Valuations + ARC) :</td>
+  <td>Sales Consultant</td>
+  <td>P0</td>
+  <td><code>&quot;sales_channel&quot;: &quot;self_service&quot;, &quot;appraisal_provider_mode&quot;: &quot;standalone&quot;</code></td>
+  <td></td>
+  <td>Complete the following steps to enable Appraisal Management (with Provider Valuations + ARC) : Navigate to Setup 1. Go to Setup in Salesforce. 2. From the Quick Find box, search for and select Salesforce Go Access Feature Settings 1. Within Salesforce Go, navigate to Features. 2. Locate and select Automotive Cloud 3. Locate and select Appraisal Management 4. Locate and select Provider Valuation 5. Locate and select ARC Relationship Graph Complete the guided setup by performing the following: 1. Enable the ORG Preference - Automotive Cloud + Appraisal Management + Provider Valuation 2. Configure External Services for KBB, Black Book, Manheim MMR (named credentials, auth, retry policy) 3. Configure VIN Decode service (NHTSA fallback, OEM primary) 4. Assign required User PSLs Sales Manager - Automotive Cloud Admin Appraisal Management Admin Provider Valuation Admin Sales Consultant - Appra…</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Trade-in / Appraisal Management Setup Data &amp; Reference Entities (1 scenarios)</td></tr>
+<tr>
+  <td>Trade-in / Appraisal Management Setup Data &amp; Reference Entities</td>
+  <td>SDET / Implementation Consultant declares the read-only data graph that must exist before any Appraisal transaction can run.</td>
+  <td>SDET</td>
+  <td>P0</td>
+  <td><code>&quot;account_type&quot;: &quot;person&quot;, &quot;sales_channel&quot;: &quot;self_service&quot;, &quot;appraisal_origin&quot;: &quot;from_lead&quot;, &quot;inspection_visit&quot;: &quot;gv_inspection&quot;, &quot;inventory_handoff&quot;: &quot;fsl_inventory_oli&quot;</code></td>
+  <td></td>
+  <td>Scenario Overview: SDET / Implementation Consultant declares the read-only data graph that must exist before any Appraisal transaction can run. This is documentation-only — no rows are inserted by this journey (project org is read-only). Step-by-Step: 1. [SDET] Reference picklist values for Interest Type: &#x27;Valuation&#x27;, &#x27;Sales&#x27;, &#x27;Trade-in&#x27; (Appraisal field). 2. [SDET] Reference picklist values for Appraisal Status (partner-defined; example smoke set: Draft → In Valuation → Pending Approval → Approved → Rejected → Inspection Scheduled → Final). 3. [SDET] Reference picklist values for Adjustment Type on Appraisal Adjustment: Markup, Discount, Reconditioning Cost, Dents and Scratches, Mark-up Profit Margin (each can be % or absolute per Epic field doc). 4. [SDET] Reference picklist values for Condition (Excellent / Good / Average / Rough) — must be a picklist (Epic flags this gap; see Notes)…</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Automotive Foundation - Setup - Configuration (Org Preferences + PSLs + Profiles + Record Types + Page Layouts) (1 scenarios)</td></tr>
+<tr>
+  <td>Automotive Foundation - Setup - Configuration (Org Preferences + PSLs + Profiles + Record Types + Page Layouts)</td>
+  <td>Complete the following steps to enable Automotive Foundation entities:</td>
+  <td>Dealer Sales Executive</td>
+  <td>P0</td>
+  <td><code>&quot;account_type&quot;: &quot;person&quot;, &quot;service_event_type&quot;: &quot;scheduled&quot;, &quot;appraisal_provider_mode&quot;: &quot;arc_enabled&quot;, &quot;appraisal_origin&quot;: &quot;from_lead&quot;</code></td>
+  <td></td>
+  <td>Complete the following steps to enable Automotive Foundation entities: Navigate to Setup 1. Go to Setup in Salesforce. 2. From the Quick Find box, search for and select Salesforce GO Access Feature Settings 1. Within Salesforce GO, navigate to Features. 2. Locate and select Automotive Cloud Foundation Complete the guided setup by performing the following: A. Enable Org Preferences 1. Enable Person Accounts (irreversible — file support ticket; OWD must allow Contact Controlled By Parent or both Private) 2. Enable Automotive Cloud 3. Enable Vehicle Connected Services 4. Enable Salesforce Scheduler 5. Enable Field Service (required for ServiceTerritory, ServiceTerritoryLocation, ServiceTerritoryMember, ServiceTerritoryWorkType, OperatingHours, OperatingHoursHoliday, TimeSlot, Location) 6. Enable Information Authorization Request (for InfoAuthRequestForm, InfoAuthorizationRequest, Multipart…</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Automotive Foundation - Setup - Data (Reference + Master Data for Foundation Entities) (1 scenarios)</td></tr>
+<tr>
+  <td>Automotive Foundation - Setup - Data (Reference + Master Data for Foundation Entities)</td>
+  <td>Load Foundation reference + master data:</td>
+  <td>Dealer Admin</td>
+  <td>P0</td>
+  <td><code>&quot;service_event_type&quot;: &quot;scheduled&quot;</code></td>
+  <td></td>
+  <td>Load Foundation reference + master data: A. Geo &amp; Country Reference 1. GeoCountry: confirm standard 250 country list active. Add ISO codes for OEM target markets. B. Operating Hours &amp; Holidays (Field Service prerequisite) 1. Create OperatingHours: &#x27;Standard Dealer Hours&#x27; (Mon-Sat 8am-7pm), &#x27;Extended Service Hours&#x27; (Mon-Sun 6am-10pm), &#x27;24/7 Roadside&#x27; 2. Create OperatingHoursHoliday: regional holidays per OEM market 3. Create TimeSlot rows for each OperatingHours per day-of-week C. Location &amp; Service Territory graph 1. Create Location records for each dealership, warehouse, service center 2. Create ServiceTerritory: &#x27;OEM West Region&#x27;, &#x27;Dealer Group North&#x27;, etc. 3. Create ServiceTerritoryLocation: link Locations to ServiceTerritories 4. Create ServiceTerritoryWorkType: link work types (Service, Inspection, Test Drive, Delivery) to territories 5. Create ServiceTerritoryMember: assign Field …</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Automotive Foundation - Setup - Integration (External Systems + APIs) (1 scenarios)</td></tr>
+<tr>
+  <td>Automotive Foundation - Setup - Integration (External Systems + APIs)</td>
+  <td>Configure Foundation integrations:</td>
+  <td>System Administrator</td>
+  <td>P0</td>
+  <td><code>&quot;connected_vehicle&quot;: &quot;connected&quot;, &quot;appraisal_provider_mode&quot;: &quot;multi_provider&quot;</code></td>
+  <td></td>
+  <td>Configure Foundation integrations: A. Identity Verification (InfoAuthRequestForm / InfoAuthorizationRequest / MultipartyInfoAuthRequest) 1. Create Named Credential &#x27;IDV_Provider&#x27; pointing to identity verification provider 2. Configure External Service for IDV callout 3. Map InfoAuthRequestForm template fields to provider request payload 4. Configure callback handler to update InfoAuthorizationRequest status 5. Failure injection: provider 5xx → InfoAuthorizationRequest stays Pending; auto-retry with exponential backoff B. Telematics / Vehicle Connected Services 1. Create Named Credential &#x27;Telematics_Provider&#x27; (per OEM) 2. Configure event listener for DTC, location, fuel level, tire pressure events 3. Map telematics events to Asset, Vehicle, AssetMilestone (service-due rollups) 4. Configure AEO orchestration: event type → subtype → expression set → Record Alert + Case 5. Failure injection…</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Automotive Foundation - Setup - Reporting (Reports + Dashboards + Agentforce + Telemetry + Audit) (1 scenarios)</td></tr>
+<tr>
+  <td>Automotive Foundation - Setup - Reporting (Reports + Dashboards + Agentforce + Telemetry + Audit)</td>
+  <td>Configure Foundation reporting:</td>
+  <td>System Administrator</td>
+  <td>P0</td>
+  <td><code>&quot;account_type&quot;: &quot;person&quot;</code></td>
+  <td></td>
+  <td>Configure Foundation reporting: A. Telemetry counters (must increment as transactional flows run) 1. Number of Vehicles created 2. Number of Assets (Vehicle / Parts) created 3. Number of AssetWarranty records created 4. Number of AssetMilestone records created (service-due / inspection / expiry) 5. Number of AssetDowntimePeriod records (scheduled / unscheduled / recall) 6. Number of AssetRelationship records (parent/child) 7. Number of Asset Account Participants / Asset Contact Participants per Asset 8. Number of Appraisals / AppraisalItems / AppraisalAdjustments / AppraisalItemAddOns / AppraisalItemProviderValuations 9. Number of InfoAuthorizationRequests / MultipartyInfoAuthRequests 10. Number of ServiceTerritory + Member + Location + WorkType records 11. Number of orgs with each Foundation Org Pref turned on B. Audit Trail 1. Person Account enable event captured 2. Field Service enab…</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Appraisal Management - Appraisal to Vehicle and Asset Lending funding journey (1 scenarios)</td></tr>
+<tr>
+  <td>Appraisal Management - Appraisal to Vehicle and Asset Lending funding journey</td>
+  <td>1. Trade-in Opportunity reaches locked Appraisal</td>
+  <td>Sales Manager</td>
+  <td>P0</td>
+  <td></td>
+  <td></td>
+  <td>1. Trade-in Opportunity reaches locked Appraisal 2. F&amp;I creates Financial Account, captures rolled allowance + payoff 3. Credit decision returned; stipulations tracked as tasks 4. Funding contract issued -&gt; Appraisal immutable 5. Funding posts; trade Asset transferred, new Asset created, Title workflow opens 6. Negative test : edit on locked Appraisal blocked 7. Unwind test : reversal restores Appraisal and Asset state</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Appraisal Management - Customer self-service via Experience Cloud + Agentforce journey (1 scenarios)</td></tr>
+<tr>
+  <td>Appraisal Management - Customer self-service via Experience Cloud + Agentforce journey</td>
+  <td>1. Customer on Experience Cloud site invokes Agentforce</td>
+  <td>Inspector</td>
+  <td>P1</td>
+  <td><code>&quot;sales_channel&quot;: &quot;self_service&quot;, &quot;appraisal_provider_mode&quot;: &quot;standalone&quot;</code></td>
+  <td></td>
+  <td>1. Customer on Experience Cloud site invokes Agentforce 2. Agent collects VIN / mileage / condition, calls Provider Valuation 3. Einstein Summary explains offer; preliminary offer shown 4. Customer books inspection 5. Inspector finalizes per Standalone-ICO flow 6. Negative tests confirm guest can&#x27;t read other appraisals and agent doesn&#x27;t fabricate values</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Appraisal Management - Lease maturity / lease return journey (1 scenarios)</td></tr>
+<tr>
+  <td>Appraisal Management - Lease maturity / lease return journey</td>
+  <td>1. Lease-maturity batch identifies upcoming maturities</td>
+  <td>Inspector</td>
+  <td>P0</td>
+  <td><code>&quot;finance_model&quot;: &quot;captive_loan&quot;</code></td>
+  <td></td>
+  <td>1. Lease-maturity batch identifies upcoming maturities 2. Appraisal pre-populated with residual + mileage cap 3. Inspector captures wear / tear and excess mileage 4. Branch chosen - Return -&gt; charges to Financial Account, Asset Off-Lease, route to wholesale or CPO - Buyout -&gt; new Opportunity created with payoff math - Re-lease -&gt; Trade-in flow starts 5. Captive finance receives ledger postings</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Appraisal Management - Mobile field appraisal journey (1 scenarios)</td></tr>
+<tr>
+  <td>Appraisal Management - Mobile field appraisal journey</td>
+  <td>1. Rep creates Appraisal on mobile at customer site</td>
+  <td>Sales Manager</td>
+  <td>P0</td>
+  <td></td>
+  <td></td>
+  <td>1. Rep creates Appraisal on mobile at customer site 2. Captures photos + odometer + (optional) OBD scan 3. Offer presented and signed on device 4. Pickup scheduled; sync to org when connectivity returns</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Appraisal Management - Negative equity / subprime trade roll-in journey (1 scenarios)</td></tr>
+<tr>
+  <td>Appraisal Management - Negative equity / subprime trade roll-in journey</td>
+  <td>1. Appraisal offer &lt; payoff -&gt; negative equity delta</td>
+  <td>Sales Manager</td>
+  <td>P0</td>
+  <td></td>
+  <td></td>
+  <td>1. Appraisal offer &lt; payoff -&gt; negative equity delta 2. New Financial Account created with rolled balance 3. LTV calculated; over-cap blocks funding 4. Stipulations captured and tracked 5. Funding contract issued, ledger reconciled</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Appraisal Management - OEM captive program / VIN eligibility journey (1 scenarios)</td></tr>
+<tr>
+  <td>Appraisal Management - OEM captive program / VIN eligibility journey</td>
+  <td>1. VIN decoded; rule matched against active programs</td>
+  <td>Sales Consultant</td>
+  <td>P1</td>
+  <td></td>
+  <td></td>
+  <td>1. VIN decoded; rule matched against active programs 2. Loyalty / conquest bonus applied as Appraisal Item 3. OEM claim record created 4. Disclosure eSigned 5. Negative test : ineligible VIN gets no bonus 6. Reversal test : deal unwound within 30d reverses claim</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Appraisal Management - Reconditioning / CPO candidate journey (1 scenarios)</td></tr>
+<tr>
+  <td>Appraisal Management - Reconditioning / CPO candidate journey</td>
+  <td>1. Trade Asset evaluated against CPO rule</td>
+  <td>Inspector</td>
+  <td>P0</td>
+  <td></td>
+  <td></td>
+  <td>1. Trade Asset evaluated against CPO rule 2. Recon estimate built from Appraisal Items 3. Work Orders created for failed checklist items 4. Recon complete -&gt; Asset = Inventory-CPO 5. Retail price computed and Asset listed in inventory</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Appraisal Management - Standalone Instant Cash Offer (no purchase) journey (1 scenarios)</td></tr>
+<tr>
+  <td>Appraisal Management - Standalone Instant Cash Offer (no purchase) journey</td>
+  <td>1. Guest user submits appraisal on Experience Cloud</td>
+  <td>Inspector</td>
+  <td>P0</td>
+  <td><code>&quot;appraisal_provider_mode&quot;: &quot;standalone&quot;</code></td>
+  <td></td>
+  <td>1. Guest user submits appraisal on Experience Cloud 2. Lead -&gt; standalone Appraisal auto-generated 3. Provider Valuations pulled, voucher emailed with 7-day expiry 4. Customer books inspection slot via Scheduler 5. Inspector adds condition items on mobile, finalizes offer 6. Manager approves if delta &gt; threshold 7. Customer accepts -&gt; ACH issued, Asset created with Status = Acquired-Wholesale or Acquired-Retail</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Appraisal Management - Trade-in on new vehicle purchase journey (1 scenarios)</td></tr>
+<tr>
+  <td>Appraisal Management - Trade-in on new vehicle purchase journey</td>
+  <td>1. Sales Consultant creates Opportunity with new-vehicle Product</td>
+  <td>Sales Consultant</td>
+  <td>P0</td>
+  <td><code>&quot;appraisal_provider_mode&quot;: &quot;arc_enabled&quot;</code></td>
+  <td></td>
+  <td>1. Sales Consultant creates Opportunity with new-vehicle Product 2. Launches Appraisal, decodes trade VIN, providers return values 3. Adds Appraisal Items for condition 4. Sales Manager overrides final offer with reason code 5. Appraisal locked, value flows to Opportunity trade allowance + payoff 6. F&amp;I closes; trade Asset created and routed to disposition queue 7. ARC graph navigates Account -&gt; Trade Asset -&gt; Appraisal -&gt; Opportunity -&gt; New Asset</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Appraisal Management - Wholesale / auction disposition journey (1 scenarios)</td></tr>
+<tr>
+  <td>Appraisal Management - Wholesale / auction disposition journey</td>
+  <td>1. Trade Asset evaluated against wholesale rule</td>
+  <td>Sales Manager</td>
+  <td>P0</td>
+  <td></td>
+  <td></td>
+  <td>1. Trade Asset evaluated against wholesale rule 2. BRE flags as wholesale candidate 3. Manheim integration submits asset, returns lane + run 4. Sale completes, proceeds posted, Asset Status = Disposed-Wholesale 5. Gain / loss vs. appraised value reported</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Automotive Foundation - Trade-in / Appraisal Initiation Journey (Lead/Opportunity → Appraisal → AppraisalItem → ProviderValuation → Adjustment → AddOn) (1 scenarios)</td></tr>
+<tr>
+  <td>Automotive Foundation - Trade-in / Appraisal Initiation Journey (Lead/Opportunity → Appraisal → AppraisalItem → ProviderValuation → Adjustment → AddOn)</td>
+  <td>1. Dealer Sales Executive opens Lead with Lead Line Item for trade-in vehicle.</td>
+  <td>Dealer Sales Executive</td>
+  <td>P0</td>
+  <td></td>
+  <td></td>
+  <td>1. Dealer Sales Executive opens Lead with Lead Line Item for trade-in vehicle. 2. Dealer Sales Executive clicks &#x27;New Appraisal&#x27; — selects Interest Type = Trade-in, Asset Type = Vehicle. 3. Dealer Sales Executive enters VIN — system looks up Vehicle record, auto-populates Make/Model/Year/Trim from VehicleDefinition + Product2 (Vehicle RT) linkage. 4. Sales Executive captures Vehicle condition (picklist), Exterior Colour (picklist), Mileage + UoM, Owner/hand-off count, Damage notes; checks Modifications and Additional Equipment checkboxes — system shows AccessoryProduct list (ProductRelatedComponent). 5. Sales Executive selects accessories — system creates AppraisalItemAddOn row per accessory. 6. Sales Executive captures Customer Asking Price. 7. Sales Executive clicks &#x27;Get Valuation&#x27; — OmniStudio Integration Procedure fans out to KBB, JD Power, Black Book, Manheim concurrently. 8. System…</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Vehicle Trade-in Appraisal — Lead → Valuation → Approval → (Inspection / Inventory / Opportunity Line Item) (6 scenarios)</td></tr>
+<tr>
+  <td>Vehicle Trade-in Appraisal — Lead → Valuation → Approval → (Inspection / Inventory / Opportunity Line Item)</td>
+  <td>A walk-in customer at a dealership wants to trade in their existing vehicle (VIN known) toward a new car.</td>
+  <td>Dealer Sales Executive</td>
+  <td>P0</td>
+  <td><code>&quot;account_type&quot;: &quot;person&quot;, &quot;appraisal_provider_mode&quot;: &quot;multi_provider&quot;, &quot;appraisal_origin&quot;: &quot;from_lead&quot;, &quot;inspection_visit&quot;: &quot;gv_inspection&quot;, &quot;inventory_handoff&quot;: &quot;fsl_inventory_oli&quot;</code></td>
+  <td></td>
+  <td>Scenario Overview: A walk-in customer at a dealership wants to trade in their existing vehicle (VIN known) toward a new car. The Dealer Sales Executive captures the trade-in interest from the open Lead, runs the Appraisal flow end-to-end through valuation, multi-provider price comparison, adjustments, Finance Manager approval, schedules an Inspection Visit (256), updates the appraisal price, gets it approved &amp; communicated, and finally adds the appraised vehicle to inventory and links it to the Opportunity Line Item (256). This journey mirrors the Process Flow diagram in the Epic (&#x27;Appraisal Management High Level Design&#x27;). Step-by-Step: 1. [Dealer Sales Executive] Opens the existing Lead (Person Account with Lead Line Item already captured). - Pre-req row: Setup-Data step 15 (Lead + Lead Line Item). - Action: from Lead page, clicks &#x27;New Appraisal&#x27; (custom action exposed by Auto_Appraisa…</td>
+</tr>
+<tr>
+  <td>Vehicle Trade-in Appraisal — Lead → Valuation → Approval → (Inspection / Inventory / Opportunity Line Item)</td>
+  <td>Variant A</td>
+  <td>Approver</td>
+  <td>P0</td>
+  <td><code>&quot;appraisal_provider_mode&quot;: &quot;single_provider&quot;, &quot;appraisal_origin&quot;: &quot;from_lead&quot;, &quot;inspection_visit&quot;: &quot;gv_inspection&quot;, &quot;inventory_handoff&quot;: &quot;fsl_inventory_oli&quot;</code></td>
+  <td></td>
+  <td>- Variant A (P0, 254): Vehicle Trade-in from a Lead, single provider (KBB only), one approver, no Inspection Visit, no Inventory hand-off (Epics 13/14 hidden in 254).</td>
+</tr>
+<tr>
+  <td>Vehicle Trade-in Appraisal — Lead → Valuation → Approval → (Inspection / Inventory / Opportunity Line Item)</td>
+  <td>Variant B</td>
+  <td>Dealer Sales Executive (primary; initiator); Finance Manager (approver); Service Advisor (Inspection Visit</td>
+  <td>P0</td>
+  <td><code>&quot;appraisal_provider_mode&quot;: &quot;multi_provider&quot;, &quot;inspection_visit&quot;: &quot;gv_inspection&quot;, &quot;inventory_handoff&quot;: &quot;fsl_inventory_oli&quot;</code></td>
+  <td></td>
+  <td>- Variant B (P1, 256): same path but with Inspection Visit + Action Plan + Document Checklist + multi-provider valuation (KBB + JD Power) + Add to Inventory + Opportunity Line Item link.</td>
+</tr>
+<tr>
+  <td>Vehicle Trade-in Appraisal — Lead → Valuation → Approval → (Inspection / Inventory / Opportunity Line Item)</td>
+  <td>Variant C</td>
+  <td>Dealer Sales Executive (primary; initiator); Finance Manager (approver); Service Advisor (Inspection Visit</td>
+  <td>P0</td>
+  <td><code>&quot;appraisal_origin&quot;: &quot;from_vehicle&quot;</code></td>
+  <td></td>
+  <td>- Variant C (P1): Asset Trade-in (Battery RT) initiated from Asset Console — uses Asset Appraisal RT, Asset Appraisal Item layout, no License Plate, includes Usage / Usage UoM and Asset Warranty End Date. Pre-req row: Setup-Data step 12.</td>
+</tr>
+<tr>
+  <td>Vehicle Trade-in Appraisal — Lead → Valuation → Approval → (Inspection / Inventory / Opportunity Line Item)</td>
+  <td>Variant D</td>
+  <td>Dealer Sales Executive (primary; initiator); Finance Manager (approver); Service Advisor (Inspection Visit</td>
+  <td>P0</td>
+  <td><code>&quot;sales_channel&quot;: &quot;self_service&quot;, &quot;appraisal_origin&quot;: &quot;from_community&quot;</code></td>
+  <td></td>
+  <td>- Variant D (P2): Customer / Partner Community user creates Appraisal externally (Epic 10) — sharing rule limits visibility to their own record.</td>
+</tr>
+<tr>
+  <td>Vehicle Trade-in Appraisal — Lead → Valuation → Approval → (Inspection / Inventory / Opportunity Line Item)</td>
+  <td>Variant E</td>
+  <td>Dealer Sales Executive (primary; initiator); Finance Manager (approver); Service Advisor (Inspection Visit</td>
+  <td>P0</td>
+  <td></td>
+  <td></td>
+  <td>- Variant E (P2): Approval cycle time ≥ 1 day (overnight approval) — verifies email re-notification and SLA report.</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Appraisal Management - Appraisal Outbound Event publish journey (Platform Event / CDC contract) (1 scenarios)</td></tr>
+<tr>
+  <td>Appraisal Management - Appraisal Outbound Event publish journey (Platform Event / CDC contract)</td>
+  <td>1. Locking an Appraisal publishes the canonical event with full payload</td>
+  <td>Dealer Sales Executive</td>
+  <td>P0</td>
+  <td></td>
+  <td></td>
+  <td>1. Locking an Appraisal publishes the canonical event with full payload 2. Reopen / Adjust publish their own event types; consumers can distinguish 3. Negative test : PII / SSN absent from payload 4. Negative test : edits on locked Appraisal do not republish silently 5. Replay test : downed subscriber catches up within 72h window 6. Ordering test : sequence Lock -&gt; Adjust -&gt; Reopen preserved at consumer 7. Contract test : payload schema versioned; breaking change flagged in CI</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Automotive Foundation - Service Operations Journey (ServiceTerritory + Member + Location + WorkType + OperatingHours + Vehicle Downtime + Recall) (1 scenarios)</td></tr>
+<tr>
+  <td>Automotive Foundation - Service Operations Journey (ServiceTerritory + Member + Location + WorkType + OperatingHours + Vehicle Downtime + Recall)</td>
+  <td>1. Service Advisor opens incoming request (e.g., customer call about check-engine light, or auto-created Case from telematics DTC).</td>
+  <td>Service Advisor</td>
+  <td>P0</td>
+  <td><code>&quot;service_event_type&quot;: &quot;recall&quot;, &quot;connected_vehicle&quot;: &quot;connected&quot;</code></td>
+  <td></td>
+  <td>1. Service Advisor opens incoming request (e.g., customer call about check-engine light, or auto-created Case from telematics DTC). 2. System pulls Asset (Vehicle RT) record by VIN; surfaces AssetWarranty (active?), AssetMilestone (next service due?), AssetDowntimePeriod (currently in service?). 3. Service Advisor confirms identity via InfoAuthRequestForm → InfoAuthorizationRequest; if multi-party (e.g., leased vehicle), MultipartyInfoAuthRequest spawned. 4. Service Advisor selects Work Type (e.g., &#x27;Diagnostic + Repair&#x27;); system queries ServiceTerritoryWorkType to find territories supporting that work. 5. System uses Customer Address Location + ServiceTerritoryLocation to filter to nearest territory. 6. System uses ServiceTerritoryMember + OperatingHours + OperatingHoursHoliday + TimeSlot to find available Field Resource and slot. 7. Service Advisor confirms appointment with customer; s…</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Appraisal Management - Fleet / commercial trade-in (multi-asset) journey (1 scenarios)</td></tr>
+<tr>
+  <td>Appraisal Management - Fleet / commercial trade-in (multi-asset) journey</td>
+  <td>1. Fleet identified with 12 Fleet Assets</td>
+  <td>Sales Manager</td>
+  <td>P0</td>
+  <td></td>
+  <td></td>
+  <td>1. Fleet identified with 12 Fleet Assets 2. Master Appraisal with 12 child Appraisals 3. Bulk VIN decode + Provider Valuation 4. Per-vehicle adjustments applied 5. Single Opportunity rolls up trade allowance and payoff to fleet lender</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Appraisal Management - Multi-rooftop dealer group sharing journey (1 scenarios)</td></tr>
+<tr>
+  <td>Appraisal Management - Multi-rooftop dealer group sharing journey</td>
+  <td>1. Store A appraises and acquires Asset</td>
+  <td>Sales Manager</td>
+  <td>P0</td>
+  <td></td>
+  <td></td>
+  <td>1. Store A appraises and acquires Asset 2. Asset visible to Store B inventory queue (no PII visible) 3. Store B requests transfer 4. Revaluation Appraisal performed at Store B 5. Store B retails unit, GL allocates profit per group rule 6. CDS test verifies Store B cannot read Store A customer PII</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Automotive Foundation - Vehicle Lifecycle 360 Journey (Account → Contact → Vehicle → Asset → Warranty → Milestone → Service Territory) (1 scenarios)</td></tr>
+<tr>
+  <td>Automotive Foundation - Vehicle Lifecycle 360 Journey (Account → Contact → Vehicle → Asset → Warranty → Milestone → Service Territory)</td>
+  <td>1. Dealer Sales Executive creates / opens Person Account (or Business Account + Contact) for the customer.</td>
+  <td>Dealer Sales Executive</td>
+  <td>P0</td>
+  <td><code>&quot;account_type&quot;: &quot;person&quot;, &quot;service_event_type&quot;: &quot;recall&quot;, &quot;connected_vehicle&quot;: &quot;connected&quot;</code></td>
+  <td></td>
+  <td>1. Dealer Sales Executive creates / opens Person Account (or Business Account + Contact) for the customer. 2. Dealer Sales Executive creates Asset (Vehicle RT) at sale, keyed by VIN; system links Asset → Vehicle (telematics record) and Asset → Product2 (Vehicle RT, master). 3. System auto-creates AssetAccountParticipant (Owner) and AssetContactParticipant (Driver). Joint-owner variant creates a second AssetAccountParticipant (Co-Owner). 4. System auto-creates AssetWarranty rows from Product2 master warranty terms (Manufacturer Warranty + any selected Extended). 5. System auto-creates AssetMilestone rows: First Service Due, Annual Inspection, Warranty Expiry — using OperatingHours + TimeSlot to land on a valid working slot. 6. If the sale includes a trailer / tow package or removable battery, system creates AssetRelationship (parent/child) linking the two Assets. 7. Service Advisor sched…</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Trade-in / Appraisal Management Integrations (Valuation Providers + Approval Routing + GV / Document Framework) (1 scenarios)</td></tr>
+<tr>
+  <td>Trade-in / Appraisal Management Integrations (Valuation Providers + Approval Routing + GV / Document Framework)</td>
+  <td>Every external/internal integration the Appraisal flow exercises is named here with stub-vs-live decision, contract, async strategy, and a failure-injection poi</td>
+  <td>Integration Owner</td>
+  <td>P0</td>
+  <td><code>&quot;sales_channel&quot;: &quot;self_service&quot;, &quot;appraisal_provider_mode&quot;: &quot;multi_provider&quot;, &quot;appraisal_origin&quot;: &quot;from_community&quot;, &quot;inspection_visit&quot;: &quot;gv_inspection&quot;, &quot;inventory_handoff&quot;: &quot;fsl_inventory_oli&quot;</code></td>
+  <td></td>
+  <td>Scenario Overview: Every external/internal integration the Appraisal flow exercises is named here with stub-vs-live decision, contract, async strategy, and a failure-injection point. The valuation system itself is partner-built per the Epic, so this journey defines the contract and the failure modes Salesforce must handle. Step-by-Step: 1. [Integration Owner] Valuation Provider integration (Epic 8, P1, R254/R256): - Contract: outbound REST/HTTP POST from Salesforce Vehicle Appraisal Item to partner valuation broker; inbound JSON with one row per provider per request. - Inbound payload fields (per Epic &#x27;Values Attributes (Vehicles)&#x27;): Market Source (KBB, JD Power, Black Book, Manheim), Market Price Date, Validity, Trade-in Value, Auction Value, Retail Value. - Asset variant: Market Source, Market Price Date, Validity, Trade-in Value, Retail Value (no Auction Value). - Persistence: write …</td>
+</tr>
+<tr class="scenario-header"><td colspan="7">Trade-in / Appraisal Management Reporting (Telemetry + Reports + Dashboards + Agentforce + Audit) (1 scenarios)</td></tr>
+<tr>
+  <td>Trade-in / Appraisal Management Reporting (Telemetry + Reports + Dashboards + Agentforce + Audit)</td>
+  <td>After the Appraisal TUJ runs at least once in the org, every observability surface that must light up is enumerated.</td>
+  <td>Telemetry Owner</td>
+  <td>P0</td>
+  <td><code>&quot;appraisal_provider_mode&quot;: &quot;multi_provider&quot;, &quot;inventory_handoff&quot;: &quot;fsl_inventory_oli&quot;</code></td>
+  <td></td>
+  <td>Scenario Overview: After the Appraisal TUJ runs at least once in the org, every observability surface that must light up is enumerated. This is the post-go-live readiness contract. Step-by-Step: 1. [Telemetry Owner] Telemetry counters (Epic Telemetry section — must all increment as the TUJ runs): - Number of Appraisal records created in an Org - Number of Appraisal Item records created in an Org - Number of Appraisal Adjustment Records - Number of Appraisal Valuations created - OmniStudio: Omni script usage (vehicle Appraisal flow) - OmniStudio: FlexCard usage (Appraisal + Appraisal Item) - Number of times the Appraisal flow was initiated - Number of times the Appraisal Item flow was initiated - Number of orgs where the Appraisal Pref has been turned on - Number of edits made to Appraisal / Appraisal Item / Appraisal Adjustment - Number of Appraisals associated with Leads / Opportunitie…</td>
+</tr>
+</tbody>
+</table>
+
+<h2><span class="tab-label">Reference</span> Summary Statistics</h2>
+<table>
+<thead><tr><th>Metric</th><th>Count</th></tr></thead>
+<tbody>
+<tr><td>Total Journeys</td><td>29</td></tr>
+<tr><td>Setup Journeys</td><td>10</td></tr>
+<tr><td>Transaction Journeys</td><td>17</td></tr>
+<tr><td>Integration Journeys</td><td>1</td></tr>
+<tr><td>Reporting Journeys</td><td>1</td></tr>
+<tr><td>Total Scenarios</td><td>34</td></tr>
+<tr><td>Variant Dimensions</td><td>10 (account_type, vehicle_product_type, sales_channel, finance_model, service_event_type, connected_vehicle, appraisal_provider_mode, appraisal_origin, inspection_visit, inventory_handoff)</td></tr>
+<tr><td>Org Constraints</td><td>9 (org_data_size, dealer_network_size, vehicle_catalog_size, person_accounts_enabled, scheduler_licensed, fsl_inventory_enabled, omnistudio_licensed, analytics_for_automotive, agentforce_for_automotive)</td></tr>
+<tr><td>Business Flows</td><td>7 (Appraisal Management - Trade-in, Appraisal Platform Setup, Automotive Foundation Setup, Campaigns & Marketing, Connected Vehicle & Fleet, Dealer Operations, Vehicle Lifecycle Management)</td></tr>
+</tbody>
+</table>
+
+<h2><span class="tab-label">Reference</span> ADM Mapping</h2>
+<table>
+<thead><tr><th>Source Sheet Concept</th><th>ADM Table</th><th>Field</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Account model (Person vs Business)</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'account_type'</code></td><td>Drives Account record type and Compact Layout</td></tr>
+<tr><td>Vehicle product type (PV / CV / EV / Two-Wheeler)</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'vehicle_product_type'</code></td><td>Drives Asset RT, warranty terms, telemetry availability</td></tr>
+<tr><td>Selling/service channel (Internal / Partner / Community)</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'sales_channel'</code></td><td>Determines portal context and executing persona</td></tr>
+<tr><td>Finance model (Cash / Loan / Lease / Subscription)</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'finance_model'</code></td><td>Drives F&amp;I flow, captive lending, residual mechanics</td></tr>
+<tr><td>Service event type</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'service_event_type'</code></td><td>Drives Case RT, Service Appointment routing, billing model</td></tr>
+<tr><td>Connected vehicle yes/no</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'connected_vehicle'</code></td><td>Gates telemetry / remote diagnostics / Agentforce</td></tr>
+<tr><td>Valuation provider mode (Appraisal Epic 8)</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'appraisal_provider_mode'</code></td><td>Standalone / single / multi-provider / ARC</td></tr>
+<tr><td>Appraisal entry point (Epics 1, 3, 5, 7, 10)</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'appraisal_origin'</code></td><td>Lead / Opportunity / Vehicle / Community</td></tr>
+<tr><td>Inspection Visit (Appraisal R256 Epic 11)</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'inspection_visit'</code></td><td>None vs GV-scheduled inspection</td></tr>
+<tr><td>Inventory hand-off + OLI link (R256 Epics 13, 14)</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'inventory_handoff'</code></td><td>FSL inventory creation + OLI link</td></tr>
+<tr><td>Org-level data size (S/M/L)</td><td><code>org_constraints</code></td><td><code>constraint_name = 'org_data_size'</code></td><td>Volumes per Foundation Data Shape</td></tr>
+<tr><td>Dealer network size</td><td><code>org_constraints</code></td><td><code>constraint_name = 'dealer_network_size'</code></td><td>Drives Lead routing depth</td></tr>
+<tr><td>Vehicle catalog (MMY) depth</td><td><code>org_constraints</code></td><td><code>constraint_name = 'vehicle_catalog_size'</code></td><td>Drives VIN/MMY lookup performance</td></tr>
+<tr><td>Person Accounts (irreversible)</td><td><code>org_constraints</code></td><td><code>constraint_name = 'person_accounts_enabled'</code></td><td>Required for B2C + Appraisal Epic 10</td></tr>
+<tr><td>Salesforce Scheduler license</td><td><code>org_constraints</code></td><td><code>constraint_name = 'scheduler_licensed'</code></td><td>Required for Inspection Visit (Appraisal R256 Epic 11)</td></tr>
+<tr><td>Field Service Inventory</td><td><code>org_constraints</code></td><td><code>constraint_name = 'fsl_inventory_enabled'</code></td><td>Required for Appraisal R256 Epic 13 hand-off</td></tr>
+<tr><td>OmniStudio license</td><td><code>org_constraints</code></td><td><code>constraint_name = 'omnistudio_licensed'</code></td><td>Required for OmniScript / FlexCard delivery</td></tr>
+<tr><td>CRM Analytics for Automotive</td><td><code>org_constraints</code></td><td><code>constraint_name = 'analytics_for_automotive'</code></td><td>Required for dashboard-scoped Reporting</td></tr>
+<tr><td>Agentforce for Automotive</td><td><code>org_constraints</code></td><td><code>constraint_name = 'agentforce_for_automotive'</code></td><td>Required for agent-surface flows</td></tr>
+<tr><td>Scenario dimension_values JSONB</td><td><code>scenarios</code></td><td><code>dimension_values</code></td><td>Each scenario declares its dimension slice</td></tr>
+<tr><td>Scenario org_constraints JSONB</td><td><code>scenarios</code></td><td><code>org_constraints</code></td><td>Declares minimum org profile required</td></tr>
+</tbody>
+</table>
+
+</body>
+</html>
+

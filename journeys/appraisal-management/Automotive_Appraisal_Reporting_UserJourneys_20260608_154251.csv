@@ -1,0 +1,53 @@
+Journey_ID,Domain,Journey_Title,Journey_Type,Setup_Subtype,Pre_Requisites,Business_Process,Detailed_Scenarios,Features_Mapped,Personas,Complexity,Data_Shape,Frequency,Priority,Setup_Required,Expected_Outcome,Integration_Points,Performance_Requirements,Author,Notes
+Auto_Appraisal_Reporting_UJ,Automotive Cloud - Appraisal Management,Trade-in / Appraisal Management Reporting (Telemetry + Reports + Dashboards + Agentforce + Audit),Setup,Reporting,"Auto_Appraisal_Config_UJ + Auto_Appraisal_Data_UJ + Auto_Appraisal_Integration_UJ completed; Telemetry pipeline live; CRM Analytics (Analytics for Automotive) licensed if dashboards are in scope; Agentforce for Automotive licensed if agent surfaces are in scope.","Telemetry counters → Audit Trail → Native Reports → CRM Analytics dashboards (optional) → Agentforce for Automotive surfaces (optional) → Field Service Inventory rollup (256) → Forecasting & Pipeline (Opportunity-linked Appraisals)","Scenario Overview: After the Appraisal TUJ runs at least once in the org, every observability surface that must light up is enumerated. This is the post-go-live readiness contract.
+
+Step-by-Step:
+1. [Telemetry Owner] Telemetry counters (Epic Telemetry section — must all increment as the TUJ runs):
+   - Number of Appraisal records created in an Org
+   - Number of Appraisal Item records created in an Org
+   - Number of Appraisal Adjustment Records
+   - Number of Appraisal Valuations created
+   - OmniStudio: Omni script usage (vehicle Appraisal flow)
+   - OmniStudio: FlexCard usage (Appraisal + Appraisal Item)
+   - Number of times the Appraisal flow was initiated
+   - Number of times the Appraisal Item flow was initiated
+   - Number of orgs where the Appraisal Pref has been turned on
+   - Number of edits made to Appraisal / Appraisal Item / Appraisal Adjustment
+   - Number of Appraisals associated with Leads / Opportunities / Accounts / Cases
+   Logged field set per record type matches Epic Telemetry mapping (no PII).
+2. [Audit Owner] Audit Trail expectations:
+   - Every Appraisal Status transition appears in Setup Audit Trail (when picklist is changed via flow / approval).
+   - Approval Process steps log Submitter / Approver / Comments per standard.
+   - Final Appraisal Price Field Update on approval logged.
+3. [Reports Owner] Native Reports (P0 — must ship as standard report folder 'Appraisal Management'):
+   - Appraisals by Status (Draft / In Valuation / Pending Approval / Approved / Rejected / Inspection Scheduled / Final).
+   - Appraisals by Interest Type (Valuation / Sales / Trade-in).
+   - Appraisals by Source — Lead / Opportunity / Account / Asset.
+   - Appraisals by Dealer Sales Executive (created by) — productivity report.
+   - Average Adjustment Value by Adjustment Type (Markup / Discount / Reconditioning / Dents).
+   - Approval cycle time (Submitted → Approved): Created Date → Modified Date when Status = Approved.
+   - Appraisals with valuation responses count (multi-provider visibility) — Appraisal Item Provider Valuation rollup.
+   - 256 only: Inspection Visits per Appraisal (when GV framework whitelisting deployed).
+4. [Dashboards Owner] CRM Analytics dashboards (Analytics for Automotive — P1):
+   - Add an 'Appraisal Performance' tab to the existing Dealer Performance dashboard.
+     - KPIs: total appraisals, approval rate, average final appraisal price, average customer asking vs final delta.
+     - Slicers: Dealer, Make, Model, Year, Adjustment Type, Provider.
+   - 256: feed Appraisal data into Inventory Performance dashboard (because Approved Appraisal → Vehicle Inventory record).
+   - Dataflow refresh order: Vehicle → Asset → Appraisal → Appraisal Item → Appraisal Item Provider Valuation → Appraisal Adjustment.
+5. [Agentforce Owner] Agentforce for Automotive (optional, P2):
+   - Topic: 'Trade-in Appraisal Management'.
+   - Actions:
+     - 'Look up appraisal by VIN' (Apex action wrapping Appraisal SOQL).
+     - 'Summarize appraisal' (Einstein Summary on Appraisal record — Customer Asking Price, Initial / Adjusted / Final Appraisal Price, Adjustment list, Provider Valuations).
+     - 'Re-route approval' (Flow action that re-submits Appraisal for approval to a different approver).
+   - Einstein Studio prompt template: 'Appraisal Negotiation Helper' that consumes Appraisal Item Provider Valuation rows and the customer asking price to suggest negotiation talking points.
+6. [TUA / Tableau Owner] Tableau Unified Analytics (TUA — optional, P3): not in scope per Epic. Listed for completeness; mark N/A unless dealership has TUA licensed.
+7. [Forecasting Owner] Advanced Account Forecasting:
+   - When Appraisal is linked to an Opportunity Line Item (Epic 14, R256), forecasted opportunity amount can include the Final Appraisal Price as a credit toward sale price. Forecast cadence: weekly. Persona: Sales Manager.
+8. [Field Service Owner] Field Service Inventory rollup (256, when Epic 13 ships):
+   - Approved Appraisal with Handover Completed → Vehicle Inventory record visible in Inventory dashboard within next dataflow refresh window.
+9. [Compliance Owner] Compliant Data Sharing / fair-lending checks: not applicable to Appraisal directly (no lending fields), but Appraisal record is referenced by Financial Account in the cross-feature TUJ — confirm Compliant Data Sharing stages on Financial Account read Appraisal.Final_Appraisal_Price as a contributing input.
+10. [Validation] Run /auto:audit and confirm 0 errors against the Reporting checklist.","Telemetry pipeline, Audit Trail, Reports & Dashboards builder, CRM Analytics (Analytics for Automotive), Agentforce for Automotive (Topics, Actions, Einstein Summary, Einstein Studio prompts), Advanced Account Forecasting, Field Service Inventory dashboards, Compliant Data Sharing","Telemetry Owner; Reports Owner; Dashboards Owner (CRM Analytics); Agentforce Owner; Sales Manager (forecast consumer); Compliance Owner","Native Reports only - P0
+Native Reports + CRM Analytics tab - P1
+Native Reports + CRM Analytics + Agentforce surfaces - P2
+Add TUA tab - P3","Medium","Native Reports & Telemetry: real-time per record action; CRM Analytics: per dataflow refresh (typically nightly); Agentforce: live conversational; Forecasting: weekly",P0,"Auto_Appraisal_Config_UJ + Auto_Appraisal_Data_UJ + Auto_Appraisal_Integration_UJ; at least one Auto_Appraisal_TUJ_001 run so counters and reports have data.","Every observability surface (telemetry counters, audit trail, native reports, CRM Analytics dashboards, optional Agentforce, optional forecasting) lights up after the TUJ runs at least once. Approval cycle time and multi-provider valuation usage are visible to Sales / Finance / OEM stakeholders.","Telemetry pipeline, Audit Trail, CRM Analytics dataflow / recipe, Agentforce conversational layer + Einstein Studio, Advanced Account Forecasting, Field Service Inventory","Reports render < 5s; CRM Analytics dashboard load < 8s; Agentforce response < 3s p50.","auto-journey-architect","Sources: Epic Doc — Telemetry section (counters + logged fields); Epic 13 (Add to Inventory); Epic 14 (Opportunity Line Item linkage). The Epic does NOT prescribe Agentforce / TUA / dashboards explicitly — those are added here as the Reporting Journey contract because the project's 4+1 contract requires a Reporting Journey. Mark unbuilt Agentforce / TUA items P2 / P3 so they're visible but not blocking."

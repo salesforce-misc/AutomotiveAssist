@@ -1,0 +1,181 @@
+User Journey,Owner,Reviewer,Business Process,Features as per PFT,Complexity,Licensing,Data Shape,Prerequisite,Scenarios,Priority,Integration,Integration Component
+"Automotive Foundation - Vehicle Lifecycle 360 Journey (Account → Contact → Vehicle → Asset → Warranty → Milestone → Service Territory)",,,"1. Dealer Sales Executive captures a customer (Person Account or Business Account + Contact) and ties them to a Vehicle/Asset record at sale.
+2. System creates Asset (Vehicle RT) keyed to the Vehicle (VIN), links Account as owner via AssetAccountParticipant, links Contacts as drivers via AssetContactParticipant.
+3. AssetWarranty is auto-generated from the Vehicle Product2 master warranty terms; AssetMilestone records are scheduled (first service, inspection, warranty expiry).
+4. AssetRelationship is created for any tow vehicle/trailer or removable battery pairing.
+5. Service Advisor uses ServiceTerritory + ServiceTerritoryMember + OperatingHours + TimeSlot to schedule first service appointment and surface upcoming milestones.
+6. Customer support flow uses InfoAuthRequestForm + InfoAuthorizationRequest to verify identity before sharing PII; MultipartyInfoAuthRequest used for joint owners.
+7. AssetDowntimePeriod logged when vehicle in service or recall.
+8. Audit Trail + Telemetry capture every transition.
+
+
+
+Persona :
+Dealer Sales Executive
+Service Advisor
+Field Resource
+Customer / Vehicle Owner
+System","Automotive Cloud Foundation, Person Accounts, Vehicle, Asset, AssetWarranty, AssetMilestone, AssetRelationship, AssetDowntimePeriod, Asset Account Participant, Asset Contact Participant, ServiceTerritory, ServiceTerritoryMember, ServiceTerritoryLocation, ServiceTerritoryWorkType, OperatingHours, TimeSlot, Location, Information Authorization Request","Vehicle creation method :
+Create via UI - P0
+Create via API / Apex - P0
+Create from Quote (Trade-in/New Sale) - P0
+Bulk import (data load) - P1
+
+
+Asset participants :
+Single Owner - P0
+Joint Owner (2 Accounts) - P1
+Lessor + Lessee + Insurer (3+ Participants) - P1
+
+
+Warranty :
+Manufacturer Warranty only - P0
+Manufacturer + Extended - P0
+Multiple service contracts - P1
+
+
+Service Territory :
+Single Territory single Member - P0
+Multi-Territory routing - P1
+Cross-territory backup coverage - P2
+
+
+Identity Verification :
+Single-party (driver) - P0
+Multi-party (joint owners) - P1
+Skip IDV (low-risk transaction) - P2","Automotive Cloud, Automotive Foundation User, Vehicle Connected Services, Salesforce Scheduler, Field Service Standard, Industry Service Excellence","Small org : 50 vehicles, 50 customers, 5 service territories
+Medium org : 50,000 vehicles, 100,000 customers, 100 service territories
+Large org : 500,000 vehicles, 1,000,000 customers, 1,000 service territories","Automotive Foundation - Setup - Configuration
+Automotive Foundation - Setup - Data
+Automotive Foundation - Setup - Integration
+
+all three configured in the system","1. Dealer Sales Executive creates / opens Person Account (or Business Account + Contact) for the customer.
+2. Dealer Sales Executive creates Asset (Vehicle RT) at sale, keyed by VIN; system links Asset → Vehicle (telematics record) and Asset → Product2 (Vehicle RT, master).
+3. System auto-creates AssetAccountParticipant (Owner) and AssetContactParticipant (Driver). Joint-owner variant creates a second AssetAccountParticipant (Co-Owner).
+4. System auto-creates AssetWarranty rows from Product2 master warranty terms (Manufacturer Warranty + any selected Extended).
+5. System auto-creates AssetMilestone rows: First Service Due, Annual Inspection, Warranty Expiry — using OperatingHours + TimeSlot to land on a valid working slot.
+6. If the sale includes a trailer / tow package or removable battery, system creates AssetRelationship (parent/child) linking the two Assets.
+7. Service Advisor schedules first service appointment via Salesforce Scheduler — system queries ServiceTerritory + ServiceTerritoryMember + ServiceTerritoryWorkType + OperatingHours + TimeSlot for the customer's Location and assigns a Field Resource.
+8. Customer support flow: agent submits InfoAuthRequestForm template → InfoAuthorizationRequest created → IDV provider returns approval → agent now authorized to discuss vehicle PII.
+9. Joint-owner variant: MultipartyInfoAuthRequest spawned; both parties must approve before agent proceeds.
+10. Vehicle enters service: AssetDowntimePeriod created with reason 'Scheduled Maintenance'; cleared on service-out.
+11. Recall variant: OEM recall feed creates AssetDowntimePeriod 'Recall' on all matching Vehicles; AssetMilestone 'Recall Service Due' added.
+12. Telemetry counters increment per record creation; Audit Trail captures setup changes (out-of-band) but not the transactional inserts.
+13. Reports + dashboards reflect updated counts within next refresh cycle.","P0","Yes","Telematics gateway (Vehicle Connected Services), Identity Verification provider (LexisNexis / Onfido), Field Service Optimizer, MuleSoft Anypoint (OEM warranty + recall feeds), OmniStudio (scheduling FlexCard)"
+"Automotive Foundation - Trade-in / Appraisal Initiation Journey (Lead/Opportunity → Appraisal → AppraisalItem → ProviderValuation → Adjustment → AddOn)",,,"1. Dealer Sales Executive captures customer trade-in interest from Lead, Opportunity, Account, Vehicle Console, or Asset Console.
+2. Sales Executive launches Appraisal flow (Vehicle or Asset variant) — populates Appraisal record with Interest Type (Trade-in / Valuation / Sale).
+3. System creates AppraisalItem record for the vehicle/asset being appraised; auto-populates Make/Model/Year/Trim/VIN/Mileage from Vehicle/Asset linkage.
+4. Sales Executive captures vehicle condition, features, accessories — creates AppraisalItemAddOn rows for each accessory selected.
+5. System fans out to external valuation providers — creates AppraisalItemProviderValuation row per provider per item (KBB, JD Power, Black Book, Manheim).
+6. Sales Executive negotiates with customer — creates AppraisalAdjustment rows for Markup, Discount, Reconditioning Cost, Dents.
+7. Final Appraisal Price calculated = Initial Price + sum(Adjustment Price); routed for Finance Manager approval.
+8. On approval, system creates QuoteLineItemRelatedObject linking the appraised vehicle to the customer's Quote (Trade-in line).
+
+
+
+Persona :
+Dealer Sales Executive
+Finance Manager
+Customer / Vehicle Owner
+System
+External Valuation Providers (KBB / JD Power / Black Book / Manheim)","Automotive Cloud Foundation, Appraisal, Appraisal Item, Appraisal Item Add On, Appraisal Item Provider Valuation, Appraisal Adjustment, Vehicle, Asset, AssetWarranty, ProductRelatedComponent (AccessoryProduct), QuoteLineItemRelatedObject","Initiation source :
+From Lead - P0
+From Opportunity - P0
+From Account - P1
+From Vehicle Console - P1
+From Asset Console - P1
+From Partner Community (external user) - P0
+
+
+Provider fan-out :
+KBB only - P0
+KBB + JD Power - P0
+KBB + JD Power + Black Book + Manheim - P1
+
+
+Adjustment scenarios :
+No adjustment (provider price accepted) - P0
+Single adjustment (reconditioning) - P0
+Multi-adjustment (markup + discount + recon + dents) - P1
+% and absolute mixed - P1
+
+
+Quote linkage :
+Standalone Appraisal (no Quote) - P0
+Linked to Quote via QuoteLineItemRelatedObject - P1","Automotive Cloud, Automotive Foundation User","Small org : 100 appraisals, 1-2 providers
+Medium org : 5,000 appraisals, 2-3 providers
+Large org : 50,000 appraisals, 4 providers","Automotive Foundation - Setup - Configuration
+Automotive Foundation - Setup - Data
+Automotive Foundation - Setup - Integration
+
+all three configured in the system","1. Dealer Sales Executive opens Lead with Lead Line Item for trade-in vehicle.
+2. Dealer Sales Executive clicks 'New Appraisal' — selects Interest Type = Trade-in, Asset Type = Vehicle.
+3. Dealer Sales Executive enters VIN — system looks up Vehicle record, auto-populates Make/Model/Year/Trim from VehicleDefinition + Product2 (Vehicle RT) linkage.
+4. Sales Executive captures Vehicle condition (picklist), Exterior Colour (picklist), Mileage + UoM, Owner/hand-off count, Damage notes; checks Modifications and Additional Equipment checkboxes — system shows AccessoryProduct list (ProductRelatedComponent).
+5. Sales Executive selects accessories — system creates AppraisalItemAddOn row per accessory.
+6. Sales Executive captures Customer Asking Price.
+7. Sales Executive clicks 'Get Valuation' — OmniStudio Integration Procedure fans out to KBB, JD Power, Black Book, Manheim concurrently.
+8. System persists AppraisalItemProviderValuation row per provider with Market Source, Trade-in Value, Auction Value, Retail Value, Average / Rough / Clean Condition Value.
+9. Sales Executive reviews provider valuations side-by-side, picks baseline (e.g., KBB Average) — Initial Appraisal Price = chosen value.
+10. Sales Executive negotiates — adds AppraisalAdjustment rows: Reconditioning -$500, Dents -$200, Markup +$100. Adjusted Appraisal Price recalculates.
+11. Sales Executive submits for Finance Manager approval; on approval, Final Appraisal Price = Adjusted Price.
+12. If linked to active Quote: system creates QuoteLineItemRelatedObject linking the Appraisal/AppraisalItem to the Trade-in line on the customer's Quote.
+13. Telemetry counters increment for Appraisal / AppraisalItem / AppraisalItemAddOn / AppraisalItemProviderValuation / AppraisalAdjustment.
+14. Provider failure variant: KBB returns 5xx → row absent for KBB, dealer proceeds with remaining 3 providers; UI shows Retry affordance.
+15. Multi-party variant: joint-owner trade-in → MultipartyInfoAuthRequest required before final approval communicates value to customer.","P0","Yes","KBB Valuation API, JD Power Valuation API, Black Book Valuation API, Manheim Valuation API, OmniStudio Integration Procedure, Salesforce Approval Process, MuleSoft Anypoint (canonical broker), Identity Verification provider"
+"Automotive Foundation - Service Operations Journey (ServiceTerritory + Member + Location + WorkType + OperatingHours + Vehicle Downtime + Recall)",,,"1. Service Advisor receives request (customer or telemetry-driven) for service appointment, recall, or roadside assistance.
+2. System queries ServiceTerritory + ServiceTerritoryLocation + ServiceTerritoryWorkType + ServiceTerritoryMember to find available Field Resource matching the work type and location.
+3. OperatingHours + OperatingHoursHoliday + TimeSlot validate that the proposed appointment lands on a working slot.
+4. AssetDowntimePeriod created when vehicle goes into service or is on recall.
+5. AssetMilestone for upcoming service / inspection / warranty expiry surface in the Service Console.
+6. Identity Verification (InfoAuthRequestForm + InfoAuthorizationRequest) required before sharing service history if the requester is not the registered owner.
+
+
+
+Persona :
+Service Advisor
+Field Resource (Technician)
+Dispatcher
+Customer / Vehicle Owner
+OEM Recall Coordinator
+System","Automotive Cloud Foundation, ServiceTerritory, ServiceTerritoryLocation, ServiceTerritoryMember, ServiceTerritoryWorkType, OperatingHours, OperatingHoursHoliday, TimeSlot, Location, Asset, AssetMilestone, AssetDowntimePeriod, AssetWarranty, Information Authorization Request","Source of request :
+Customer-initiated (phone / portal / app) - P0
+Telematics-initiated (DTC, Connected Services event) - P0
+OEM-initiated recall - P0
+Scheduled milestone - P0
+
+
+Routing complexity :
+Single Territory, Single Member - P0
+Multi-Territory routing - P1
+Cross-territory backup coverage - P2
+Mobile service (resource travels to customer Location) - P1
+
+
+Identity Verification :
+Owner-initiated (no IDV) - P0
+Authorized driver (single-party IDV) - P0
+Third-party (multi-party IDV) - P1
+
+
+Holiday / hours edge cases :
+Standard working hours - P0
+Holiday rerouting - P1
+24/7 emergency - P2","Automotive Cloud, Automotive Foundation User, Salesforce Scheduler, Field Service Standard, Field Service Dispatcher, Industry Service Excellence","Small org : 5 territories, 50 members, 100 work types
+Medium org : 100 territories, 500 members, 300 work types
+Large org : 1,000 territories, 5,000 members, 3,000 work types","Automotive Foundation - Setup - Configuration
+Automotive Foundation - Setup - Data
+Automotive Foundation - Setup - Integration
+
+all three configured in the system","1. Service Advisor opens incoming request (e.g., customer call about check-engine light, or auto-created Case from telematics DTC).
+2. System pulls Asset (Vehicle RT) record by VIN; surfaces AssetWarranty (active?), AssetMilestone (next service due?), AssetDowntimePeriod (currently in service?).
+3. Service Advisor confirms identity via InfoAuthRequestForm → InfoAuthorizationRequest; if multi-party (e.g., leased vehicle), MultipartyInfoAuthRequest spawned.
+4. Service Advisor selects Work Type (e.g., 'Diagnostic + Repair'); system queries ServiceTerritoryWorkType to find territories supporting that work.
+5. System uses Customer Address Location + ServiceTerritoryLocation to filter to nearest territory.
+6. System uses ServiceTerritoryMember + OperatingHours + OperatingHoursHoliday + TimeSlot to find available Field Resource and slot.
+7. Service Advisor confirms appointment with customer; system creates Service Appointment, links to Asset.
+8. AssetDowntimePeriod created with reason 'Scheduled Maintenance' on appointment start; closed on service-out.
+9. Recall variant: OEM Recall Coordinator triggers bulk recall — system creates AssetDowntimePeriod 'Recall' and AssetMilestone 'Recall Service Due' on all matching Vehicles; mass communication via Document Generation.
+10. Roadside variant: Field Resource dispatched to customer Location; uses '24/7 Roadside' OperatingHours; AssetDowntimePeriod 'Unscheduled' opened.
+11. Holiday variant: appointment falls on OperatingHoursHoliday → system reroutes to next available working slot or extended-hours territory.
+12. Telemetry counters increment for ServiceTerritory member usage, AssetDowntimePeriod creation, AssetMilestone closure.","P0","Yes","Telematics gateway (DTC events), Field Service Optimizer, Salesforce Scheduler, Identity Verification provider, MuleSoft Anypoint (OEM recall feed), Document Generation engine"

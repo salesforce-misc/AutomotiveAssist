@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>Altura Import Template — Automotive Cloud: Foundation</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 2rem; background: #f8f9fa; color: #1a1a1a; }
+  h1 { color: #0176d3; margin-bottom: 0.3rem; }
+  h2 { color: #333; border-bottom: 2px solid #0176d3; padding-bottom: 0.3rem; margin-top: 2.5rem; }
+  h3 { color: #0176d3; margin-top: 1.5rem; }
+  .subtitle { color: #666; margin-bottom: 2rem; }
+  .tab-label { background: #0176d3; color: #fff; padding: 4px 12px; border-radius: 4px 4px 0 0; display: inline-block; font-weight: 600; font-size: 0.9rem; }
+  table { border-collapse: collapse; width: 100%; margin-bottom: 2rem; font-size: 0.85rem; }
+  th { background: #e8f4fd; color: #0176d3; font-weight: 600; text-align: left; padding: 8px 10px; border: 1px solid #d0d0d0; white-space: nowrap; }
+  td { padding: 6px 10px; border: 1px solid #e0e0e0; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+  tr:hover td { background: #f0f7ff; }
+  .required { color: #d32f2f; font-weight: bold; }
+  .optional { color: #888; font-style: italic; }
+  .note { background: #fff3cd; border-left: 4px solid #ffc107; padding: 10px 14px; margin: 1rem 0; font-size: 0.9rem; }
+  .info { background: #e8f4fd; border-left: 4px solid #0176d3; padding: 10px 14px; margin: 1rem 0; font-size: 0.9rem; }
+  .rule { background: #fce4ec; border-left: 4px solid #d32f2f; padding: 10px 14px; margin: 1rem 0; font-size: 0.9rem; }
+  .warn { background: #fff8e1; border-left: 4px solid #f57f17; padding: 10px 14px; margin: 1rem 0; font-size: 0.9rem; }
+  code { background: #eee; padding: 2px 5px; border-radius: 3px; font-size: 0.85rem; }
+  .legend { display: flex; gap: 1.5rem; flex-wrap: wrap; margin: 1rem 0; }
+  .legend span { font-size: 0.85rem; }
+  .legend .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+  .dot-setup { background: #4caf50; }
+  .dot-txn { background: #2196f3; }
+  .dot-reporting { background: #9c27b0; }
+  .dot-dim { background: #ff9800; }
+  .scenario-header td { background: #e8f4fd !important; font-weight: 600; }
+  .dim-table th { background: #fff3e0; color: #e65100; }
+  .dim-values-table th { background: #fff8e1; color: #f57f17; }
+  .constraint-table th { background: #e8f5e9; color: #2e7d32; }
+  .section-label { background: #f5f5f5; border: 1px solid #ddd; padding: 6px 12px; border-radius: 4px; display: inline-block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; color: #555; }
+  .data-vol-table th { background: #ede7f6; color: #4527a0; }
+</style>
+</head>
+<body>
+
+<h1>Altura Standard Import Template</h1>
+<p class="subtitle">Automotive Cloud &mdash; Foundation &mdash; Vertical &amp; Journey Onboarding</p>
+
+<div class="info">
+  <strong>Source:</strong> <code>journeys/auto-foundation-journeys.md</code> authored by the <code>auto-sdet-architect</code> agent &mdash;
+  derived from <code>JOURNEY_MAP.md</code> Part 2 steps 1&ndash;11 (PSLs &rarr; Profiles &rarr; Person Accounts &rarr; Account RTs &rarr; Contact &rarr; ACR &rarr;
+  AAR &rarr; CCR/PRR &rarr; Party Relationship Group &rarr; Business Profile/IOU/Supplier &rarr; Product Record Types) and
+  <code>PERSONA_JOURNEYS.md</code> persona model.
+  Contains <strong>6 journeys</strong> (4 Setup + 2 Transaction) covering the Automotive Foundation tier &mdash; the cross-cutting baseline every Auto Cloud module depends on.
+</div>
+
+<div class="note">
+  <strong>Authoring vs Runtime:</strong> Flows, journeys, and scenarios are <em>authoring-layer</em> constructs (human organization of test intent). Test cases and chains are <em>runtime-layer</em> (executor composition). This template populates the authoring layer only &mdash; runtime composition happens later via the pipeline.
+</div>
+
+<div class="warn">
+  <strong>Foundation Platform Constraints &amp; Irreversibility:</strong>
+  Foundation gates the entire Auto Cloud stack. <strong>Person Accounts</strong> is one-way (file support ticket; OWD must allow <code>Contact Controlled By Parent</code> or both Private).
+  <strong>Lightning Knowledge</strong> and <strong>Timeline</strong> are out-of-scope at Foundation but their flippability must be verified.
+  <strong>ARC is always last (step 43)</strong> &mdash; Foundation only reserves the <code>ARC Access</code> PSL pool.
+  Mandatory record-type splits: Product (<code>Vehicle</code> / <code>Parts</code>) at Foundation step 11; Asset (<code>Vehicle</code> / <code>Parts</code>) at next-tier step 13.
+  Connected org <code>autodemoNag</code> is <strong>READ-ONLY</strong> &mdash; no inserts/updates/deletes/deploys.
+</div>
+
+<!-- =========================================================== -->
+<!-- TAB 1: VERTICAL SETUP -->
+<!-- =========================================================== -->
+<h2><span class="tab-label">Tab 1</span> Vertical Setup</h2>
+
+<table id="tab1">
+<thead>
+<tr>
+  <th>vertical_name <span class="required">*</span></th>
+  <th>display_name</th>
+  <th>application <span class="required">*</span></th>
+  <th>parent_vertical</th>
+  <th>preferred_prefix</th>
+  <th>owner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>automotive</td>
+  <td>Automotive Cloud &mdash; Foundation</td>
+  <td>Automotive Cloud - Foundation</td>
+  <td>Industries</td>
+  <td>AUTO</td>
+  <td>auto-sdet-architect@salesforce.com</td>
+</tr>
+</tbody>
+</table>
+
+<div class="info">
+  <code>wave_id</code> is auto-assigned by the import skill at ingest time. Do not include it in the template &mdash; this prevents collisions across concurrent imports.
+</div>
+
+<!-- =========================================================== -->
+<!-- TAB 2: JOURNEYS -->
+<!-- =========================================================== -->
+<h2><span class="tab-label">Tab 2</span> Journeys <span class="required">(Required)</span></h2>
+
+<div class="legend">
+  <span><span class="dot dot-setup"></span> Setup (4)</span>
+  <span><span class="dot dot-txn"></span> Transaction (2)</span>
+  <span><span class="dot dot-reporting"></span> Reporting (embedded in Setup #4)</span>
+</div>
+
+<table id="tab2">
+<thead>
+<tr>
+  <th>flow_name <span class="required">*</span></th>
+  <th>journey_name <span class="required">*</span></th>
+  <th>journey_type <span class="required">*</span></th>
+  <th>persona</th>
+  <th>priority</th>
+  <th>prerequisite</th>
+  <th>business_process</th>
+  <th>features</th>
+  <th>complexity</th>
+  <th>data_shape_notes</th>
+  <th>integration</th>
+  <th>integration_component</th>
+</tr>
+</thead>
+<tbody>
+<!-- SETUP JOURNEYS (4) -->
+<tr>
+  <td>Automotive Foundation Platform Setup</td>
+  <td>Admin Setup Journey for Permissions &amp; Profiles</td>
+  <td>setup</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td>Admin logs in to Org having Automotive Cloud required licenses; org has Sales Cloud + Service Cloud baseline available; Setup Audit Trail enabled</td>
+  <td>Establish the permission and profile substrate: assign Automotive Foundation User PSL (mandatory), reserve Group Membership and ARC Access PSL pools, clone Standard User to create Auto Internal profiles (Admin/Standard/Sales/Service/Finance), and mark the four Auto apps (Automotive, Service Console for Automotive, Partner Visits, Warranty Lifecycle Management) as Visible. Auto ships no default profiles &mdash; every cloned profile is explicit.</td>
+  <td>Permission Set Licenses, Profiles, App Visibility</td>
+  <td>Medium</td>
+  <td>PSL seats: smoke &ge; 5 &middot; regression &ge; 25 &middot; perf &ge; 200 per PSL. Profiles: 5 cloned profiles minimum. No data shape impact at this journey.</td>
+  <td>Yes</td>
+  <td>SSO / IdP (live), Setup Audit Trail (live)</td>
+</tr>
+<tr>
+  <td>Automotive Foundation Platform Setup</td>
+  <td>Admin Setup Journey for Person Accounts &amp; Stakeholder Model</td>
+  <td>setup</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td>Permissions &amp; Profiles journey complete; throwaway sandbox available for Person Accounts dry-run; sponsor sign-off on irreversibility recorded</td>
+  <td>Configure the irreversible Person Accounts toggle and the full stakeholder relationship graph. Pre-gate Contact OWD to Controlled By Parent (or both Private). File the Person Accounts support ticket and enable. Add Account Record Types (Business + Person, optionally Dealer/Household/Supplier per sponsor decision). Enable Account Contact Relationship (multi-account contacts), Account Account Relationship (household-to-dealer), Contact Contact Relationship + Party Role Relationship (spouse/lawyer/accountant), Party Relationship Group (households + dealer groups) including Group Membership Settings.</td>
+  <td>Person Accounts (irreversible), Account Record Types, Contact, ACR, AAR, CCR, PRR, PRG, Group Membership Settings</td>
+  <td>High</td>
+  <td>Person Accounts: smoke 5 households &times; 4 people = 20 PA &middot; regression 50 households = 200 PA &middot; perf 5,000 households = 20K PA. ACR/AAR/CCR/PRR/PRG counts scale to household count.</td>
+  <td>No</td>
+  <td></td>
+</tr>
+<tr>
+  <td>Automotive Foundation Platform Setup</td>
+  <td>Admin Setup Journey for Business Profile, IOU &amp; Product Record Types</td>
+  <td>setup</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td>Person Accounts &amp; Stakeholder Model journey complete; product taxonomy decisions made (Vehicle vs Parts page-layout split signed off)</td>
+  <td>Configure dealer/distributor org structure and the mandatory Product record-type split. Add Business Profile (Business Partner Type, Service Type, Region picklists), Internal Organization Unit (per business unit), Supplier shell (Warranty Supplier Recovery populates fully later). Add Product2 record types Vehicle and Parts with separate page layouts &mdash; without this every downstream inventory + vehicle module breaks. Asset Vehicle/Parts RT split is deferred to next tier (step 13, owned by auto-vehicle-asset-fleet skill).</td>
+  <td>Business Profile, Internal Organization Unit, Supplier (shell), Product2 Record Types (Vehicle / Parts), Page Layouts per RT</td>
+  <td>Medium</td>
+  <td>Business Profiles: smoke 1 &middot; regression 25 &middot; perf 500. IOU: smoke 1 &middot; regression 5 &middot; perf 50. Product2 seed: smoke 2 (1 Vehicle + 1 Parts) &middot; regression 20 &middot; perf 2,000.</td>
+  <td>No</td>
+  <td></td>
+</tr>
+<tr>
+  <td>Automotive Foundation Platform Setup</td>
+  <td>Admin Setup Journey for Foundation Reporting &amp; Audit Baseline</td>
+  <td>setup</td>
+  <td>Salesforce Admin</td>
+  <td>P1</td>
+  <td>All three preceding Foundation Setup journeys complete</td>
+  <td>Establish observability and audit baseline. Verify Setup Audit Trail captures every Foundation toggle (Person Accounts, OWD changes, profile clones, PSL assignments, Group Membership Settings, Product RT additions). Snapshot PSL capacity (Automotive Foundation User UsedLicenses), profile inventory, OWD baseline (Contact = ControlledByParent, AAR = Private, PRR = Private, Account = PublicReadWrite). Confirm Person Account flip evidence (SetupAuditTrail row + queryable IsPersonAccount). Verify CRM Analytics Plus and Manufacturing Analytics Apps PSL pool reserved (no dashboards yet) and Data Cloud Automotive Data Kit available but not installed. Reporting reaches full coverage only at later tiers (CRM Analytics step 42, Data Cloud step 41, KPIs step 31, Forecasting step 24) &mdash; Foundation establishes the audit floor.</td>
+  <td>Setup Audit Trail, PSL Capacity Reports, Profile Inventory, OWD Baseline, CRM Analytics enablement check, Data Cloud enablement check</td>
+  <td>Low</td>
+  <td>Audit Trail: non-empty post-Foundation. PSL UsedLicenses &ge; test population per PSL. No data volume impact &mdash; reporting reads existing metadata.</td>
+  <td>Yes</td>
+  <td>Setup Audit Trail (live), CRM Analytics (reserved-only), Data Cloud (reserved-only)</td>
+</tr>
+<!-- TRANSACTION JOURNEYS (2) -->
+<tr>
+  <td>Automotive Foundation Daily Loop</td>
+  <td>Dealer Representative Onboards Household-of-Four</td>
+  <td>txn</td>
+  <td>Dealer Representative, Salesforce Admin, Service Agent</td>
+  <td>P0</td>
+  <td>All four Foundation Setup journeys complete. Dealer Representative user has Auto Internal Sales profile + Automotive Foundation User PSL + Group Membership PSL. Lightning Experience renders Automotive app as default. Dealer Account exists with Business Profile.</td>
+  <td>1. Dealer Representative logs in and creates a Person Account "Aisha Khan" via Automotive app New Account &rarr; Person Account RT. 2. Captures spouse "Rohan Khan" as a separate Person Account. 3. Links the two via Contact Contact Relationship "Spouse" with a Party Role Relationship row classified as Spouse. 4. Creates a Party Relationship Group "Khan Household" and adds both Person Accounts as members. 5. Links the household to the dealer's Business Profile via Account Account Relationship "Preferred Dealer". 6. Hands off to Service Agent who pulls "Khan Household" via global search and confirms household + spouse linkage surfaces on the Person Account page (preview of Service Console behavior, verified at Foundation tier as "data is queryable").</td>
+  <td>Person Account, Account Contact Relationship, Account Account Relationship, Contact Contact Relationship, Party Role Relationship, Party Relationship Group</td>
+  <td>Medium</td>
+  <td>Per session: 2 Person Accounts (household members) &middot; 1 Business Account (preferred dealer) &middot; 2 Contacts (auto via PA model) &middot; 1 ACR &middot; 1 AAR (household&harr;dealer) &middot; 1 CCR (Aisha&harr;Rohan) &middot; 1 PRR (Spouse classification) &middot; 1 PRG (Khan Household) + 2 PRG members. Smoke 5 households &middot; regression 50 households &middot; perf 5,000 households.</td>
+  <td>No</td>
+  <td></td>
+</tr>
+<tr>
+  <td>Automotive Foundation Daily Loop</td>
+  <td>Service Agent Inbound Call Lookup with Sharing Boundary</td>
+  <td>txn</td>
+  <td>Service Agent</td>
+  <td>P0</td>
+  <td>Dealer Representative onboarding journey has produced at least one household with PRG + AAR + CCR + PRR records. Service Agent user has Auto Internal Service profile + Automotive Foundation User PSL + Group Membership PSL but NO record share to PRR rows.</td>
+  <td>1. Service Agent logs in. 2. Searches "Aisha Khan" via global search and opens the Person Account. 3. Reviews related lists: Party Relationship Groups, Contacts, AAR, PRR &mdash; verifies "Khan Household" PRG is visible, preferred-dealer AAR link is visible, spouse PRR is visible. 4. Attempts to edit a PRR row (OWD enforcement test &mdash; PRR is Private, edit must be blocked with "Insufficient Privileges" or greyed-out action). 5. Attempts to escalate the call &mdash; no Case escalation surface exists at Foundation tier; agent surfaces a "module not yet configured" message marking the explicit Foundation/Service-Console seam.</td>
+  <td>Person Account (read), Contact (read), AccountContactRelation (read), AccountAccountRelation (read), ContactContactRelation (read), PartyRoleRelation (sharing-blocked), PartyRelationshipGroup (read)</td>
+  <td>Medium</td>
+  <td>Read-side scenarios &mdash; depends on data produced by TUJ-1. No additional volume cost. Sharing test: at least 1 PRR row that the Service Agent does NOT own and is NOT shared to.</td>
+  <td>No</td>
+  <td></td>
+</tr>
+</tbody>
+</table>
+
+<div class="info">
+  <strong><code>flow_name</code>:</strong> Two flows defined &mdash; <code>Automotive Foundation Platform Setup</code> (4 setup journeys) and <code>Automotive Foundation Daily Loop</code> (2 transaction journeys). The import skill creates both flows and membership in one pass.
+</div>
+
+<div class="info">
+  <strong><code>prerequisite</code>:</strong> Prose only. The four setup journeys form a strict chain (1 &rarr; 2 &rarr; 3 &rarr; 4) because Person Accounts (journey 2) cannot be flipped until OWD baseline (journey 1) is set, and Product RTs (journey 3) cannot be added until Account RTs (journey 2) exist. Transaction journeys depend on all four setup journeys being complete.
+</div>
+
+<div class="info">
+  <strong><code>persona</code>:</strong> Multi-persona OK at journey level. TUJ-1 lists Dealer Rep + Admin + Service Agent because the journey hands off across them. At scenario/ALT level, the rule is one persona per row.
+</div>
+
+<div class="info">
+  <strong><code>data_shape_notes</code>:</strong> Foundation has no Vehicle/Asset/Financial Account/Claim volumes &mdash; those tiers light up downstream. Foundation volumes track stakeholder-graph cardinality (households, PA, ACR/AAR/CCR/PRR/PRG).
+</div>
+
+<!-- =========================================================== -->
+<!-- TAB 3: DIMENSIONS -->
+<!-- =========================================================== -->
+<h2><span class="tab-label">Tab 3</span> Variant Dimensions <span class="dot dot-dim" style="margin-left:8px"></span></h2>
+<p>Derived from the Foundation Configuration Journey + Setup Data Journey. These dimensions drive scenario decomposition &mdash; each journey gets crossed with applicable dimension values to produce atomic test scenarios. Maps to <code>variant_dimensions</code> table in ADM.</p>
+
+<!-- Section A: Dimension Catalog -->
+<h3><span class="section-label">Section A</span> Dimension Catalog</h3>
+<p>One row per dimension. Defines the dimension name, description, and which journey types it applies to.</p>
+
+<table class="dim-table">
+<thead>
+<tr>
+  <th>dimension_name <span class="required">*</span></th>
+  <th>description</th>
+  <th>applies_to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>account_record_type</code></td>
+  <td>Account Record Type used for the stakeholder &mdash; determines page layout, sharing path, and downstream module compatibility</td>
+  <td>Setup, Transaction</td>
+</tr>
+<tr>
+  <td><code>contact_owd_baseline</code></td>
+  <td>Organization-Wide Default for Contact &mdash; gates the Person Accounts irreversible toggle and downstream sharing behavior</td>
+  <td>Setup</td>
+</tr>
+<tr>
+  <td><code>relationship_object</code></td>
+  <td>Which relationship object the scenario exercises &mdash; ACR / AAR / CCR / PRR / PRG &mdash; each has distinct enable steps and OWD</td>
+  <td>Setup, Transaction</td>
+</tr>
+<tr>
+  <td><code>profile_clone_source</code></td>
+  <td>Source profile cloned to create the Auto Internal profile &mdash; determines baseline object access and app visibility starting point</td>
+  <td>Setup</td>
+</tr>
+<tr>
+  <td><code>psl_layering</code></td>
+  <td>Which PSL stack is applied to the test user &mdash; Foundation only vs Foundation+Group vs Foundation+ARC reserved</td>
+  <td>Setup, Transaction</td>
+</tr>
+<tr>
+  <td><code>person_account_state</code></td>
+  <td>Whether Person Accounts is enabled in the org &mdash; irreversible toggle &mdash; gates every customer journey downstream</td>
+  <td>Setup, Transaction</td>
+</tr>
+<tr>
+  <td><code>product_rt_split_state</code></td>
+  <td>Whether Product2 has the mandatory Vehicle/Parts record-type split with separate page layouts</td>
+  <td>Setup</td>
+</tr>
+<tr>
+  <td><code>setup_method</code></td>
+  <td>How org setup is performed &mdash; Setup UI manual configuration vs metadata deploy</td>
+  <td>Setup</td>
+</tr>
+</tbody>
+</table>
+
+<!-- Section B: Dimension Values -->
+<h3><span class="section-label">Section B</span> Dimension Values</h3>
+<p>One row per value. Links back to the dimension catalog above.</p>
+
+<table class="dim-values-table">
+<thead>
+<tr>
+  <th>dimension_name <span class="required">*</span></th>
+  <th>id <span class="required">*</span></th>
+  <th>label</th>
+  <th>priority</th>
+  <th>description</th>
+</tr>
+</thead>
+<tbody>
+<!-- account_record_type values -->
+<tr>
+  <td><code>account_record_type</code></td>
+  <td><code>business_account</code></td>
+  <td>Business Account</td>
+  <td>P0</td>
+  <td>Default Business Account RT &mdash; dealers, OEM divisions, suppliers, internal departments</td>
+</tr>
+<tr>
+  <td><code>account_record_type</code></td>
+  <td><code>person_account</code></td>
+  <td>Person Account</td>
+  <td>P0</td>
+  <td>Person Account RT &mdash; drivers, owners, individual customers (requires irreversible toggle)</td>
+</tr>
+<tr>
+  <td><code>account_record_type</code></td>
+  <td><code>dealer_account</code></td>
+  <td>Dealer Account (custom RT)</td>
+  <td>P1</td>
+  <td>Custom Business Account RT specifically for dealers &mdash; optional at Foundation, often deferred to Partner Performance tier</td>
+</tr>
+<tr>
+  <td><code>account_record_type</code></td>
+  <td><code>household_account</code></td>
+  <td>Household Account (custom RT)</td>
+  <td>P2</td>
+  <td>Custom Business Account RT for households when modeled as Account &mdash; alternative to Party Relationship Group household model</td>
+</tr>
+<!-- contact_owd_baseline values -->
+<tr>
+  <td><code>contact_owd_baseline</code></td>
+  <td><code>controlled_by_parent</code></td>
+  <td>Controlled By Parent</td>
+  <td>P0</td>
+  <td>Contact sharing follows the parent Account &mdash; recommended Foundation default; required to flip Person Accounts</td>
+</tr>
+<tr>
+  <td><code>contact_owd_baseline</code></td>
+  <td><code>both_private</code></td>
+  <td>Account &amp; Contact both Private</td>
+  <td>P1</td>
+  <td>Alternative valid baseline that satisfies Person Accounts prerequisite &mdash; chosen when Account-level privacy is required</td>
+</tr>
+<tr>
+  <td><code>contact_owd_baseline</code></td>
+  <td><code>public_read_only</code></td>
+  <td>Public Read Only</td>
+  <td>P2</td>
+  <td>Blocks Person Accounts toggle &mdash; negative-path test only</td>
+</tr>
+<tr>
+  <td><code>contact_owd_baseline</code></td>
+  <td><code>public_read_write</code></td>
+  <td>Public Read/Write</td>
+  <td>P2</td>
+  <td>Blocks Person Accounts toggle &mdash; negative-path test only</td>
+</tr>
+<!-- relationship_object values -->
+<tr>
+  <td><code>relationship_object</code></td>
+  <td><code>acr</code></td>
+  <td>Account Contact Relationship</td>
+  <td>P0</td>
+  <td>Multi-account contacts &mdash; foundation for households + dealer-staff cross-account access</td>
+</tr>
+<tr>
+  <td><code>relationship_object</code></td>
+  <td><code>aar</code></td>
+  <td>Account Account Relationship</td>
+  <td>P0</td>
+  <td>Household &harr; preferred dealer; dealer &harr; dealer group; OWD = Private</td>
+</tr>
+<tr>
+  <td><code>relationship_object</code></td>
+  <td><code>ccr</code></td>
+  <td>Contact Contact Relationship</td>
+  <td>P0</td>
+  <td>Spouse / partner / lawyer / accountant relationships between Contacts</td>
+</tr>
+<tr>
+  <td><code>relationship_object</code></td>
+  <td><code>prr</code></td>
+  <td>Party Role Relationship</td>
+  <td>P0</td>
+  <td>Role classification on a CCR (Spouse, Lawyer, Accountant); OWD = Private &mdash; sharing test surface</td>
+</tr>
+<tr>
+  <td><code>relationship_object</code></td>
+  <td><code>prg</code></td>
+  <td>Party Relationship Group</td>
+  <td>P0</td>
+  <td>Households + dealer groups; requires Group Membership PSL + Group Membership Settings admin toggle</td>
+</tr>
+<!-- profile_clone_source values -->
+<tr>
+  <td><code>profile_clone_source</code></td>
+  <td><code>standard_user</code></td>
+  <td>Standard User</td>
+  <td>P0</td>
+  <td>Recommended baseline &mdash; Auto ships no default profiles, every Auto profile is cloned from Standard User</td>
+</tr>
+<tr>
+  <td><code>profile_clone_source</code></td>
+  <td><code>system_admin</code></td>
+  <td>System Administrator</td>
+  <td>P1</td>
+  <td>Used for Auto Internal Admin profile only &mdash; broader baseline access</td>
+</tr>
+<tr>
+  <td><code>profile_clone_source</code></td>
+  <td><code>standard_platform_user</code></td>
+  <td>Standard Platform User</td>
+  <td>P2</td>
+  <td>Light-touch profile baseline &mdash; rarely used at Foundation</td>
+</tr>
+<!-- psl_layering values -->
+<tr>
+  <td><code>psl_layering</code></td>
+  <td><code>foundation_only</code></td>
+  <td>Automotive Foundation User only</td>
+  <td>P1</td>
+  <td>Minimum viable PSL &mdash; read access to Auto data model objects, blocks Group Membership UX</td>
+</tr>
+<tr>
+  <td><code>psl_layering</code></td>
+  <td><code>foundation_plus_group</code></td>
+  <td>Foundation + Group Membership</td>
+  <td>P0</td>
+  <td>Foundation PSL + Group Membership &mdash; enables Party Relationship Group page access; recommended Foundation default</td>
+</tr>
+<tr>
+  <td><code>psl_layering</code></td>
+  <td><code>foundation_plus_arc_reserved</code></td>
+  <td>Foundation + Group + ARC Access (reserved)</td>
+  <td>P1</td>
+  <td>ARC Access PSL pool reserved at Foundation; activated only at step 43</td>
+</tr>
+<!-- person_account_state values -->
+<tr>
+  <td><code>person_account_state</code></td>
+  <td><code>enabled</code></td>
+  <td>Person Accounts enabled</td>
+  <td>P0</td>
+  <td>Post-toggle state &mdash; Account.IsPersonAccount queryable; Person Account RT available; one-way</td>
+</tr>
+<tr>
+  <td><code>person_account_state</code></td>
+  <td><code>disabled</code></td>
+  <td>Person Accounts not yet enabled</td>
+  <td>P1</td>
+  <td>Pre-toggle state &mdash; sandbox-first verification target; toggle UI must be reachable (positive) or greyed-out (negative)</td>
+</tr>
+<!-- product_rt_split_state values -->
+<tr>
+  <td><code>product_rt_split_state</code></td>
+  <td><code>configured</code></td>
+  <td>Vehicle + Parts RTs configured</td>
+  <td>P0</td>
+  <td>Both Vehicle and Parts record types exist on Product2 with separate page layouts &mdash; Foundation-complete state</td>
+</tr>
+<tr>
+  <td><code>product_rt_split_state</code></td>
+  <td><code>missing</code></td>
+  <td>Product RT split missing</td>
+  <td>P1</td>
+  <td>Negative-path: validates that downstream inventory + vehicle modules correctly fail with a clear error message</td>
+</tr>
+<!-- setup_method values -->
+<tr>
+  <td><code>setup_method</code></td>
+  <td><code>setup_ui_manual</code></td>
+  <td>Setup UI (Manual)</td>
+  <td>P0</td>
+  <td>Configuration performed manually via Salesforce Setup pages &mdash; default Foundation path</td>
+</tr>
+<tr>
+  <td><code>setup_method</code></td>
+  <td><code>metadata_deploy</code></td>
+  <td>Metadata Deploy (sf project deploy)</td>
+  <td>P1</td>
+  <td>Configuration shipped as metadata package &mdash; faster repeatable setup; some toggles (Person Accounts) cannot be deployed</td>
+</tr>
+<tr>
+  <td><code>setup_method</code></td>
+  <td><code>scratch_org_template</code></td>
+  <td>Scratch Org Template</td>
+  <td>P1</td>
+  <td>Setup baked into a scratch-org definition file &mdash; preferred for SDET regression infrastructure</td>
+</tr>
+</tbody>
+</table>
+
+<!-- =========================================================== -->
+<!-- TAB 4: ORG CONSTRAINTS -->
+<!-- =========================================================== -->
+<h2><span class="tab-label">Tab 4</span> Org Constraints</h2>
+<p>Org-level constraints determining which scenarios can run on which target orgs. Maps to <code>org_constraints</code> + <code>org_constraint_values</code> tables in ADM. Derived from Foundation Setup Data Journey volume tiers and irreversible-toggle states.</p>
+
+<table class="constraint-table">
+<thead>
+<tr>
+  <th>constraint_name</th>
+  <th>constraint_type</th>
+  <th>description</th>
+  <th>values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>person_accounts_state</code></td>
+  <td>org_irreversible_toggle</td>
+  <td>Person Accounts enablement state &mdash; one-way toggle; gates every customer-facing scenario downstream</td>
+  <td>
+    <code>enabled</code> &rarr; Required for all P0 transaction scenarios<br>
+    <code>disabled</code> &rarr; Sandbox-first dry-run target only
+  </td>
+</tr>
+<tr>
+  <td><code>contact_owd</code></td>
+  <td>org_baseline</td>
+  <td>Organization-Wide Default for Contact object</td>
+  <td>
+    <code>controlled_by_parent</code> &rarr; Recommended &mdash; allows Person Accounts toggle<br>
+    <code>both_private</code> &rarr; Alternative valid baseline<br>
+    <code>public_read_only</code> &rarr; Blocks Person Accounts toggle (negative test)<br>
+    <code>public_read_write</code> &rarr; Blocks Person Accounts toggle (negative test)
+  </td>
+</tr>
+<tr>
+  <td><code>group_membership_state</code></td>
+  <td>org_setting</td>
+  <td>Group Membership Settings admin toggle &mdash; required for Party Relationship Group page access</td>
+  <td>
+    <code>enabled</code> &rarr; PRG functional &mdash; required for all household scenarios<br>
+    <code>disabled</code> &rarr; Negative test &mdash; PRG page should fail with clear UX
+  </td>
+</tr>
+<tr>
+  <td><code>product_rt_split</code></td>
+  <td>feature_gate</td>
+  <td>Product2 record-type split into Vehicle + Parts with separate page layouts &mdash; mandatory for Auto data model</td>
+  <td>
+    <code>configured</code> &rarr; Both RTs + layouts present &mdash; Foundation-complete<br>
+    <code>missing</code> &rarr; Negative-path validation only
+  </td>
+</tr>
+<tr>
+  <td><code>foundation_psl_capacity</code></td>
+  <td>org_profile</td>
+  <td>Available Automotive Foundation User PSL seat capacity &mdash; determines test population size</td>
+  <td>
+    <code>small</code> &rarr; &le; 25 seats (smoke tier)<br>
+    <code>medium</code> &rarr; 26&ndash;200 seats (regression tier)<br>
+    <code>large</code> &rarr; &gt; 200 seats (perf tier)
+  </td>
+</tr>
+<tr>
+  <td><code>arc_access_psl_reserved</code></td>
+  <td>org_profile</td>
+  <td>Whether ARC Access PSL pool is reserved at Foundation (activated at step 43)</td>
+  <td>
+    <code>yes</code> &rarr; Reservable &mdash; Foundation preferred<br>
+    <code>no</code> &rarr; ARC tier blocked &mdash; flag for sponsor escalation
+  </td>
+</tr>
+<tr>
+  <td><code>stakeholder_volume_tier</code></td>
+  <td>data_volume</td>
+  <td>Test-data volume tier for the stakeholder graph (households + Person Accounts + relationships)</td>
+  <td>
+    <code>smoke</code> &rarr; 5 households &times; 4 = 20 PA, 5 PRG, 5 AAR, 5 CCR, 5 PRR<br>
+    <code>regression</code> &rarr; 50 households = 200 PA, 50 PRG, 50 AAR, 50 CCR, 50 PRR<br>
+    <code>perf</code> &rarr; 5,000 households = 20K PA, 5K PRG, 5K AAR, 5K CCR, 5K PRR
+  </td>
+</tr>
+<tr>
+  <td><code>setup_audit_trail_state</code></td>
+  <td>observability</td>
+  <td>Whether Setup Audit Trail is capturing Foundation toggles &mdash; required for sponsor sign-off</td>
+  <td>
+    <code>enabled</code> &rarr; Required for prod-like sandbox &amp; production<br>
+    <code>disabled</code> &rarr; Negative-path only &mdash; sponsor escalation
+  </td>
+</tr>
+</tbody>
+</table>
+
+<!-- =========================================================== -->
+<!-- TAB 5: SCENARIOS -->
+<!-- =========================================================== -->
+<h2><span class="tab-label">Tab 5</span> Scenarios &amp; Steps</h2>
+<p>Scenarios extracted from the Foundation journey doc (<code>journeys/auto-foundation-journeys.md</code>). Each scenario preserves the original persona, steps, and priority from the Configuration Journey + Transaction User Journeys. Dimension values are attached where mappings are clear.</p>
+
+<div class="rule">
+  <strong>Source-first rule:</strong> These scenarios come directly from the auto-sdet-architect Foundation deliverable. They are NOT generated by dimension crossing. Each scenario name, persona, and walkthrough is extracted verbatim from the source journey doc.
+</div>
+
+<div class="note">
+  <strong>One persona per scenario.</strong> Each scenario is executed by exactly one persona. When the same functional scenario applies to multiple personas, the name is disambiguated.
+</div>
+
+<table id="tab5">
+<thead>
+<tr>
+  <th>journey_name <span class="required">*</span></th>
+  <th>scenario_name <span class="required">*</span></th>
+  <th>persona <span class="required">*</span></th>
+  <th>priority</th>
+  <th>dimension_values</th>
+  <th>org_constraints</th>
+  <th>scenario_walkthrough</th>
+</tr>
+</thead>
+<tbody>
+
+<!-- ___ Journey 1: Setup - Permissions & Profiles ___ -->
+<tr class="scenario-header"><td colspan="7">Admin Setup Journey for Permissions &amp; Profiles (3 scenarios)</td></tr>
+<tr>
+  <td>Admin Setup Journey for Permissions &amp; Profiles</td>
+  <td>Assign Automotive Foundation User PSL and Reserve Group Membership + ARC Access</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td><code>"psl_layering": "foundation_plus_group", "setup_method": "setup_ui_manual"</code></td>
+  <td><code>"foundation_psl_capacity": "medium", "arc_access_psl_reserved": "yes"</code></td>
+  <td>Admin logs into Automotive Cloud Org &rarr; Navigate to Setup &rarr; Permission Set Licenses &rarr; Confirm Automotive Foundation User PSL has UsedLicenses &lt; TotalLicenses &rarr; Confirm Group Membership PSL pool reservable &rarr; Confirm ARC Access PSL pool reservable (activated only at step 43) &rarr; Assign Automotive Foundation User PSL to admin user &rarr; Assign Group Membership PSL to admin user &rarr; Verify PermissionSetLicenseAssign rows present via SOQL</td>
+</tr>
+<tr>
+  <td>Admin Setup Journey for Permissions &amp; Profiles</td>
+  <td>Clone Standard User to Create Auto Internal Profiles</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td><code>"profile_clone_source": "standard_user", "setup_method": "setup_ui_manual"</code></td>
+  <td><code>"foundation_psl_capacity": "medium"</code></td>
+  <td>Admin logs in &rarr; Navigate to Setup &rarr; Profiles &rarr; Clone Standard User to create Auto Internal Admin, Auto Internal Standard, Auto Internal Sales, Auto Internal Service, Auto Internal Finance &rarr; For each cloned profile mark Automotive, Service Console for Automotive, Partner Visits, Warranty Lifecycle Management apps as Visible &rarr; Grant Read on every Auto data model object referenced by the persona &rarr; Verify via retrieve_metadata Profile that customApplications Visible flags are set</td>
+</tr>
+<tr>
+  <td>Admin Setup Journey for Permissions &amp; Profiles</td>
+  <td>Verify No Default Auto Profiles Shipped</td>
+  <td>Salesforce Admin</td>
+  <td>P1</td>
+  <td><code>"setup_method": "setup_ui_manual"</code></td>
+  <td></td>
+  <td>Admin logs in &rarr; Run SOQL <code>SELECT Name FROM Profile WHERE Name LIKE 'Automotive%'</code> &rarr; Confirm no default Auto-named profile exists out of the box &rarr; Validate that all Auto profiles are explicit clones &mdash; this is a regression guard against future Salesforce releases shipping default Auto profiles that could conflict with cloned profile names</td>
+</tr>
+
+<!-- ___ Journey 2: Setup - Person Accounts & Stakeholder Model ___ -->
+<tr class="scenario-header"><td colspan="7">Admin Setup Journey for Person Accounts &amp; Stakeholder Model (6 scenarios)</td></tr>
+<tr>
+  <td>Admin Setup Journey for Person Accounts &amp; Stakeholder Model</td>
+  <td>Set Contact OWD to Controlled By Parent (Pre-Gate for Person Accounts)</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td><code>"contact_owd_baseline": "controlled_by_parent", "setup_method": "setup_ui_manual"</code></td>
+  <td><code>"contact_owd": "controlled_by_parent"</code></td>
+  <td>Admin logs in &rarr; Navigate to Setup &rarr; Sharing Settings &rarr; Organization-Wide Defaults &rarr; Set Contact to Controlled By Parent &rarr; Save &rarr; Verify list_admin_settings returns OWD Contact = ControlledByParent &rarr; This is the mandatory pre-gate for the Person Accounts toggle &mdash; the Setup UI greys out the Person Accounts enable button if Contact OWD is anything other than Controlled By Parent or both Private</td>
+</tr>
+<tr>
+  <td>Admin Setup Journey for Person Accounts &amp; Stakeholder Model</td>
+  <td>Enable Person Accounts (Sandbox-First Irreversible Toggle)</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td><code>"contact_owd_baseline": "controlled_by_parent", "person_account_state": "enabled"</code></td>
+  <td><code>"person_accounts_state": "enabled", "setup_audit_trail_state": "enabled"</code></td>
+  <td>Sandbox-first dry-run &mdash; Admin logs into THROWAWAY sandbox &rarr; File support ticket to enable Person Accounts &rarr; From Setup &rarr; Person Accounts &rarr; Acknowledge org implications &rarr; Enable &rarr; Verify describe_sobject Account returns IsPersonAccount field &rarr; Verify SOQL <code>SELECT IsPersonAccount FROM Account LIMIT 1</code> succeeds &rarr; Verify SetupAuditTrail row present &rarr; Take post-toggle health_check snapshot &rarr; Only after sandbox-first passes do we repeat in prod-like sandbox</td>
+</tr>
+<tr>
+  <td>Admin Setup Journey for Person Accounts &amp; Stakeholder Model</td>
+  <td>Add Account Record Types Business + Person</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td><code>"account_record_type": "business_account"</code> + <code>"account_record_type": "person_account"</code></td>
+  <td><code>"person_accounts_state": "enabled"</code></td>
+  <td>Admin logs in (Person Accounts already enabled) &rarr; Navigate to Object Manager &rarr; Account &rarr; Record Types &rarr; Add Business Account RT (default) &rarr; Add Person Account RT (default after Person Accounts toggle) &rarr; Assign page layouts per RT &rarr; Verify describe_sobject Account &rarr; recordTypeInfos includes both Business and Person &rarr; Verify retrieve_metadata RecordType for layout assignments</td>
+</tr>
+<tr>
+  <td>Admin Setup Journey for Person Accounts &amp; Stakeholder Model</td>
+  <td>Enable Account Contact Relationship + Account Account Relationship</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td><code>"relationship_object": "acr"</code> + <code>"relationship_object": "aar"</code></td>
+  <td><code>"person_accounts_state": "enabled"</code></td>
+  <td>Admin logs in &rarr; Navigate to Setup &rarr; Account Settings &rarr; Enable Account Contact Relationships (multi-account contacts) &rarr; Enable Account Account Relationships (household &harr; preferred dealership) &rarr; Configure page layouts &rarr; Verify describe_sobject AccountContactRelation and AccountAccountRelation are queryable and not blocked by license &rarr; Set AAR OWD to Private (recommended)</td>
+</tr>
+<tr>
+  <td>Admin Setup Journey for Person Accounts &amp; Stakeholder Model</td>
+  <td>Enable Contact Contact Relationship + Party Role Relationship</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td><code>"relationship_object": "ccr"</code> + <code>"relationship_object": "prr"</code></td>
+  <td><code>"person_accounts_state": "enabled"</code></td>
+  <td>Admin logs in &rarr; Enable Contact Contact Relationship (spouse / partner / lawyer / accountant) &rarr; Enable Party Role Relationship for role classification on the CCR &rarr; Populate reference picklists for Party Role codes &rarr; Verify describe_sobject ContactContactRelation and PartyRoleRelation &rarr; Set OWD PartyRoleRelation = Private &mdash; this is the sharing-test surface for the Service Agent boundary scenario in TUJ-2</td>
+</tr>
+<tr>
+  <td>Admin Setup Journey for Person Accounts &amp; Stakeholder Model</td>
+  <td>Enable Party Relationship Group + Group Membership Settings</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td><code>"relationship_object": "prg", "psl_layering": "foundation_plus_group"</code></td>
+  <td><code>"group_membership_state": "enabled"</code></td>
+  <td>Admin logs in &rarr; Confirm Group Membership PSL is assigned to admin user &rarr; Navigate to Setup &rarr; Group Membership Settings &rarr; Enable &rarr; Verify list_admin_settings GroupMembershipSettings.IsEnabled = true &rarr; Navigate to Object Manager &rarr; Party Relationship Group &rarr; Configure page layout for households + dealer groups + supplier groups &rarr; Verify describe_sobject PartyRelationshipGroup is queryable</td>
+</tr>
+
+<!-- ___ Journey 3: Setup - Business Profile, IOU & Product RTs ___ -->
+<tr class="scenario-header"><td colspan="7">Admin Setup Journey for Business Profile, IOU &amp; Product Record Types (3 scenarios)</td></tr>
+<tr>
+  <td>Admin Setup Journey for Business Profile, IOU &amp; Product Record Types</td>
+  <td>Configure Business Profile with Industry Picklists</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td><code>"setup_method": "setup_ui_manual"</code></td>
+  <td><code>"person_accounts_state": "enabled"</code></td>
+  <td>Admin logs in &rarr; Navigate to Object Manager &rarr; Business Profile &rarr; Configure picklist values for Business Partner Type (Dealer, Distributor, Supplier, OEM Division) &rarr; Service Type &rarr; Region &rarr; Verify describe_sobject BusinessProfile returns populated picklists &rarr; Create one Business Profile shell per dealer/distributor and link it to the corresponding Business Account</td>
+</tr>
+<tr>
+  <td>Admin Setup Journey for Business Profile, IOU &amp; Product Record Types</td>
+  <td>Configure Internal Organization Unit + Supplier Shell</td>
+  <td>Salesforce Admin</td>
+  <td>P1</td>
+  <td><code>"setup_method": "setup_ui_manual"</code></td>
+  <td></td>
+  <td>Admin logs in &rarr; Configure Internal Organization Unit hierarchy (one per business unit / region / brand) &rarr; Create Supplier shell records (Supplier surfaces fully in Warranty Supplier Recovery tier &mdash; only the object exists at Foundation) &rarr; Verify describe_sobject InternalOrganizationUnit and Supplier &rarr; Run count SOQL on InternalOrganizationUnit to confirm hierarchy</td>
+</tr>
+<tr>
+  <td>Admin Setup Journey for Business Profile, IOU &amp; Product Record Types</td>
+  <td>Add Product Record Types Vehicle + Parts with Separate Page Layouts</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td><code>"product_rt_split_state": "configured"</code></td>
+  <td><code>"product_rt_split": "configured"</code></td>
+  <td>Admin logs in &rarr; Navigate to Object Manager &rarr; Product2 &rarr; Record Types &rarr; Add Vehicle RT &rarr; Add Parts RT &rarr; Create Product2-Vehicle Layout and Product2-Parts Layout (separate &mdash; no shared layout) &rarr; Assign each layout to its RT &rarr; Verify describe_sobject Product2 recordTypeInfos includes both RTs &rarr; Verify retrieve_metadata returns both layouts &rarr; This is the MANDATORY split &mdash; without it every downstream inventory + vehicle module breaks</td>
+</tr>
+
+<!-- ___ Journey 4: Setup - Reporting & Audit Baseline ___ -->
+<tr class="scenario-header"><td colspan="7">Admin Setup Journey for Foundation Reporting &amp; Audit Baseline (4 scenarios)</td></tr>
+<tr>
+  <td>Admin Setup Journey for Foundation Reporting &amp; Audit Baseline</td>
+  <td>Verify Setup Audit Trail Captures All Foundation Toggles</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td><code>"setup_method": "setup_ui_manual"</code></td>
+  <td><code>"setup_audit_trail_state": "enabled"</code></td>
+  <td>Admin logs in &rarr; Navigate to Setup &rarr; View Setup Audit Trail &rarr; Confirm rows exist for: Person Accounts enable, OWD changes (Contact = ControlledByParent), profile clones (Auto Internal *), PSL assignments (Automotive Foundation User, Group Membership), Group Membership Settings enable, Account RT additions (Business + Person), Product2 RT additions (Vehicle + Parts) &rarr; Run SOQL on SetupAuditTrail filtered by Foundation date range &rarr; Verify non-empty</td>
+</tr>
+<tr>
+  <td>Admin Setup Journey for Foundation Reporting &amp; Audit Baseline</td>
+  <td>PSL Capacity + Profile Inventory Snapshot</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td></td>
+  <td><code>"foundation_psl_capacity": "medium"</code></td>
+  <td>Admin logs in &rarr; Run SOQL on PermissionSetLicenseAssign + PermissionSetLicense to snapshot UsedLicenses vs TotalLicenses for Automotive Foundation User, Group Membership, ARC Access &rarr; Confirm UsedLicenses &ge; test population per PSL &rarr; Run SOQL on Profile to confirm five Auto Internal profiles exist &rarr; Confirm default Salesforce profiles are unchanged &rarr; Document baseline for sponsor sign-off</td>
+</tr>
+<tr>
+  <td>Admin Setup Journey for Foundation Reporting &amp; Audit Baseline</td>
+  <td>OWD Baseline Snapshot</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td><code>"contact_owd_baseline": "controlled_by_parent"</code></td>
+  <td><code>"contact_owd": "controlled_by_parent"</code></td>
+  <td>Admin logs in &rarr; Navigate to Sharing Settings &rarr; Capture OWD baseline: Contact = ControlledByParent, AccountAccountRelation = Private, PartyRoleRelation = Private, Account = PublicReadWrite &rarr; Cross-check via list_admin_settings &rarr; Document baseline as the Foundation OWD contract &mdash; any future module-tier OWD overlay must layer on top, never downgrade Foundation</td>
+</tr>
+<tr>
+  <td>Admin Setup Journey for Foundation Reporting &amp; Audit Baseline</td>
+  <td>CRM Analytics + Data Cloud Enablement Reservation Check</td>
+  <td>Salesforce Admin</td>
+  <td>P1</td>
+  <td></td>
+  <td></td>
+  <td>Admin logs in &rarr; Verify CRM Analytics Plus and Manufacturing Analytics Apps PSL pool is reservable (no dashboards yet at Foundation) &rarr; Verify Data Cloud Automotive Data Kit is *available* but not installed &rarr; Confirm baseline of "enabled but not configured" so step 41 (Data Cloud) and step 42 (CRM Analytics) tiers can layer on top &rarr; Run list_admin_settings Data Cloud to confirm</td>
+</tr>
+
+<!-- ___ Journey 5: Txn - Dealer Rep Onboards Household-of-Four ___ -->
+<tr class="scenario-header"><td colspan="7">Dealer Representative Onboards Household-of-Four (6 scenarios)</td></tr>
+<tr>
+  <td>Dealer Representative Onboards Household-of-Four</td>
+  <td>Dealer Rep Logs In and Lands on Automotive App</td>
+  <td>Dealer Representative</td>
+  <td>P0</td>
+  <td><code>"profile_clone_source": "standard_user", "psl_layering": "foundation_plus_group"</code></td>
+  <td><code>"person_accounts_state": "enabled", "foundation_psl_capacity": "small"</code></td>
+  <td>Dealer Representative logs into Automotive Cloud Org &rarr; PSA: Auto Internal Sales profile + Automotive Foundation User PSL + Group Membership PSL &rarr; Lightning Experience renders Automotive app as default (App Visibility honoured from Profile) &rarr; Verify navigation bar shows Auto Cloud objects (Account, Vehicle, Asset, Lead, Opportunity)</td>
+</tr>
+<tr>
+  <td>Dealer Representative Onboards Household-of-Four</td>
+  <td>Create Two Person Accounts (Aisha and Rohan Khan)</td>
+  <td>Dealer Representative</td>
+  <td>P0</td>
+  <td><code>"account_record_type": "person_account"</code></td>
+  <td><code>"person_accounts_state": "enabled"</code></td>
+  <td>Dealer Rep clicks New Account &rarr; Selects Person Account RT &rarr; Creates "Aisha Khan" with PersonExternalId &rarr; Save &rarr; Verify Account.IsPersonAccount = true &rarr; Verify auto-created Contact row matches &rarr; Repeat for spouse "Rohan Khan" as a separate Person Account &rarr; Verify two distinct Person Account rows exist via SOQL filtered by IsPersonAccount</td>
+</tr>
+<tr>
+  <td>Dealer Representative Onboards Household-of-Four</td>
+  <td>Link Spouses via Contact Contact Relationship + Party Role</td>
+  <td>Dealer Representative</td>
+  <td>P0</td>
+  <td><code>"relationship_object": "ccr"</code> + <code>"relationship_object": "prr"</code></td>
+  <td></td>
+  <td>Dealer Rep opens Aisha's Person Account &rarr; Related list &rarr; Contact Contact Relationships &rarr; New &rarr; Link to Rohan's Contact &rarr; Type = Spouse &rarr; Save &rarr; Verify ContactContactRelation row created &rarr; Verify Party Role Relationship row classified as Spouse &rarr; OWD PRR = Private &rarr; Dealer Rep can see because they created the record</td>
+</tr>
+<tr>
+  <td>Dealer Representative Onboards Household-of-Four</td>
+  <td>Create Party Relationship Group "Khan Household"</td>
+  <td>Dealer Representative</td>
+  <td>P0</td>
+  <td><code>"relationship_object": "prg"</code></td>
+  <td><code>"group_membership_state": "enabled"</code></td>
+  <td>Dealer Rep navigates to Party Relationship Group object &rarr; New &rarr; Name "Khan Household" &rarr; Group Type = Household &rarr; Save &rarr; Add Aisha and Rohan as members &rarr; Verify PartyRelationshipGroup row created &rarr; Verify members visible &rarr; Verify PRG record visible on each Person Account's Party Relationship Groups related list &rarr; Sharing test boundary: positive (record creator sees members)</td>
+</tr>
+<tr>
+  <td>Dealer Representative Onboards Household-of-Four</td>
+  <td>Link Household to Preferred Dealer via Account Account Relationship</td>
+  <td>Dealer Representative</td>
+  <td>P0</td>
+  <td><code>"relationship_object": "aar", "account_record_type": "business_account"</code></td>
+  <td></td>
+  <td>Dealer Rep opens Khan Household PRG (or Aisha's Person Account) &rarr; Related list &rarr; Account Account Relationships &rarr; New &rarr; Link to dealer's Business Account "Acme Auto Dealer" &rarr; Type = Preferred Dealer &rarr; Save &rarr; Verify AccountAccountRelation row present &rarr; OWD = Private &rarr; Dealer Rep sees both sides &mdash; this AAR will be the household-side share path used by the next persona handoff</td>
+</tr>
+<tr>
+  <td>Dealer Representative Onboards Household-of-Four</td>
+  <td>Negative Test &mdash; CCR Between Two Non-Person-Account Contacts Must Fail</td>
+  <td>Dealer Representative</td>
+  <td>P1</td>
+  <td><code>"relationship_object": "ccr"</code></td>
+  <td></td>
+  <td>Dealer Rep attempts to create a Contact Contact Relationship between two Contacts that are NOT linked to Person Accounts &rarr; Expected: OOTB CCR validation rejects with a clear error &rarr; This is the negative-path proof that ContactContactRelation is enabled and validation is in place</td>
+</tr>
+
+<!-- ___ Journey 6: Txn - Service Agent Inbound Call Lookup ___ -->
+<tr class="scenario-header"><td colspan="7">Service Agent Inbound Call Lookup with Sharing Boundary (5 scenarios)</td></tr>
+<tr>
+  <td>Service Agent Inbound Call Lookup with Sharing Boundary</td>
+  <td>Service Agent Logs In and Lands on Service Console (Foundation Slice)</td>
+  <td>Service Agent</td>
+  <td>P0</td>
+  <td><code>"profile_clone_source": "standard_user", "psl_layering": "foundation_plus_group"</code></td>
+  <td><code>"person_accounts_state": "enabled"</code></td>
+  <td>Service Agent logs in &rarr; PSA: Auto Internal Service profile + Automotive Foundation User PSL + Group Membership PSL &rarr; Service Console for Automotive app is *visible but not configured at Foundation* &mdash; Agent uses standard Lightning record pages instead &rarr; This explicitly verifies the Foundation/Service-Console seam: app visibility works but module configuration is deferred to step 35</td>
+</tr>
+<tr>
+  <td>Service Agent Inbound Call Lookup with Sharing Boundary</td>
+  <td>Global Search Lookup of Person Account "Aisha Khan"</td>
+  <td>Service Agent</td>
+  <td>P0</td>
+  <td><code>"account_record_type": "person_account"</code></td>
+  <td><code>"person_accounts_state": "enabled"</code></td>
+  <td>Service Agent uses Lightning global search to find "Aisha Khan" &rarr; Opens the Person Account &rarr; Verify Person Account loads &rarr; Verify Controlled-by-parent Contact data shows aligned with Person Account fields &rarr; Read access works for Account = PublicReadWrite OWD baseline</td>
+</tr>
+<tr>
+  <td>Service Agent Inbound Call Lookup with Sharing Boundary</td>
+  <td>Review Related Lists &mdash; PRG, AAR, CCR, PRR Visibility</td>
+  <td>Service Agent</td>
+  <td>P0</td>
+  <td><code>"relationship_object": "prg"</code> + <code>"relationship_object": "aar"</code> + <code>"relationship_object": "ccr"</code></td>
+  <td></td>
+  <td>Service Agent reviews related lists on Aisha's Person Account &rarr; Verify Party Relationship Groups list shows "Khan Household" &rarr; Verify Account Account Relationships list shows "Preferred Dealer" link to Acme Auto Dealer &rarr; Verify Contact Contact Relationships list shows spouse link to Rohan &mdash; reads succeed because OWD on Account = PublicReadWrite and PRG/AAR/CCR are queryable from the parent Account context</td>
+</tr>
+<tr>
+  <td>Service Agent Inbound Call Lookup with Sharing Boundary</td>
+  <td>Sharing Boundary Test &mdash; PRR Edit Must Be Blocked</td>
+  <td>Service Agent</td>
+  <td>P0</td>
+  <td><code>"relationship_object": "prr"</code></td>
+  <td></td>
+  <td>Service Agent attempts to *edit* a Party Role Relationship row classified as Spouse &rarr; PRR is OWD = Private &rarr; Service Agent has no record share to this PRR row (record was created by Dealer Rep) &rarr; Expected: edit action is greyed-out OR Salesforce returns "Insufficient Privileges" &rarr; This is the explicit OWD enforcement boundary test &mdash; proves Foundation OWD configuration is correctly applied</td>
+</tr>
+<tr>
+  <td>Service Agent Inbound Call Lookup with Sharing Boundary</td>
+  <td>Boundary Test &mdash; PRG with Zero Members Renders Empty State</td>
+  <td>Service Agent</td>
+  <td>P1</td>
+  <td><code>"relationship_object": "prg"</code></td>
+  <td></td>
+  <td>Service Agent opens a Party Relationship Group with 0 members (edge case) &rarr; Expected: PRG page renders with "no members" empty state, NOT an error or stack trace &rarr; This is the boundary scenario for empty-collection rendering at the Foundation tier &mdash; downstream household-aware UX must handle this same case</td>
+</tr>
+
+</tbody>
+</table>
+
+<!-- =========================================================== -->
+<!-- DATA VOLUMES REFERENCE -->
+<!-- =========================================================== -->
+<h2>Data Volumes Reference (Foundation Stakeholder Graph)</h2>
+<p>Source: <code>journeys/auto-foundation-journeys.md</code> Setup Data Journey, graphs F2&ndash;F6. Foundation has no Vehicle/Asset/Financial Account/Claim volumes &mdash; those tiers light up downstream. Foundation volumes scale to <strong>household count</strong>, with each household = 4 Person Accounts + 1 PRG + 4 PRG members + spouse-CCR + spouse-PRR + 1 AAR (household&harr;dealer).</p>
+
+<table class="data-vol-table">
+<thead>
+<tr>
+  <th>Object / Artifact</th>
+  <th>Smoke (5 households)</th>
+  <th>Regression (50 households)</th>
+  <th>Perf (5,000 households)</th>
+  <th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Households (PRG)</strong></td>
+  <td>5</td><td>50</td><td>5,000</td>
+  <td>Each PRG = one household</td>
+</tr>
+<tr>
+  <td><strong>Person Accounts</strong></td>
+  <td>20</td><td>200</td><td>20,000</td>
+  <td>4 PA per household average</td>
+</tr>
+<tr>
+  <td><strong>Auto Contacts (via PA model)</strong></td>
+  <td>20</td><td>200</td><td>20,000</td>
+  <td>1:1 with Person Accounts</td>
+</tr>
+<tr>
+  <td><strong>Business Accounts (Dealers)</strong></td>
+  <td>1</td><td>5</td><td>50</td>
+  <td>Approx 1 dealer per 100 households</td>
+</tr>
+<tr>
+  <td><strong>Business Profiles</strong></td>
+  <td>1</td><td>5</td><td>50</td>
+  <td>1:1 with dealer Business Account</td>
+</tr>
+<tr>
+  <td><strong>Internal Org Units</strong></td>
+  <td>1</td><td>5</td><td>50</td>
+  <td>One per business unit / region</td>
+</tr>
+<tr>
+  <td><strong>Account Contact Relationships</strong></td>
+  <td>5</td><td>50</td><td>5,000</td>
+  <td>1 per household (cross-account contact)</td>
+</tr>
+<tr>
+  <td><strong>Account Account Relationships</strong></td>
+  <td>5</td><td>50</td><td>5,000</td>
+  <td>1 per household&harr;dealer link</td>
+</tr>
+<tr>
+  <td><strong>Contact Contact Relationships</strong></td>
+  <td>5</td><td>50</td><td>5,000</td>
+  <td>1 per household (spouse pair)</td>
+</tr>
+<tr>
+  <td><strong>Party Role Relationships</strong></td>
+  <td>5</td><td>50</td><td>5,000</td>
+  <td>1 Spouse PRR per CCR</td>
+</tr>
+<tr>
+  <td><strong>PRG Members</strong></td>
+  <td>20</td><td>200</td><td>20,000</td>
+  <td>4 members per PRG</td>
+</tr>
+<tr>
+  <td><strong>Auto Internal Profiles</strong></td>
+  <td>5</td><td>5</td><td>5</td>
+  <td>Same set across volume tiers</td>
+</tr>
+<tr>
+  <td><strong>Foundation User PSAs</strong></td>
+  <td>&ge; 5</td><td>&ge; 25</td><td>&ge; 200</td>
+  <td>Automotive Foundation User PSL assignments</td>
+</tr>
+<tr>
+  <td><strong>Product2 Seed</strong></td>
+  <td>2 (1 Vehicle, 1 Parts)</td><td>20</td><td>2,000</td>
+  <td>Foundation seed only &mdash; full catalog at Product Mgmt tier</td>
+</tr>
+<tr>
+  <td><strong>SetupAuditTrail Rows</strong></td>
+  <td>~30</td><td>~30</td><td>~30</td>
+  <td>One-time toggles &mdash; volume-independent</td>
+</tr>
+</tbody>
+</table>
+
+<!-- REFERENCE TABLES -->
+<!-- =========================================================== -->
+<h2><span class="tab-label">Reference</span> Foundation Configuration Metrics</h2>
+
+<h3>Permission Set License Stack (Foundation)</h3>
+<table>
+<thead><tr><th>PSL</th><th>Status at Foundation</th><th>Priority</th></tr></thead>
+<tbody>
+<tr><td>Automotive Foundation User</td><td>Mandatory &mdash; assigned to every Auto Cloud user</td><td>P0</td></tr>
+<tr><td>Group Membership</td><td>Required for Party Relationship Group access</td><td>P0</td></tr>
+<tr><td>ARC Access</td><td>Reserved at Foundation; activated only at step 43 (ARC tier)</td><td>P1</td></tr>
+<tr><td>Industries Visit</td><td>Out of scope at Foundation &mdash; surfaces at step 31 (Partner Visits)</td><td>Deferred</td></tr>
+<tr><td>Vehicle Connected Services</td><td>Out of scope at Foundation &mdash; surfaces at step 29</td><td>Deferred</td></tr>
+<tr><td>Vehicle and Asset Finance</td><td>Out of scope at Foundation &mdash; surfaces at step 23 (depends on Timeline)</td><td>Deferred</td></tr>
+<tr><td>Vehicle and Asset Lending</td><td>Out of scope at Foundation &mdash; surfaces at step 25</td><td>Deferred</td></tr>
+<tr><td>Industry Service Excellence</td><td>Out of scope at Foundation &mdash; surfaces at step 35 (Service Console)</td><td>Deferred</td></tr>
+<tr><td>Warranty Lifecycle Management Psl</td><td>Out of scope at Foundation &mdash; surfaces at step 26</td><td>Deferred</td></tr>
+<tr><td>Claims Management Foundation</td><td>Out of scope at Foundation &mdash; surfaces at step 27</td><td>Deferred</td></tr>
+</tbody>
+</table>
+
+<h3>Irreversible Toggles &mdash; Foundation Position</h3>
+<table>
+<thead><tr><th>Toggle</th><th>Foundation Position</th><th>Sandbox-First Required?</th></tr></thead>
+<tbody>
+<tr><td>Person Accounts</td><td><strong>In scope at Foundation step 3</strong> &mdash; gates every customer journey</td><td>Yes &mdash; throwaway sandbox dry-run before prod-like</td></tr>
+<tr><td>Lightning Knowledge</td><td>Out of scope at Foundation &mdash; surfaces at step 35; verify flippable only</td><td>Yes &mdash; when activated</td></tr>
+<tr><td>Timeline</td><td>Out of scope at Foundation &mdash; surfaces at step 37; verify flippable only</td><td>Yes &mdash; when activated</td></tr>
+<tr><td>Vehicle and Asset Finance Additional Components</td><td>Out of scope at Foundation &mdash; depends on Timeline being on first</td><td>Yes &mdash; when activated</td></tr>
+<tr><td>Group Membership Settings</td><td>In scope at Foundation step 9 &mdash; reversible but rarely worth flipping back</td><td>Recommended</td></tr>
+</tbody>
+</table>
+
+<h3>Mandatory Record-Type Splits</h3>
+<table>
+<thead><tr><th>Object</th><th>Required RTs</th><th>Foundation Tier?</th></tr></thead>
+<tbody>
+<tr><td>Product2</td><td>Vehicle, Parts</td><td><strong>Yes &mdash; step 11</strong></td></tr>
+<tr><td>Asset</td><td>Vehicle, Parts</td><td>Deferred to step 13 (auto-vehicle-asset-fleet skill); Foundation must not block</td></tr>
+<tr><td>Account</td><td>Business Account, Person Account</td><td><strong>Yes &mdash; step 4</strong></td></tr>
+</tbody>
+</table>
+
+<h3>Stakeholder Relationship Objects</h3>
+<table>
+<thead><tr><th>Object</th><th>Purpose</th><th>OWD</th><th>Priority</th></tr></thead>
+<tbody>
+<tr><td>Account Contact Relationship (ACR)</td><td>Multi-account contacts</td><td>Inherited</td><td>P0</td></tr>
+<tr><td>Account Account Relationship (AAR)</td><td>Household &harr; dealer; dealer &harr; dealer group</td><td>Private (recommended)</td><td>P0</td></tr>
+<tr><td>Contact Contact Relationship (CCR)</td><td>Spouse / partner / lawyer / accountant</td><td>Inherited</td><td>P0</td></tr>
+<tr><td>Party Role Relationship (PRR)</td><td>Role classification on a CCR (Spouse, Lawyer, etc.)</td><td>Private</td><td>P0</td></tr>
+<tr><td>Party Relationship Group (PRG)</td><td>Households + dealer groups + supplier groups</td><td>Inherited</td><td>P0</td></tr>
+</tbody>
+</table>
+
+<h3>Profile Inventory (Foundation Minimum)</h3>
+<table>
+<thead><tr><th>Profile</th><th>Cloned From</th><th>Auto Apps Visible</th></tr></thead>
+<tbody>
+<tr><td>Auto Internal Admin</td><td>System Administrator (or Standard User)</td><td>All four Auto apps</td></tr>
+<tr><td>Auto Internal Standard</td><td>Standard User</td><td>Automotive</td></tr>
+<tr><td>Auto Internal Sales</td><td>Standard User</td><td>Automotive</td></tr>
+<tr><td>Auto Internal Service</td><td>Standard User</td><td>Service Console for Automotive, Automotive</td></tr>
+<tr><td>Auto Internal Finance</td><td>Standard User</td><td>Automotive</td></tr>
+</tbody>
+</table>
+
+<h2><span class="tab-label">Reference</span> Foundation Prerequisites</h2>
+<table>
+<thead><tr><th>Category</th><th>Requirement</th></tr></thead>
+<tbody>
+<tr><td>Licensing</td><td>Automotive Cloud required licenses; Sales Cloud + Service Cloud baseline (license-included)</td></tr>
+<tr><td>Org Configuration</td><td>Setup Audit Trail enabled; My Domain configured; SSO/IdP wired (live integration at Foundation)</td></tr>
+<tr><td>Sandbox Strategy</td><td>Throwaway sandbox available for Person Accounts dry-run; prod-like sandbox for full Foundation rollout; scratch-org template recommended for SDET regression infrastructure</td></tr>
+<tr><td>OWD Pre-Gate</td><td>Contact OWD set to Controlled By Parent (or both Account &amp; Contact = Private) BEFORE attempting Person Accounts toggle</td></tr>
+<tr><td>Sponsor Sign-off</td><td>Person Accounts irreversibility acknowledged; OEM-vs-Dealer scope decision recorded; dealer/household/supplier RT inclusion decision recorded</td></tr>
+<tr><td>Read-Only Org Constraint</td><td>Connected org <code>autodemoNag</code> is READ-ONLY for this project &mdash; SDET-architect produces plans only; execution handed to <code>auto-sdet</code> against a non-read-only sandbox</td></tr>
+<tr><td>Downstream Tier Awareness</td><td>Asset RT split (step 13), ARC graph definitions (step 43), Lightning Knowledge (step 35), Timeline (step 37), V&amp;A Finance Additional Components (step 23) are all out of scope at Foundation but must be flippable</td></tr>
+</tbody>
+</table>
+
+<h2><span class="tab-label">Reference</span> Summary Statistics</h2>
+<table>
+<thead><tr><th>Metric</th><th>Count</th></tr></thead>
+<tbody>
+<tr><td>Total Journeys</td><td>6</td></tr>
+<tr><td>Setup Journeys</td><td>4</td></tr>
+<tr><td>Transaction Journeys</td><td>2</td></tr>
+<tr><td>Reporting Journeys</td><td>0 (embedded in Setup #4)</td></tr>
+<tr><td>Total Scenarios</td><td>27</td></tr>
+<tr><td>Variant Dimensions</td><td>8 (account_record_type, contact_owd_baseline, relationship_object, profile_clone_source, psl_layering, person_account_state, product_rt_split_state, setup_method)</td></tr>
+<tr><td>Org Constraints</td><td>8 (person_accounts_state, contact_owd, group_membership_state, product_rt_split, foundation_psl_capacity, arc_access_psl_reserved, stakeholder_volume_tier, setup_audit_trail_state)</td></tr>
+<tr><td>Business Flows</td><td>2 (Automotive Foundation Platform Setup, Automotive Foundation Daily Loop)</td></tr>
+<tr><td>Irreversible Toggles in Scope</td><td>1 (Person Accounts &mdash; sandbox-first gated)</td></tr>
+<tr><td>Mandatory RT Splits</td><td>2 (Account: Business+Person; Product2: Vehicle+Parts)</td></tr>
+<tr><td>JOURNEY_MAP Steps Covered</td><td>11 (steps 1&ndash;11 of 43 &mdash; the cross-cutting Foundation spine)</td></tr>
+</tbody>
+</table>
+
+<h2><span class="tab-label">Reference</span> ADM Mapping</h2>
+<table>
+<thead><tr><th>Source Journey Concept</th><th>ADM Table</th><th>Field</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Account Record Type (Business / Person / Dealer / Household)</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'account_record_type'</code></td><td>Determines page layout, sharing path, and downstream module compatibility</td></tr>
+<tr><td>Contact OWD Baseline</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'contact_owd_baseline'</code></td><td>Gates Person Accounts irreversible toggle</td></tr>
+<tr><td>Relationship Object (ACR/AAR/CCR/PRR/PRG)</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'relationship_object'</code></td><td>Each has distinct enable steps and OWD</td></tr>
+<tr><td>Profile Clone Source</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'profile_clone_source'</code></td><td>Auto ships no default profiles &mdash; clone source decides baseline access</td></tr>
+<tr><td>PSL Layering</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'psl_layering'</code></td><td>Foundation only vs Foundation+Group vs Foundation+ARC reserved</td></tr>
+<tr><td>Person Account State</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'person_account_state'</code></td><td>Pre/post irreversible toggle</td></tr>
+<tr><td>Product RT Split State</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'product_rt_split_state'</code></td><td>Mandatory Vehicle/Parts split</td></tr>
+<tr><td>Setup Method (Setup UI / Metadata Deploy / Scratch Template)</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'setup_method'</code></td><td>Manual vs deploy vs template-driven setup path</td></tr>
+<tr><td>Person Accounts Org State</td><td><code>org_constraints</code></td><td><code>constraint_name = 'person_accounts_state'</code></td><td>Irreversible org toggle &mdash; gates customer scenarios</td></tr>
+<tr><td>Contact OWD</td><td><code>org_constraints</code></td><td><code>constraint_name = 'contact_owd'</code></td><td>Org sharing baseline for Contact</td></tr>
+<tr><td>Group Membership Settings</td><td><code>org_constraints</code></td><td><code>constraint_name = 'group_membership_state'</code></td><td>Required for PRG page access</td></tr>
+<tr><td>Product RT Split</td><td><code>org_constraints</code></td><td><code>constraint_name = 'product_rt_split'</code></td><td>Mandatory Foundation feature gate</td></tr>
+<tr><td>Foundation PSL Capacity (Small/Medium/Large)</td><td><code>org_constraints</code></td><td><code>constraint_name = 'foundation_psl_capacity'</code></td><td>Determines test population size</td></tr>
+<tr><td>ARC Access PSL Reserved</td><td><code>org_constraints</code></td><td><code>constraint_name = 'arc_access_psl_reserved'</code></td><td>Reserved at Foundation, activated at step 43</td></tr>
+<tr><td>Stakeholder Volume Tier (Smoke/Regression/Perf)</td><td><code>org_constraints</code></td><td><code>constraint_name = 'stakeholder_volume_tier'</code></td><td>Households + PA + relationships scale tier</td></tr>
+<tr><td>Setup Audit Trail State</td><td><code>org_constraints</code></td><td><code>constraint_name = 'setup_audit_trail_state'</code></td><td>Required for sponsor sign-off &mdash; observability gate</td></tr>
+</tbody>
+</table>
+
+</body></html>

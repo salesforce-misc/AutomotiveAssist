@@ -1,0 +1,90 @@
+---
+id: psl-foundation-assigned
+group: pre-deployment
+description: Every active user has the Automotive Foundation User PSL
+severity: error
+check:
+  type: psl-assignment
+  psl: Automotive Foundation User
+  target: all-active-users
+remediation: Assign Automotive Foundation User PSL via /auto:configure-permissions
+docs: skills/auto-user-management/SKILL.md
+---
+id: account-record-types-exist
+group: pre-deployment
+description: Account has at least Business + Person Account record types
+severity: error
+check:
+  type: metadata
+  object: Account
+  hasRecordTypes:
+    - Business_Account
+    - PersonAccount
+remediation: Create Account record types before enabling Person Accounts
+docs: skills/auto-stakeholder-management/SKILL.md
+---
+id: product-record-types-split
+group: pre-deployment
+description: Product has Vehicle and Parts record types with separate page layouts
+severity: error
+check:
+  type: metadata
+  object: Product2
+  hasRecordTypes:
+    - Vehicle
+    - Parts
+remediation: Create Product record types via /auto:configure-record-types
+docs: skills/auto-product-management/SKILL.md
+---
+id: asset-record-types-split
+group: pre-deployment
+description: Asset has Vehicle and Parts record types with separate page layouts
+severity: error
+check:
+  type: metadata
+  object: Asset
+  hasRecordTypes:
+    - Vehicle
+    - Parts
+remediation: Create Asset record types via /auto:configure-record-types
+docs: skills/auto-vehicle-asset-fleet/SKILL.md
+---
+id: schedule-appointment-quick-action-removed
+group: pre-deployment
+description: Default Schedule Appointment quick action removed from Lead and Opportunity layouts when Salesforce Scheduler is enabled
+severity: warning
+check:
+  type: metadata
+  layouts:
+    - Lead.Layout
+    - Opportunity.Layout
+  doesNotContainQuickAction: SetSchedulingPolicy
+remediation: Remove default Schedule Appointment quick action; add Schedule Test Drive button instead
+docs: skills/auto-leads-opportunities/SKILL.md
+---
+id: partner-lead-default-mappings-enabled
+group: pre-deployment
+description: Partner Lead Management Default Mappings enabled (preserves Lead Line Item / Preferred Seller through conversion)
+severity: error
+check:
+  type: admin-setting
+  category: Partner Lead Management
+  setting: Enable Default Mappings
+  expected: true
+remediation: Enable via Setup → Partner Lead Management → Enable Default Mappings
+docs: skills/auto-leads-opportunities/SKILL.md
+---
+id: timeline-required-before-vaf-additional-components
+group: pre-deployment
+description: Timeline must be enabled before Vehicle and Asset Finance Additional Components
+severity: error
+check:
+  type: admin-setting
+  category: Vehicle and Asset
+  setting: Enable Vehicle and Asset Finance Additional Components
+  requires:
+    - category: Timeline
+      setting: Enable Timeline
+      value: true
+remediation: Enable Timeline first (irreversible). See /auto:configure-finance-console
+docs: skills/auto-finance-lending/SKILL.md

@@ -1,0 +1,61 @@
+Journey_ID,Domain,Journey_Title,Journey_Type,Setup_Subtype,Pre_Requisites,Business_Process,Detailed_Scenarios,Features_Mapped,Personas,Complexity,Data_Shape,Frequency,Priority,Setup_Required,Expected_Outcome,Integration_Points,Performance_Requirements,Author,Notes
+Auto_Appraisal_Integration_UJ,Automotive Cloud - Appraisal Management,Trade-in / Appraisal Management Integrations (Valuation Providers + Approval Routing + GV / Document Framework),Setup,Integration,"Auto_Appraisal_Config_UJ + Auto_Appraisal_Data_UJ completed; OmniStudio runtime healthy; External Services / Named Credentials enabled; MuleSoft / partner-built valuation adapter is the contract owner per Epic ('Integration with an external valuation system - To be built by Partner').","Valuation Provider integration → Approval routing & email → GV Visit framework integration → Document Checklist Items / Action Plan integration → Inventory hand-off integration → Lead / Opportunity Line Item conversion (256) → Telemetry / Audit hooks","Scenario Overview: Every external/internal integration the Appraisal flow exercises is named here with stub-vs-live decision, contract, async strategy, and a failure-injection point. The valuation system itself is partner-built per the Epic, so this journey defines the contract and the failure modes Salesforce must handle.
+
+Step-by-Step:
+1. [Integration Owner] Valuation Provider integration (Epic 8, P1, R254/R256):
+   - Contract: outbound REST/HTTP POST from Salesforce Vehicle Appraisal Item to partner valuation broker; inbound JSON with one row per provider per request.
+   - Inbound payload fields (per Epic 'Values Attributes (Vehicles)'): Market Source (KBB, JD Power, Black Book, Manheim), Market Price Date, Validity, Trade-in Value, Auction Value, Retail Value.
+   - Asset variant: Market Source, Market Price Date, Validity, Trade-in Value, Retail Value (no Auction Value).
+   - Persistence: write each provider response to Appraisal Item Provider Valuation (Average / Rough / Clean Condition Value) — multiple rows per single Appraisal Item per Epic 'Ability to get multiple valuations from different external systems against a single appraisal record'.
+   - Stub-vs-live: stub for smoke (mocked Named Credential returning fixed JSON for KBB + JD Power); live in regression sandbox; live in pre-prod against partner sandbox.
+   - Async strategy: HTTP callout from OmniScript Integration Procedure; timeout 30s per provider; multi-provider call fan-out via parallel Integration Procedure step.
+   - Failure injection: provider returns 5xx → Appraisal stays in 'In Valuation', dealer can retry or proceed to manual entry; provider returns malformed JSON → log to Audit Trail and surface inline error on FlexCard.
+   - Observability: Telemetry counter 'OmniScript Integration Procedure usage for Appraisal' (per Epic Telemetry).
+   - Precondition: Partner valuation adapter deployed; Named Credential 'KBB_Valuation' / 'JDPower_Valuation' / 'BlackBook_Valuation' configured; integration user has 'Manage Appraisal' permission.
+2. [Integration Owner] Approval Process integration (Epic 9, P0, R254):
+   - Contract: standard Salesforce Approval Process on Appraisal; final-step Field Update Final Appraisal Price = Adjusted Appraisal Price; email notification to Finance Manager / Approving Authority.
+   - Stub-vs-live: live (no external integration); use a test approver user.
+   - Async strategy: synchronous within submit; email is async.
+   - Failure injection: approver rejects → Status = Rejected → dealer can adjust Adjustment Price and re-submit (Epic Detailed Description: 'Ability to make adjustments to the Appraisal Price and re-submit for approval').
+   - Observability: Telemetry counter 'Number of edits made to Appraisal' / 'Adjustment'.
+   - Precondition: at least one approver user with Appraisal_Finance_Manager PS and a valid email.
+3. [Integration Owner] Generic Visit framework integration (Epic 11 — Inspection Visit, P1, R256):
+   - Contract: Appraisal record opens a GV Visit (Inspection Visit) of type 'Vehicle Trade-in Inspection' with Action Plan Template prefilled.
+   - Stub-vs-live: live in 256; not exercised in 254.
+   - Async strategy: synchronous create on 'Schedule Visit for Inspection' button click in the Process Flow.
+   - Failure injection: GV framework not whitelisted for trade-in (TD-0213024 not deployed) → button surfaces error 'Generic Visit framework not whitelisted for Appraisal'.
+   - Precondition: TD-0213024 merged; trade-in entity whitelisted; Action Plan Template exists.
+4. [Integration Owner] Document Checklist / Action Plan integration (Epic 12, P1, R256):
+   - Contract: trade-in entities whitelisted for Action Plan + ActionPlanItem + DocumentChecklistItem (TD-0213023).
+   - Stub-vs-live: live in 256.
+   - Failure injection: missing whitelist → no Action Plan can be attached to Appraisal; surface 'Action Plan Template not available for Appraisal' error.
+   - Precondition: TD-0213023 merged.
+5. [Integration Owner] Assessment whitelisting (TD-0213025) and OmniAssessmentTask whitelisting (TD-0213027): used for Dynamic Assessment (Epic 8 in 256 / Epic 11 inspection task capture). Live in 256.
+6. [Integration Owner] BRE / Pricing Procedure availability (post-256 — currently NOT in scope per the Epic):
+   - The Epic does NOT prescribe a Business Rules Engine expression set or a CPQ pricing procedure for Appraisal (price logic is a simple sum: Final Appraisal Price = Initial Appraisal Price + sum of Adjustment Prices, gated by approval). If the dealership wants BRE-driven adjudication of the appraisal-to-financial-account hand-off, that becomes an integration with the lending flow; flag P3 and out-of-scope until a separate Epic is filed.
+   - Stub: N/A. Live: N/A in 254/256.
+7. [Integration Owner] Inventory hand-off integration (Epic 13, P2, R256):
+   - Contract: 'Add to Inventory' button on Approved Appraisal → creates Vehicle Inventory record (Field Service Inventory model) with Handover Completed = TRUE.
+   - Stub-vs-live: live in 256; not exercised in 254 (button hidden).
+   - Async strategy: synchronous; Handover Completed checkbox is the gate.
+   - Failure injection: Vehicle Inventory model not configured → surface configuration error and roll back the checkbox change.
+   - Precondition: Vehicle Inventory configured per Auto_Inventory_Config_UJ.
+8. [Integration Owner] Lead / Opportunity Line Item integration (Epic 14, P2, R256):
+   - Contract: link the appraised vehicle to Opportunity Line Item or Lead Line Item or Quote.
+   - Stub-vs-live: live in 256; relies on TD-0209987 (Opportunity), TD-0209991 (Lead) whitelisting.
+   - Failure injection: whitelisting not deployed → RL hidden on Lead / Opportunity → surface in /auto:audit.
+9. [Integration Owner] Experience Cloud (Partner / Customer Community, Epic 10, P0 R254):
+   - Contract: Appraisal OmniScript exposed on Dealer Partner Community page; external user creates Appraisal as themselves.
+   - Stub-vs-live: live; sharing rules ensure the external user only sees their own Appraisals.
+   - Failure injection: Appraisal_External_Community_User PS not assigned → page surfaces 'Insufficient privileges' on the OmniScript launch.
+10. [Integration Owner] Telemetry / Audit hooks:
+    - Counters per Epic Telemetry section: number of Appraisal records, Appraisal Item records, Appraisal Adjustment records, Appraisal Valuations created, OmniScript Integration Procedure usage, FlexCard usage, number of times Appraisal flow / Appraisal Item flow initiated, number of orgs with Appraisal Pref ON, number of edits per record, number of Appraisals associated with Lead / Opportunity / Account / Cases.
+    - Logged fields per Telemetry: Appraisal (ReferenceRecord, UsageType, PurposeType); Appraisal Item (Type, Identification Number, Reference Record); Appraisal Item Add-on (Appraisal Item); Appraisal Item Provider Valuation (Appraisal Item, Provider Name, Valuation Date Time); Appraisal Adjustment (Appraisal, Appraisal Item, Type).
+    - Stub-vs-live: live; uses standard Telemetry pipeline; no PII captured.
+    - Failure injection: Telemetry pipeline down → no functional impact, deltas missed; alert on missing-data.","Named Credentials, External Services, OmniStudio Integration Procedure, Approval Process, Email Service, Generic Visit Framework, Action Plan Template, Document Checklist Item, OmniAssessmentTask, Assessment, Field Service Inventory (for hand-off), Telemetry, Audit Trail, Experience Cloud Authentication & Sharing","Integration Owner (primary); SDET (verification); Partner Engineer (Valuation adapter)","Smoke - P0
+Regression with full multi-provider fan-out - P1
+Failure injection (5xx, malformed JSON, missing whitelist) - P2
+
+KBB only - P0
+KBB + JD Power - P0
+KBB + JD Power + Black Book + Manheim - P1","Medium","Per release; per partner-adapter version bump",P0,"Auto_Appraisal_Config_UJ + Auto_Appraisal_Data_UJ completed; valuation Named Credentials configured; TD-0209987 / TD-0209989 / TD-0209991 / TD-0209992 / TD-0213023 / TD-0213024 / TD-0213025 / TD-0213027 deployed (per release schedule).","Every external dependency the Appraisal flow exercises is named, contracted, and has a failure-injection scenario. Multi-provider valuation fan-out is observable. Approval routing is closed-loop. GV / Action Plan / Document Checklist whitelisting is verified.","Partner Valuation Adapter (KBB / JD Power / Black Book / Manheim), Approval / Email, Generic Visit framework, Action Plan / DocumentChecklistItem, OmniAssessmentTask, Assessment, Field Service Inventory, Lead / Opportunity / Account / Asset whitelisting, Telemetry pipeline, Audit Trail, Experience Cloud","Per-provider valuation callout < 30s; multi-provider fan-out (4 providers) total < 60s; approval submit < 5s; email notify < 30s.","auto-journey-architect","Sources: Epic Doc — Process Flow diagram, Epic 8 ('integrate with the choice of vehicle valuation system and capture the response'), Epic 9 (approval flow), Epic 10 (external user), Epic 11 (inspection visit), Epic 12 (documents), Epic 13 (inventory), Epic 14 (Opportunity / Lead Line Item / Quote linkage), TDs section, Telemetry section. NOTE: BRE / pricing-procedure integration is intentionally NOT prescribed by the Epic — flagged as out-of-scope here so the 4+1 contract is honored without inventing capability."
