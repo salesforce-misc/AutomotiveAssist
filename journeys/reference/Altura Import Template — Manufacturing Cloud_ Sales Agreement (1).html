@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<!-- saved from url=(0077)file:///Users/hmacha/test-plans/docs/IMPORT_TEMPLATE_MFG_SALES_AGREEMENT.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>Altura Import Template — Manufacturing Cloud: Sales Agreement</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 2rem; background: #f8f9fa; color: #1a1a1a; }
+  h1 { color: #0176d3; margin-bottom: 0.3rem; }
+  h2 { color: #333; border-bottom: 2px solid #0176d3; padding-bottom: 0.3rem; margin-top: 2.5rem; }
+  h3 { color: #0176d3; margin-top: 1.5rem; }
+  .subtitle { color: #666; margin-bottom: 2rem; }
+  .tab-label { background: #0176d3; color: #fff; padding: 4px 12px; border-radius: 4px 4px 0 0; display: inline-block; font-weight: 600; font-size: 0.9rem; }
+  table { border-collapse: collapse; width: 100%; margin-bottom: 2rem; font-size: 0.85rem; }
+  th { background: #e8f4fd; color: #0176d3; font-weight: 600; text-align: left; padding: 8px 10px; border: 1px solid #d0d0d0; white-space: nowrap; }
+  td { padding: 6px 10px; border: 1px solid #e0e0e0; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+  tr:hover td { background: #f0f7ff; }
+  .required { color: #d32f2f; font-weight: bold; }
+  .optional { color: #888; font-style: italic; }
+  .note { background: #fff3cd; border-left: 4px solid #ffc107; padding: 10px 14px; margin: 1rem 0; font-size: 0.9rem; }
+  .info { background: #e8f4fd; border-left: 4px solid #0176d3; padding: 10px 14px; margin: 1rem 0; font-size: 0.9rem; }
+  .rule { background: #fce4ec; border-left: 4px solid #d32f2f; padding: 10px 14px; margin: 1rem 0; font-size: 0.9rem; }
+  .warn { background: #fff8e1; border-left: 4px solid #f57f17; padding: 10px 14px; margin: 1rem 0; font-size: 0.9rem; }
+  code { background: #eee; padding: 2px 5px; border-radius: 3px; font-size: 0.85rem; }
+  .legend { display: flex; gap: 1.5rem; flex-wrap: wrap; margin: 1rem 0; }
+  .legend span { font-size: 0.85rem; }
+  .legend .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+  .dot-setup { background: #4caf50; }
+  .dot-txn { background: #2196f3; }
+  .dot-reporting { background: #9c27b0; }
+  .dot-dim { background: #ff9800; }
+  .scenario-header td { background: #e8f4fd !important; font-weight: 600; }
+  .dim-table th { background: #fff3e0; color: #e65100; }
+  .dim-values-table th { background: #fff8e1; color: #f57f17; }
+  .constraint-table th { background: #e8f5e9; color: #2e7d32; }
+  .section-label { background: #f5f5f5; border: 1px solid #ddd; padding: 6px 12px; border-radius: 4px; display: inline-block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; color: #555; }
+  .data-vol-table th { background: #ede7f6; color: #4527a0; }
+</style>
+</head>
+<body>
+
+<h1>Altura Standard Import Template</h1>
+<p class="subtitle">Manufacturing Cloud — Sales Agreement — Vertical &amp; Journey Onboarding</p>
+
+<div class="info">
+  <strong>Source:</strong> "MFG User Journey (WIP)" spreadsheet — "Setup User Journey" tab (Rows 2–4) + "Commercial Excellence Transacti" tab (Row 2) + "AF" sheet from the
+  <a href="https://salesforce.quip.com/RDd0A0SEqg94#RNbACAtYWSd">Manufacturing &amp; Rebate &amp; PBB &amp; Auto Data Shapes</a> Quip doc.
+  Contains <strong>4 journeys</strong> (3 Setup + 1 Transaction) focused exclusively on the Sales Agreement feature within Manufacturing Cloud.
+</div>
+
+<div class="note">
+  <strong>Authoring vs Runtime:</strong> Flows, journeys, and scenarios are <em>authoring-layer</em> constructs (human organization of test intent). Test cases and chains are <em>runtime-layer</em> (executor composition). This template populates the authoring layer only — runtime composition happens later via the pipeline.
+</div>
+
+<div class="warn">
+  <strong>SA Platform Limits (as of R264):</strong>
+  Max <strong>2,000 products per SA</strong> (UI Grid pagination blocks &gt;2K; VOC 10K target blocked — P1 open).
+  Max <strong>72 schedules per SA</strong> (BT perm <code>MAX_SALES_AGRMT_SCHEDULES_LMT</code>; increasable to 120 max).
+  Actuals Calculation is <strong>unsupported</strong> when SA Product Schedules &gt;10K (DPE row-lock / OOM).
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- TAB 1: VERTICAL SETUP -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2><span class="tab-label">Tab 1</span> Vertical Setup</h2>
+
+<table id="tab1">
+<thead>
+<tr>
+  <th>vertical_name <span class="required">*</span></th>
+  <th>display_name</th>
+  <th>application <span class="required">*</span></th>
+  <th>parent_vertical</th>
+  <th>preferred_prefix</th>
+  <th>owner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>manufacturing</td>
+  <td>Manufacturing Cloud — Sales Agreement</td>
+  <td>Manufacturing Cloud - Commercial Excellence</td>
+  <td>Industries</td>
+  <td>MFG</td>
+  <td>vinay.venkatraman@salesforce.com</td>
+</tr>
+</tbody>
+</table>
+
+<div class="info">
+  <code>wave_id</code> is auto-assigned by the import skill at ingest time. Do not include it in the template — this prevents collisions across concurrent imports.
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- TAB 2: JOURNEYS -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2><span class="tab-label">Tab 2</span> Journeys <span class="required">(Required)</span></h2>
+
+<div class="legend">
+  <span><span class="dot dot-setup"></span> Setup (3)</span>
+  <span><span class="dot dot-txn"></span> Transaction (1)</span>
+</div>
+
+<table id="tab2">
+<thead>
+<tr>
+  <th>flow_name <span class="required">*</span></th>
+  <th>journey_name <span class="required">*</span></th>
+  <th>journey_type <span class="required">*</span></th>
+  <th>persona</th>
+  <th>priority</th>
+  <th>prerequisite</th>
+  <th>business_process</th>
+  <th>features</th>
+  <th>complexity</th>
+  <th>data_shape_notes</th>
+  <th>integration</th>
+  <th>integration_component</th>
+</tr>
+</thead>
+<tbody>
+<!-- SETUP JOURNEYS (3) -->
+<tr>
+  <td>Sales Agreement Platform Setup</td>
+  <td>Admin Setup Journey for Sales Agreement Foundational Setup</td>
+  <td>setup</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td>Admin logs in to Org having Manufacturing Cloud required licenses (SKU 200008653)</td>
+  <td>Setup a Manufacturing Cloud org: Enable Sales Agreement preference via Salesforce GO, assign Manufacturing Sales Agreements and Data Processing Engine permission sets to the system admin.</td>
+  <td>Sales Agreement, Manufacturing Sales Agreements, Data Processing Engine</td>
+  <td>High</td>
+  <td>Accounts: S=1,000/M=1,400/L=4,500. Sales Agreements: S=8,500/M=11,900/L=38,250. SA Products: S=625K/M=875K/L=2.8M. SAPS: S=9.75M/M=13.65M/L=43.88M</td>
+  <td>No</td>
+  <td></td>
+</tr>
+<tr>
+  <td>Sales Agreement Platform Setup</td>
+  <td>Admin Setup Journey for Sales Agreement (RLM Enabled Flow)</td>
+  <td>setup</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td>Admin logs in to Org having Manufacturing and Revenue Cloud required licenses</td>
+  <td>Setup a Manufacturing Cloud org with Revenue Lifecycle Management enabled: Verify Quote Settings (Quotes Without Related Opportunity, Order, Negative Quantity, Zero Quantity, Enhanced Commerce Orders), Revenue Settings (Configure Products at Runtime), Permission Sets (Product Catalog Management, Price Management, DPE), Context Service, Pricing Procedures, Product Discovery, Pricing Discovery, Standard Price Book activation, and optional features (Instant Pricing, Groups, Tax Engine, Contracts, Deep Clone, Order from Quote, Product Configurator).</td>
+  <td>Sales Agreement, Revenue Lifecycle Management, Product Discovery, Price Management, Product Catalog Management, Context Service, Pricing Procedures</td>
+  <td>High</td>
+  <td>Accounts: S=1,000/M=1,400/L=4,500. Products per Account: S=200/M=250/L=500. Sales Agreements: S=8,500/M=11,900/L=38,250. SA Products: S=625K/M=875K/L=2.8M. SAPS: S=9.75M/M=13.65M/L=43.88M. Orders: S=630K/M=882K/L=2.84M</td>
+  <td>Yes</td>
+  <td>Revenue Cloud Product Catalog Management, Revenue Cloud Product Discovery, Revenue Cloud NGP, Revenue Cloud Configurator</td>
+</tr>
+<tr>
+  <td>Sales Agreement Platform Setup</td>
+  <td>Admin Setup Journey for Sales Agreement with Batch Process Monitoring</td>
+  <td>setup</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td>Admin logs in to Org having Manufacturing Cloud required licenses</td>
+  <td>Setup a Manufacturing Cloud org with Sales Agreement and Batch Process Monitoring: Enable Sales Agreement preference, assign Manufacturing Sales Agreements permission set, configure Batch Process Monitoring to ensure daily scheduling and execution at the designated time.</td>
+  <td>Sales Agreement, Batch Process Monitoring</td>
+  <td>High</td>
+  <td>Accounts: S=1,000/M=1,400/L=4,500. Sales Agreements: S=8,500/M=11,900/L=38,250. SA Products: S=625K/M=875K/L=2.8M. SAPS: S=9.75M/M=13.65M/L=43.88M</td>
+  <td>No</td>
+  <td></td>
+</tr>
+<!-- TRANSACTION JOURNEYS (1) -->
+<tr>
+  <td>Commercial Excellence — Sales Agreements</td>
+  <td>Annual Sales Agreement Creation and Negotiation</td>
+  <td>txn</td>
+  <td>Account Manager, Procurement Manager, Regional Sales Director</td>
+  <td>P0</td>
+  <td>A verified Customer Account and associated Contacts (Decision Makers/Procurement) must exist. A defined User Role Hierarchy is configured. An Opportunity with detailed OLI is created. A Quote is generated and synced. A Standard/Custom Price Book is active with Price Book Entries. Cost Books and entries are configured. An active Approval Process is configured for the Sales Agreement object.</td>
+  <td>1. Account Manager initiates a new Sales Agreement to define the strategic duration of the partnership. 2. Account Manager populates the agreement with product line items to meet inventory needs and volume commitments. 3. Account Manager and Procurement Manager finalize pricing; the AM refines discount tiers and updates the agreement to reflect negotiated commercial terms. 4. Once finalized, the AM routes the agreement to the Regional Sales Director for internal compliance and margin review. 5. The Sales Director grants formal approval, activating the agreement and enabling the client to execute orders against the new pricing.</td>
+  <td>Sales Agreement</td>
+  <td>High</td>
+  <td>Accounts: S=1,000/M=1,400/L=4,500. Products per Account: S=200 max/M=250 max/L=500 max. Periods: S=24/M=36/L=36. Sales Agreements: S=8,500/M=11,900/L=38,250. SA Products: S=625K/M=875K/L=2.8M. SAPS: S=9.75M/M=13.65M/L=43.88M. Orders: S=630K/M=882K/L=2.84M. Order Products: S=9.75M/M=13.65M/L=43.88M. SA Limit: max 2,000 products per SA; max 72 schedules per SA</td>
+  <td>Yes</td>
+  <td>Revenue Cloud Product Catalog Management, Revenue Cloud Product Discovery, Revenue Cloud NGP, Revenue Cloud Configurator</td>
+</tr>
+</tbody>
+</table>
+
+<div class="info">
+  <strong><code>flow_name</code>:</strong> Declares the business flow this journey belongs to. The import skill creates the flow and membership in one pass — equivalent to an in-lined <code>/map-journeys</code>. Journeys sharing the same <code>flow_name</code> are grouped into a single <code>business_flow</code> with <code>flow_journeys</code> edges.
+</div>
+
+<div class="info">
+  <strong><code>prerequisite</code>:</strong> Prose only. Structured journey-to-journey dependencies come from <code>flow_name</code> grouping + the <code>/map-journeys</code> skill post-import.
+</div>
+
+<div class="info">
+  <strong><code>persona</code>:</strong> Multi-persona OK at journey level (a journey CAN be executed by different personas). At scenario/ALT level, the rule is one persona per row.
+</div>
+
+<div class="info">
+  <strong><code>data_shape_notes</code>:</strong> References the <a href="https://salesforce.quip.com/RDd0A0SEqg94#RNbACAtYWSd">AF sheet</a> S/M/L volume data. Account distribution: 50% Non-Frequent (NF), 40% Normal, 10% Busy. These volumes determine which org tier is required for each scenario.
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- TAB 3: DIMENSIONS -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2><span class="tab-label">Tab 3</span> Variant Dimensions <span class="dot dot-dim" style="margin-left:8px"></span></h2>
+<p>Derived from the MFG User Journey complexity columns. These dimensions drive scenario decomposition — each transaction journey gets crossed with applicable dimension values to produce atomic test scenarios. Maps to <code>variant_dimensions</code> table in ADM.</p>
+
+<!-- Section A: Dimension Catalog -->
+<h3><span class="section-label">Section A</span> Dimension Catalog</h3>
+<p>One row per dimension. Defines the dimension name, description, and which journey types it applies to.</p>
+
+<table class="dim-table">
+<thead>
+<tr>
+  <th>dimension_name <span class="required">*</span></th>
+  <th>description</th>
+  <th>applies_to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>sa_creation_method</code></td>
+  <td>How the Sales Agreement is created — determines entry point, data inheritance, and required preconditions</td>
+  <td>Transaction</td>
+</tr>
+<tr>
+  <td><code>sa_schedule_frequency</code></td>
+  <td>Sales Agreement schedule frequency determining how often planned vs actual quantities are calculated and compared</td>
+  <td>Transaction</td>
+</tr>
+<tr>
+  <td><code>sa_actuals_calculation_mode</code></td>
+  <td>Method used to calculate actual quantities against the Sales Agreement — determines integration complexity and data flow</td>
+  <td>Transaction</td>
+</tr>
+<tr>
+  <td><code>sa_product_level</code></td>
+  <td>Granularity at which products are tracked in the Sales Agreement — individual Product vs Product Category</td>
+  <td>Transaction</td>
+</tr>
+<tr>
+  <td><code>sa_product_addition_method</code></td>
+  <td>How products are added to the Sales Agreement — determines UI flow and catalog interaction</td>
+  <td>Transaction</td>
+</tr>
+<tr>
+  <td><code>sa_negotiation_method</code></td>
+  <td>How terms and pricing are updated during negotiation — determines editing UX and bulk operation capabilities</td>
+  <td>Transaction</td>
+</tr>
+<tr>
+  <td><code>setup_method</code></td>
+  <td>How org setup is performed — Salesforce GO guided setup vs manual configuration</td>
+  <td>Setup</td>
+</tr>
+</tbody>
+</table>
+
+<!-- Section B: Dimension Values -->
+<h3><span class="section-label">Section B</span> Dimension Values</h3>
+<p>One row per value. Links back to the dimension catalog above.</p>
+
+<table class="dim-values-table">
+<thead>
+<tr>
+  <th>dimension_name <span class="required">*</span></th>
+  <th>id <span class="required">*</span></th>
+  <th>label</th>
+  <th>priority</th>
+  <th>description</th>
+</tr>
+</thead>
+<tbody>
+<!-- sa_creation_method values -->
+<tr>
+  <td><code>sa_creation_method</code></td>
+  <td><code>ui_creation</code></td>
+  <td>Create via UI</td>
+  <td>P0</td>
+  <td>Sales Agreement created directly from Manufacturing Cloud UI</td>
+</tr>
+<tr>
+  <td><code>sa_creation_method</code></td>
+  <td><code>api_apex</code></td>
+  <td>Create via API / Apex</td>
+  <td>P1</td>
+  <td>Sales Agreement created programmatically via REST API or Apex</td>
+</tr>
+<tr>
+  <td><code>sa_creation_method</code></td>
+  <td><code>from_opportunity</code></td>
+  <td>From Opportunity via objectHierarchyRelationship</td>
+  <td>P2</td>
+  <td>Sales Agreement created from an existing Opportunity record via objectHierarchyRelationship mapping</td>
+</tr>
+<tr>
+  <td><code>sa_creation_method</code></td>
+  <td><code>from_quote_ohr</code></td>
+  <td>From Quote via objectHierarchyRelationship</td>
+  <td>P2</td>
+  <td>Sales Agreement created from an existing Quote via objectHierarchyRelationship mapping</td>
+</tr>
+<tr>
+  <td><code>sa_creation_method</code></td>
+  <td><code>from_quote_context</code></td>
+  <td>From Quote via Context Definition</td>
+  <td>P2</td>
+  <td>Sales Agreement created from an existing Quote via context definition</td>
+</tr>
+<tr>
+  <td><code>sa_creation_method</code></td>
+  <td><code>deep_clone</code></td>
+  <td>Deep Clone</td>
+  <td>P2</td>
+  <td>Sales Agreement created by deep cloning an existing agreement with all line items</td>
+</tr>
+<!-- sa_schedule_frequency values -->
+<tr>
+  <td><code>sa_schedule_frequency</code></td>
+  <td><code>monthly</code></td>
+  <td>Monthly</td>
+  <td>P0</td>
+  <td>Schedule frequency is monthly — most common production cadence</td>
+</tr>
+<tr>
+  <td><code>sa_schedule_frequency</code></td>
+  <td><code>weekly</code></td>
+  <td>Weekly</td>
+  <td>P1</td>
+  <td>Schedule frequency is weekly — high-velocity supply chains</td>
+</tr>
+<tr>
+  <td><code>sa_schedule_frequency</code></td>
+  <td><code>quarterly</code></td>
+  <td>Quarterly</td>
+  <td>P1</td>
+  <td>Schedule frequency is quarterly — strategic long-term agreements</td>
+</tr>
+<tr>
+  <td><code>sa_schedule_frequency</code></td>
+  <td><code>yearly</code></td>
+  <td>Yearly</td>
+  <td>P2</td>
+  <td>Schedule frequency is yearly — annual volume commitments</td>
+</tr>
+<tr>
+  <td><code>sa_schedule_frequency</code></td>
+  <td><code>onetime</code></td>
+  <td>One Time</td>
+  <td>P3</td>
+  <td>Single delivery schedule — spot purchase agreements</td>
+</tr>
+<!-- sa_actuals_calculation_mode values -->
+<tr>
+  <td><code>sa_actuals_calculation_mode</code></td>
+  <td><code>manual_api</code></td>
+  <td>Manually using API Upload</td>
+  <td>P0</td>
+  <td>Actuals uploaded manually via API from external ERP/MES systems</td>
+</tr>
+<tr>
+  <td><code>sa_actuals_calculation_mode</code></td>
+  <td><code>auto_direct_orders</code></td>
+  <td>Automatically from Direct Orders</td>
+  <td>P0</td>
+  <td>Actuals calculated automatically from orders placed directly against the agreement</td>
+</tr>
+<tr>
+  <td><code>sa_actuals_calculation_mode</code></td>
+  <td><code>auto_orders_through_contracts</code></td>
+  <td>Automatically from Orders through Contracts</td>
+  <td>P2</td>
+  <td>Actuals calculated from orders routed through contract records</td>
+</tr>
+<tr>
+  <td><code>sa_actuals_calculation_mode</code></td>
+  <td><code>dpe_definition</code></td>
+  <td>Using a Data Processing Engine Definition</td>
+  <td>P3</td>
+  <td>Actuals calculated via custom DPE definition for complex aggregation logic</td>
+</tr>
+<!-- sa_product_level values -->
+<tr>
+  <td><code>sa_product_level</code></td>
+  <td><code>product</code></td>
+  <td>Product</td>
+  <td>P0</td>
+  <td>Agreement tracks individual products (SKU-level granularity)</td>
+</tr>
+<tr>
+  <td><code>sa_product_level</code></td>
+  <td><code>category</code></td>
+  <td>Category</td>
+  <td>P1</td>
+  <td>Agreement tracks product categories (aggregated across SKUs)</td>
+</tr>
+<!-- sa_product_addition_method values -->
+<tr>
+  <td><code>sa_product_addition_method</code></td>
+  <td><code>ui_add</code></td>
+  <td>Add Products from UI</td>
+  <td>P0</td>
+  <td>Products added manually via the Sales Agreement UI</td>
+</tr>
+<tr>
+  <td><code>sa_product_addition_method</code></td>
+  <td><code>api_apex</code></td>
+  <td>Add Products from API / Apex</td>
+  <td>P1</td>
+  <td>Products added programmatically via REST API or Apex</td>
+</tr>
+<tr>
+  <td><code>sa_product_addition_method</code></td>
+  <td><code>browse_catalog</code></td>
+  <td>Browse Catalog (RLM Enabled Flow)</td>
+  <td>P1</td>
+  <td>Products selected via Product Discovery catalog browsing (requires RLM)</td>
+</tr>
+<!-- sa_negotiation_method values -->
+<tr>
+  <td><code>sa_negotiation_method</code></td>
+  <td><code>inline_edits_enabled</code></td>
+  <td>Inline Edits — Enabled Adjustments</td>
+  <td>P0</td>
+  <td>Terms edited inline with adjustment tracking enabled</td>
+</tr>
+<tr>
+  <td><code>sa_negotiation_method</code></td>
+  <td><code>inline_edits_disabled</code></td>
+  <td>Inline Edits — Disabled Adjustments</td>
+  <td>P1</td>
+  <td>Terms edited inline with adjustment tracking disabled</td>
+</tr>
+<tr>
+  <td><code>sa_negotiation_method</code></td>
+  <td><code>mass_update</code></td>
+  <td>Mass Update</td>
+  <td>P1</td>
+  <td>Bulk update of multiple schedule quantities/prices in a single operation</td>
+</tr>
+<tr>
+  <td><code>sa_negotiation_method</code></td>
+  <td><code>api_update</code></td>
+  <td>Update Metrics via API</td>
+  <td>P1</td>
+  <td>Agreement metrics updated programmatically via API</td>
+</tr>
+<tr>
+  <td><code>sa_negotiation_method</code></td>
+  <td><code>bulk_agent</code></td>
+  <td>Bulk Update via Sales Agreement Bulk Update Agent</td>
+  <td>P2</td>
+  <td>AI-assisted bulk update using the Sales Agreement Bulk Update Agent</td>
+</tr>
+<!-- setup_method values -->
+<tr>
+  <td><code>setup_method</code></td>
+  <td><code>salesforce_go</code></td>
+  <td>Salesforce GO (Guided Setup)</td>
+  <td>P0</td>
+  <td>Configuration performed via Salesforce GO guided setup wizard</td>
+</tr>
+<tr>
+  <td><code>setup_method</code></td>
+  <td><code>manual</code></td>
+  <td>Manual Setup</td>
+  <td>P1</td>
+  <td>Configuration performed manually via Setup pages</td>
+</tr>
+</tbody>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- TAB 4: ORG CONSTRAINTS -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2><span class="tab-label">Tab 4</span> Org Constraints</h2>
+<p>Org-level constraints determining which scenarios can run on which target orgs. Maps to <code>org_constraints</code> + <code>org_constraint_values</code> tables in ADM. Derived from MFG data shape tiers and Sales Agreement configuration parameters.</p>
+
+<table class="constraint-table">
+<thead>
+<tr>
+  <th>constraint_name</th>
+  <th>constraint_type</th>
+  <th>description</th>
+  <th>values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>org_data_size</code></td>
+  <td>org_profile</td>
+  <td>Overall org data volume — determines available object counts, agreement volume, and customer account complexity</td>
+  <td>
+    <code>small</code> → Small (1K accounts, 8.5K SAs, 625K SAPs, 9.75M SAPS)<br>
+    <code>medium</code> → Medium (1.4K accounts, 11.9K SAs, 875K SAPs, 13.65M SAPS)<br>
+    <code>large</code> → Large (4.5K accounts, 38.25K SAs, 2.8M SAPs, 43.88M SAPS)
+  </td>
+</tr>
+<tr>
+  <td><code>sa_schedule_count</code></td>
+  <td>feature_gate</td>
+  <td>Number of schedule entries per Sales Agreement — ranges from 1 to 72. Determines volume of planned/actual calculation cycles.</td>
+  <td>
+    <code>small</code> → 1–12 schedules<br>
+    <code>medium</code> → 13–36 schedules<br>
+    <code>large</code> → 37–72 schedules
+  </td>
+</tr>
+<tr>
+  <td><code>sa_future_actuals_schedules</code></td>
+  <td>feature_gate</td>
+  <td>Number of future actuals calculation schedules configured — determines how far ahead the system pre-calculates actuals</td>
+  <td>
+    <code>none</code> → 0 future schedules<br>
+    <code>small</code> → 6 future schedules<br>
+    <code>medium</code> → 12 future schedules<br>
+    <code>large</code> → 18–24 future schedules
+  </td>
+</tr>
+<tr>
+  <td><code>sa_decimal_scale</code></td>
+  <td>feature_gate</td>
+  <td>Decimal precision for quantity fields in Sales Agreement schedules</td>
+  <td>
+    <code>standard</code> → 2 decimal places<br>
+    <code>extended</code> → 4 decimal places<br>
+    <code>high_precision</code> → 6 decimal places
+  </td>
+</tr>
+<tr>
+  <td><code>sa_status_validation_override</code></td>
+  <td>feature_gate</td>
+  <td>Whether Override Predefined Status Validations is enabled — allows custom status transitions beyond OOTB rules</td>
+  <td>
+    <code>disabled</code> → Standard status validation rules (default)<br>
+    <code>enabled</code> → Custom status transitions allowed
+  </td>
+</tr>
+<tr>
+  <td><code>sa_user_specifies_planned_qty</code></td>
+  <td>feature_gate</td>
+  <td>Whether User Specifies Planned Quantity is enabled — allows manual override of system-calculated planned quantities</td>
+  <td>
+    <code>disabled</code> → System calculates planned quantities (default)<br>
+    <code>enabled</code> → User manually specifies planned quantities
+  </td>
+</tr>
+</tbody>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- TAB 5: SCENARIOS -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2><span class="tab-label">Tab 5</span> Scenarios &amp; Steps</h2>
+<p>Scenarios extracted from SME-defined source sheet. Each scenario preserves the original persona, steps, and priority from the source. Dimension values are attached where mappings are clear.</p>
+
+<div class="rule">
+  <strong>Source-first rule:</strong> These scenarios come directly from the SME source sheet. They are NOT generated by dimension crossing. Each scenario name, persona, and walkthrough is extracted verbatim from the source.
+</div>
+
+<div class="note">
+  <strong>One persona per scenario.</strong> Each scenario is executed by exactly one persona. When the same functional scenario applies to multiple personas, the name is disambiguated.
+</div>
+
+<table id="tab5">
+<thead>
+<tr>
+  <th>journey_name <span class="required">*</span></th>
+  <th>scenario_name <span class="required">*</span></th>
+  <th>persona <span class="required">*</span></th>
+  <th>priority</th>
+  <th>dimension_values</th>
+  <th>org_constraints</th>
+  <th>scenario_walkthrough</th>
+</tr>
+</thead>
+<tbody>
+
+<!-- ─── Journey 1: Setup - Admin Setup for Sales Agreement Foundational ─── -->
+<tr class="scenario-header"><td colspan="7">Admin Setup Journey for Sales Agreement Foundational Setup (3 scenarios)</td></tr>
+<tr>
+  <td>Admin Setup Journey for Sales Agreement Foundational Setup</td>
+  <td>Enable Sales Agreement Preference and Assign Permission Sets</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td><code>"setup_method": "salesforce_go"</code></td>
+  <td></td>
+  <td>Salesforce Admin logs into the Manufacturing Cloud Org → Navigate to Setup → Salesforce GO → Sales Agreement → Turn On Sales Agreement Preference → Assign Manufacturing Sales Agreements permission set to admin → Assign Data Processing Engine permission set to admin → Verify preference is active and permission sets assigned</td>
+</tr>
+<tr>
+  <td>Admin Setup Journey for Sales Agreement Foundational Setup</td>
+  <td>Enable Sales Agreement with Approval Process Configured</td>
+  <td>Salesforce Admin</td>
+  <td>P1</td>
+  <td><code>"setup_method": "salesforce_go"</code></td>
+  <td></td>
+  <td>Salesforce Admin logs into Manufacturing Cloud Org → Navigate to Setup → Salesforce GO → Sales Agreement → Turn On Sales Agreement Preference → Assign permission sets → Navigate to Process Automation → Approval Processes → Create new Approval Process for Sales Agreement object → Define approval steps and criteria → Activate approval process → Verify approval routing works</td>
+</tr>
+<tr>
+  <td>Admin Setup Journey for Sales Agreement Foundational Setup</td>
+  <td>Enable Sales Agreement with Override Predefined Status Validations</td>
+  <td>Salesforce Admin</td>
+  <td>P1</td>
+  <td><code>"setup_method": "salesforce_go"</code></td>
+  <td><code>"sa_status_validation_override": "enabled"</code></td>
+  <td>Salesforce Admin logs into Manufacturing Cloud Org → Navigate to Setup → Salesforce GO → Sales Agreement → Turn On Sales Agreement Preference → Enable Override Predefined Status Validations → Assign permission sets → Verify custom status transitions are now available beyond OOTB rules</td>
+</tr>
+
+<!-- ─── Journey 2: Setup - Admin Setup for Sales Agreement (RLM Enabled) ─── -->
+<tr class="scenario-header"><td colspan="7">Admin Setup Journey for Sales Agreement (RLM Enabled Flow) (2 scenarios)</td></tr>
+<tr>
+  <td>Admin Setup Journey for Sales Agreement (RLM Enabled Flow)</td>
+  <td>Configure Revenue + MFG Cloud Core Settings and Permissions</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td><code>"setup_method": "salesforce_go"</code></td>
+  <td></td>
+  <td>Admin logs into Revenue + MFG Cloud Org → Navigate to Setup → Sales Agreement → Verify Quote Settings: Quotes Without Related Opportunity enabled, Order enabled, Negative Quantity enabled, Zero Quantity enabled, Enhanced Commerce Orders enabled → Verify Revenue Settings: Configure Products at Runtime enabled → Assign Product Catalog Management, Price Management, and Data Processing Engine permission sets → Verify Context Service Definition Org pref enabled → Verify OOTB SalesTransactionContext Definition extended → Verify Pricing Setting Org pref enabled → Clone and activate OOTB Pricing Procedure → Set Default Pricing Procedure in Revenue Settings → Verify Product Discovery Context Definition extended → Enable Product Discovery Pricing Procedure → Clone and activate Product Discovery Pricing Procedure → Clone and activate Pricing Discovery Procedure → Verify Standard Price Book activated</td>
+</tr>
+<tr>
+  <td>Admin Setup Journey for Sales Agreement (RLM Enabled Flow)</td>
+  <td>Configure Optional Advanced Features (Pricing, Contracts, Deep Clone, Configurator)</td>
+  <td>Salesforce Admin</td>
+  <td>P1</td>
+  <td><code>"setup_method": "manual"</code></td>
+  <td></td>
+  <td>Navigate to Pricing features → Enable Instant Pricing → Enable Groups in Quotes and Orders → Activate New Order Save Behavior → Set Up Tax Engine → Create Tax Policy → Enable Tax Calculation for Quotes and Orders → Navigate to Contracts → Add New Contract Button to Quote Page → Configure Flow for Creating Contracts from Quotes → Enable Document Builder → Turn On Advanced Approvals → Navigate to Deep Clone → Turn On Clone Quotes and Orders → Add Deep Clone Action to Page Layout → Configure Order Creation from Quote Flow → Navigate to Product Configurator → Enable Constraints Engine → Enable Transaction Processing for Quotes and Orders</td>
+</tr>
+
+<!-- ─── Journey 3: Setup - Admin Setup for Sales Agreement with Batch Process ─── -->
+<tr class="scenario-header"><td colspan="7">Admin Setup Journey for Sales Agreement with Batch Process Monitoring (1 scenario)</td></tr>
+<tr>
+  <td>Admin Setup Journey for Sales Agreement with Batch Process Monitoring</td>
+  <td>Enable Sales Agreement with Batch Process Monitoring Scheduling</td>
+  <td>Salesforce Admin</td>
+  <td>P0</td>
+  <td><code>"setup_method": "salesforce_go"</code></td>
+  <td></td>
+  <td>Salesforce Admin logs into Manufacturing Cloud Org → Navigate to Setup → Salesforce GO → Sales Agreement → Turn On Sales Agreement Preference → Assign Manufacturing Sales Agreements permission set → Configure Batch Process Monitoring → Set daily scheduling time for batch execution → Verify batch process monitoring is active and scheduled at designated time</td>
+</tr>
+
+<!-- ─── Journey 4: Txn - Annual Sales Agreement Creation and Negotiation ─── -->
+<tr class="scenario-header"><td colspan="7">Annual Sales Agreement Creation and Negotiation (5 scenarios)</td></tr>
+<tr>
+  <td>Annual Sales Agreement Creation and Negotiation</td>
+  <td>Account Manager Creates Sales Agreement via UI with Monthly Schedule</td>
+  <td>Account Manager</td>
+  <td>P0</td>
+  <td><code>"sa_creation_method": "ui_creation", "sa_schedule_frequency": "monthly", "sa_actuals_calculation_mode": "manual_api", "sa_product_level": "product"</code></td>
+  <td></td>
+  <td>Account Manager initiates new Sales Agreement from Account record → Link to strategic global account → Set agreement start date and duration → Select Monthly schedule frequency → Add product line items from Standard Price Book → Set planned quantities per schedule → Configure Manual API upload for actuals calculation → Save agreement in Draft status</td>
+</tr>
+<tr>
+  <td>Annual Sales Agreement Creation and Negotiation</td>
+  <td>Account Manager Adds Products and Negotiates Terms</td>
+  <td>Account Manager</td>
+  <td>P0</td>
+  <td><code>"sa_product_addition_method": "ui_add", "sa_negotiation_method": "inline_edits_enabled"</code></td>
+  <td></td>
+  <td>Account Manager opens Draft Sales Agreement → Add additional product line items from Price Book → Apply inline edits to adjust discount tiers based on committed quantities → Update volume-based pricing with Procurement Manager input → Use Mass Update to modify multiple schedule quantities → Verify negotiated commercial terms reflected in agreement totals (Total Revenue, Average Discount, Margin)</td>
+</tr>
+<tr>
+  <td>Annual Sales Agreement Creation and Negotiation</td>
+  <td>Account Manager Submits Sales Agreement for Approval</td>
+  <td>Account Manager</td>
+  <td>P0</td>
+  <td><code>"sa_creation_method": "ui_creation"</code></td>
+  <td></td>
+  <td>Account Manager opens finalized Sales Agreement → Review agreement metrics (Total Revenue, Average Discount, Margin) → Submit for Approval to Regional Sales Director → Verify agreement status changes to Pending Approval → Verify approval request routed correctly per configured approval process</td>
+</tr>
+<tr>
+  <td>Annual Sales Agreement Creation and Negotiation</td>
+  <td>Regional Sales Director Reviews and Activates Agreement</td>
+  <td>Regional Sales Director</td>
+  <td>P0</td>
+  <td><code>"sa_creation_method": "ui_creation"</code></td>
+  <td></td>
+  <td>Regional Sales Director receives approval notification → Open Sales Agreement under review → Review agreement metrics (Total Revenue, Average Discount, Margin) → Verify internal compliance and margin thresholds met → Approve the agreement → Verify agreement status changes to Activated → Verify client can now execute orders against the new pricing → Verify DPE begins tracking actuals against committed terms</td>
+</tr>
+<tr>
+  <td>Annual Sales Agreement Creation and Negotiation</td>
+  <td>Create Sales Agreement with Auto Actuals from Direct Orders</td>
+  <td>Account Manager</td>
+  <td>P0</td>
+  <td><code>"sa_creation_method": "ui_creation", "sa_schedule_frequency": "monthly", "sa_actuals_calculation_mode": "auto_direct_orders", "sa_product_level": "product"</code></td>
+  <td></td>
+  <td>Account Manager creates new Sales Agreement → Select Monthly schedule frequency → Configure Automatically from Direct Orders as actuals calculation mode → Add product line items → Set planned quantities → Submit and Activate agreement → Place order against agreement → Verify actual quantities auto-calculated from direct order → Verify planned vs actual comparison on schedule view</td>
+</tr>
+
+</tbody>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- DATA VOLUMES REFERENCE -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2>Data Volumes Reference (AF Sheet — S/M/L)</h2>
+<p>Source: <a href="https://salesforce.quip.com/RDd0A0SEqg94#RNbACAtYWSd">"240 - Manufacturing &amp; Rebate &amp; PBB &amp; Auto Data Shapes"</a> Google Sheet, tab "AF". Account distribution: 50% Non-Frequent (NF), 40% Normal, 10% Busy. These volumes inform scenario org_constraints and data_shape_notes in Tab 2 and Tab 5.</p>
+
+<table class="data-vol-table">
+<thead>
+<tr>
+  <th>Object</th>
+  <th>Small TOTAL</th>
+  <th>Small (Normal)</th>
+  <th>Small (Busy)</th>
+  <th>Medium TOTAL</th>
+  <th>Medium (Normal)</th>
+  <th>Medium (Busy)</th>
+  <th>Large TOTAL</th>
+  <th>Large (Normal)</th>
+  <th>Large (Busy)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Accounts</strong></td>
+  <td>1,000</td><td>400</td><td>100</td>
+  <td>1,400</td><td>560</td><td>140</td>
+  <td>4,500</td><td>1,800</td><td>450</td>
+</tr>
+<tr>
+  <td><strong>Products per Account</strong></td>
+  <td>200 max</td><td>150</td><td>200</td>
+  <td>250 max</td><td>200</td><td>250</td>
+  <td>500 max</td><td>300</td><td>500</td>
+</tr>
+<tr>
+  <td><strong>Periods</strong></td>
+  <td>24</td><td>24</td><td>24</td>
+  <td>36</td><td>36</td><td>36</td>
+  <td>36</td><td>36</td><td>36</td>
+</tr>
+<tr>
+  <td><strong>Sales Agreements</strong></td>
+  <td>8,500</td><td>4,000</td><td>2,000</td>
+  <td>11,900</td><td>5,600</td><td>2,800</td>
+  <td>38,250</td><td>18,000</td><td>9,000</td>
+</tr>
+<tr>
+  <td><strong>SA Products (SAP)</strong></td>
+  <td>625,000</td><td>200,000</td><td>400,000</td>
+  <td>875,000</td><td>280,000</td><td>560,000</td>
+  <td>2,812,500</td><td>900,000</td><td>1,800,000</td>
+</tr>
+<tr>
+  <td><strong>SA Product Schedules (SAPS)</strong></td>
+  <td>9,750,000</td><td>2,400,000</td><td>7,200,000</td>
+  <td>13,650,000</td><td>3,360,000</td><td>10,080,000</td>
+  <td>43,875,000</td><td>10,800,000</td><td>32,400,000</td>
+</tr>
+<tr>
+  <td><strong>Orders</strong></td>
+  <td>630,000</td><td>240,000</td><td>360,000</td>
+  <td>882,000</td><td>336,000</td><td>504,000</td>
+  <td>2,835,000</td><td>1,080,000</td><td>1,620,000</td>
+</tr>
+<tr>
+  <td><strong>Order Products</strong></td>
+  <td>9,750,000</td><td>2,400,000</td><td>7,200,000</td>
+  <td>13,650,000</td><td>3,360,000</td><td>10,080,000</td>
+  <td>43,875,000</td><td>10,800,000</td><td>32,400,000</td>
+</tr>
+<tr>
+  <td><strong>Opportunities</strong></td>
+  <td>22,000</td><td>7,500</td><td>2,000</td>
+  <td>43,750</td><td>14,000</td><td>3,500</td>
+  <td>146,250</td><td>67,500</td><td>22,500</td>
+</tr>
+<tr>
+  <td><strong>OLI Schedules</strong></td>
+  <td>390,000</td><td>180,000</td><td>60,000</td>
+  <td>756,000</td><td>336,000</td><td>105,000</td>
+  <td>2,970,000</td><td>1,620,000</td><td>675,000</td>
+</tr>
+</tbody>
+</table>
+
+<!-- REFERENCE TABLES -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<h2><span class="tab-label">Reference</span> Sales Agreement Configuration Metrics</h2>
+
+<h3>Creation Methods</h3>
+<table>
+<thead><tr><th>Method</th><th>Description</th><th>Priority</th></tr></thead>
+<tbody>
+<tr><td>Create Sales Agreement via UI</td><td>Direct creation from Manufacturing Cloud interface</td><td>P0</td></tr>
+<tr><td>Create Sales Agreement via API / Apex</td><td>Programmatic creation via REST API or Apex code</td><td>P1</td></tr>
+<tr><td>Opportunity to Sales Agreement</td><td>via objectHierarchyRelationship mapping</td><td>P2</td></tr>
+<tr><td>Quote to Sales Agreement (objectHierarchyRelationship)</td><td>via objectHierarchyRelationship mapping</td><td>P2</td></tr>
+<tr><td>Quote to Sales Agreement (Context Definition)</td><td>via context definition mapping</td><td>P2</td></tr>
+<tr><td>Deep Clone</td><td>Clone an existing Sales Agreement with all line items</td><td>P2</td></tr>
+</tbody>
+</table>
+
+<h3>Schedule Configuration</h3>
+<table>
+<thead><tr><th>Parameter</th><th>Values</th><th>Priority</th></tr></thead>
+<tbody>
+<tr><td>Schedule Frequency</td><td>Weekly, Monthly, Quarterly, Yearly, OneTime</td><td>Monthly=P0, Weekly/Quarterly=P1, Yearly=P2, OneTime=P3</td></tr>
+<tr><td>Schedule Count</td><td>1 to 72</td><td>All supported</td></tr>
+<tr><td>Decimal Scale</td><td>2, 4, 6</td><td>2=P0, 4=P1, 6=P2</td></tr>
+<tr><td>Future Actuals Calculation Schedules</td><td>0, 6, 12, 18, 24</td><td>0=P0, 6/12=P1, 18/24=P2</td></tr>
+</tbody>
+</table>
+
+<h3>Actuals Calculation Modes</h3>
+<table>
+<thead><tr><th>Mode</th><th>Description</th><th>Priority</th></tr></thead>
+<tbody>
+<tr><td>Manually using API upload</td><td>Actuals uploaded from external systems via REST API</td><td>P0</td></tr>
+<tr><td>Automatically from direct orders</td><td>System auto-calculates from orders placed against the agreement</td><td>P0</td></tr>
+<tr><td>Automatically from orders through contracts</td><td>Actuals derived from orders routed through contract records</td><td>P2</td></tr>
+<tr><td>Using a Data Processing Engine Definition</td><td>Custom DPE definition for complex multi-source aggregation</td><td>P3</td></tr>
+</tbody>
+</table>
+
+<h3>Product Addition Methods</h3>
+<table>
+<thead><tr><th>Method</th><th>Description</th><th>Priority</th></tr></thead>
+<tbody>
+<tr><td>Add Products from UI</td><td>Manual product selection via Sales Agreement interface</td><td>P0</td></tr>
+<tr><td>Add Products from API / Apex</td><td>Programmatic product addition</td><td>P1</td></tr>
+<tr><td>Browse Catalog (RLM Enabled Flow)</td><td>Product Discovery catalog browsing — requires RLM</td><td>P1</td></tr>
+</tbody>
+</table>
+
+<h3>Negotiation Methods</h3>
+<table>
+<thead><tr><th>Method</th><th>Description</th><th>Priority</th></tr></thead>
+<tbody>
+<tr><td>Inline Edits — Enabled Adjustments</td><td>Direct cell-level editing with adjustment tracking on</td><td>P0</td></tr>
+<tr><td>Inline Edits — Disabled Adjustments</td><td>Direct cell-level editing with adjustment tracking off</td><td>P1</td></tr>
+<tr><td>Mass Update</td><td>Bulk update of multiple schedule quantities/prices</td><td>P1</td></tr>
+<tr><td>Update Metrics via API</td><td>Programmatic update of agreement metrics</td><td>P1</td></tr>
+<tr><td>Bulk Update via SA Bulk Update Agent</td><td>AI-assisted bulk update using Agent</td><td>P2</td></tr>
+</tbody>
+</table>
+
+<h3>Feature Toggles</h3>
+<table>
+<thead><tr><th>Feature</th><th>States</th><th>Priority</th></tr></thead>
+<tbody>
+<tr><td>Override Predefined Status Validations</td><td>Enabled / Disabled</td><td>Disabled=P0, Enabled=P1</td></tr>
+<tr><td>User Specifies Planned Quantity</td><td>Enabled / Disabled</td><td>Disabled=P0, Enabled=P2</td></tr>
+<tr><td>Product Level</td><td>Product / Category</td><td>Product=P0, Category=P1</td></tr>
+<tr><td>Approval Process</td><td>Enabled / Disabled</td><td>Disabled=P0, Enabled=P1</td></tr>
+</tbody>
+</table>
+
+<h2><span class="tab-label">Reference</span> Prerequisites</h2>
+<table>
+<thead><tr><th>Category</th><th>Requirement</th></tr></thead>
+<tbody>
+<tr><td>Licensing</td><td>Manufacturing Cloud required licenses (SKU 200008653). Revenue Cloud licenses for RLM-enabled flow.</td></tr>
+<tr><td>Account &amp; Contact</td><td>A verified Customer Account and associated Contacts (Decision Makers/Procurement) must exist</td></tr>
+<tr><td>Role Hierarchy</td><td>A defined User Role Hierarchy is configured within Salesforce</td></tr>
+<tr><td>Opportunity</td><td>An Opportunity with detailed Opportunity Line Items (OLI) is created</td></tr>
+<tr><td>Quote</td><td>A Quote is generated and synced from the Opportunity</td></tr>
+<tr><td>Price Book</td><td>A Standard (and/or Custom) Price Book is active, with Price Book Entries for all relevant products</td></tr>
+<tr><td>Cost Book</td><td>Cost Books and entries are configured to track manufacturing COGS</td></tr>
+<tr><td>Approval Process</td><td>An active Approval Process is configured for the Sales Agreement object</td></tr>
+</tbody>
+</table>
+
+<h2><span class="tab-label">Reference</span> Summary Statistics</h2>
+<table>
+<thead><tr><th>Metric</th><th>Count</th></tr></thead>
+<tbody>
+<tr><td>Total Journeys</td><td>4</td></tr>
+<tr><td>Setup Journeys</td><td>3</td></tr>
+<tr><td>Transaction Journeys</td><td>1</td></tr>
+<tr><td>Reporting Journeys</td><td>0</td></tr>
+<tr><td>Total Scenarios</td><td>11</td></tr>
+<tr><td>Variant Dimensions</td><td>7 (sa_creation_method, sa_schedule_frequency, sa_actuals_calculation_mode, sa_product_level, sa_product_addition_method, sa_negotiation_method, setup_method)</td></tr>
+<tr><td>Org Constraints</td><td>6 (org_data_size, sa_schedule_count, sa_future_actuals_schedules, sa_decimal_scale, sa_status_validation_override, sa_user_specifies_planned_qty)</td></tr>
+<tr><td>Business Flows</td><td>2 (Sales Agreement Platform Setup, Commercial Excellence — Sales Agreements)</td></tr>
+</tbody>
+</table>
+
+<h2><span class="tab-label">Reference</span> ADM Mapping</h2>
+<table>
+<thead><tr><th>Source Sheet Concept</th><th>ADM Table</th><th>Field</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Creation Method (UI/API/Opp/Quote/Clone)</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'sa_creation_method'</code></td><td>Entry point and data inheritance path for the agreement</td></tr>
+<tr><td>Schedule Frequency (Weekly/Monthly/Quarterly/Yearly/OneTime)</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'sa_schedule_frequency'</code></td><td>Drives how often planned vs actual quantities are compared</td></tr>
+<tr><td>Actuals Calculation Mode (Manual/Auto Direct/Auto Contracts/DPE)</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'sa_actuals_calculation_mode'</code></td><td>Determines integration complexity and data flow patterns</td></tr>
+<tr><td>Product Level (Product/Category)</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'sa_product_level'</code></td><td>SKU-level vs category-level agreement tracking granularity</td></tr>
+<tr><td>Product Addition (UI/API/Catalog)</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'sa_product_addition_method'</code></td><td>How products enter the agreement — UI vs programmatic vs catalog</td></tr>
+<tr><td>Negotiation Method (Inline/Mass/API/Agent)</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'sa_negotiation_method'</code></td><td>Editing UX and bulk operation capabilities during negotiation</td></tr>
+<tr><td>Setup Method (Salesforce GO / Manual)</td><td><code>variant_dimensions</code></td><td><code>dimension_name = 'setup_method'</code></td><td>Guided vs manual org configuration path</td></tr>
+<tr><td>Data Shape Tiers (Small/Medium/Large)</td><td><code>org_constraints</code></td><td><code>constraint_name = 'org_data_size'</code></td><td>Org-level volume — determines which scenarios need large orgs</td></tr>
+<tr><td>Schedule Count (1–72)</td><td><code>org_constraints</code></td><td><code>constraint_name = 'sa_schedule_count'</code></td><td>Volume of schedule entries per agreement</td></tr>
+<tr><td>Future Actuals Schedules (0/6/12/18/24)</td><td><code>org_constraints</code></td><td><code>constraint_name = 'sa_future_actuals_schedules'</code></td><td>Pre-calculation horizon for actuals</td></tr>
+<tr><td>Decimal Scale (2/4/6)</td><td><code>org_constraints</code></td><td><code>constraint_name = 'sa_decimal_scale'</code></td><td>Quantity precision configuration</td></tr>
+<tr><td>Override Status Validations (Enabled/Disabled)</td><td><code>org_constraints</code></td><td><code>constraint_name = 'sa_status_validation_override'</code></td><td>Feature gate for custom status transitions</td></tr>
+<tr><td>User Specifies Planned Qty (Enabled/Disabled)</td><td><code>org_constraints</code></td><td><code>constraint_name = 'sa_user_specifies_planned_qty'</code></td><td>Feature gate for manual planned quantity override</td></tr>
+</tbody>
+</table>
+
+
+
+</body></html>

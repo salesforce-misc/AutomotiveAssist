@@ -1,0 +1,27 @@
+# Automotive Cloud Validation Rule Schema
+# Each rule is a YAML doc with these fields.
+
+# Required:
+#   id: unique kebab-case slug (matches the file basename within the group)
+#   group: rule group (pre-deployment | mobile-login-check | connected-services-check | lending-check | inventory-check)
+#   description: one-line human-readable description
+#   severity: error | warning | info
+#   check:
+#     type: tooling-soql | soql | admin-setting | psl-assignment | trigger-handler | metadata
+#     # type-specific fields below
+#
+# Optional:
+#   remediation: short remediation hint (Setup path or command)
+#   docs: link to the relevant skill / SKILL.md
+#
+# Example:
+# id: psl-foundation-assigned
+# group: pre-deployment
+# description: Every active user has the Automotive Foundation User PSL
+# severity: error
+# check:
+#   type: psl-assignment
+#   psl: Automotive Foundation User
+#   target: all-active-users
+# remediation: Assign Automotive Foundation User PSL via /auto:configure-permissions
+# docs: skills/auto-user-management/SKILL.md

@@ -1,0 +1,37 @@
+Journey_ID,Domain,Journey_Title,Journey_Type,Setup_Subtype,Pre_Requisites,Business_Process,Detailed_Scenarios,Features_Mapped,Personas,Complexity,Data_Shape,Frequency,Priority,Setup_Required,Expected_Outcome,Integration_Points,Performance_Requirements,Author,Notes
+Auto_Appraisal_Data_UJ,Automotive Cloud - Appraisal Management,Trade-in / Appraisal Management Setup Data & Reference Entities,Setup,Setup Data,"Auto_Appraisal_Config_UJ completed; Vehicle Definition reference data already loaded (MMY catalog); Business Brand & Catalog already loaded; Code Sets exist for Condition / Exterior Colour / Mileage UoM / Owner; Auto_Vehicle_Data_UJ available so Vehicle records can be referenced by VIN# search.","Reference data → Master picklist value sets → Vehicle Definition / Product graph → Asset graph → Lead / Opportunity graph → Approval routing user graph → Community user graph → Telemetry baseline","Scenario Overview: SDET / Implementation Consultant declares the read-only data graph that must exist before any Appraisal transaction can run. This is documentation-only — no rows are inserted by this journey (project org is read-only).
+
+Step-by-Step:
+1. [SDET] Reference picklist values for Interest Type: 'Valuation', 'Sales', 'Trade-in' (Appraisal field).
+2. [SDET] Reference picklist values for Appraisal Status (partner-defined; example smoke set: Draft → In Valuation → Pending Approval → Approved → Rejected → Inspection Scheduled → Final).
+3. [SDET] Reference picklist values for Adjustment Type on Appraisal Adjustment: Markup, Discount, Reconditioning Cost, Dents and Scratches, Mark-up Profit Margin (each can be % or absolute per Epic field doc).
+4. [SDET] Reference picklist values for Condition (Excellent / Good / Average / Rough) — must be a picklist (Epic flags this gap; see Notes).
+5. [SDET] Reference picklist values for Exterior Colour (must be a picklist; closed list per Epic).
+6. [SDET] Reference picklist values for Mileage UoM (Miles, Km).
+7. [SDET] Reference picklist values for Owner / Hand-off count (1, 2, 3+).
+8. [SDET] Reference picklist values for Usage UoM (Hours / Cycles / Miles / Km — used on Asset Appraisal Item).
+9. [SDET] Reference picklist values for Market Source on Appraisal Item Provider Valuation (KBB, JD Power, Black Book, Manheim, Custom Provider).
+10. [SDET] Vehicle Definition graph: Make → Model → Year → Style/Trim/Variant rows that the dealer can pick when manually entering vehicle details (Process Flow path: Vehicle Found in Inventory? = No → Manual entry).
+11. [SDET] Vehicle graph: at least one VIN-resolvable Vehicle record per smoke run so 'Search by VIN#' auto-populates make / model / year / style / mileage. Field map: VIN, License Plate, State, Last Odometer Reading, Style.
+12. [SDET] Asset graph (for Trade-in Asset RT testing): Asset record with AIN#, Make, Model, Year, Product Family, Install Date, Purchase Date, Warranty End Date.
+13. [SDET] Asset Warranty graph: at least one Asset Warranty record so Wrranty End Date populates on the Vehicle Appraisal Item (Existing Field linkage per Epic).
+14. [SDET] Product graph: ProductRelatedComponent rows under AccessoryProduct so Appraisal Accessories Attributes can lookup Related Product (rooftop, leather seats, advanced sound systems, etc.).
+15. [SDET] Lead graph: Lead with Lead Line Item so Epic 1 (initiate appraisal from Lead) and Epic 14 (link appraised vehicle to Lead Line Item / Quote in 256) are testable.
+16. [SDET] Opportunity graph: Opportunity with Opportunity Product + Opportunity Line Item so Epic 14 (Opportunity Line Item link) is testable in 256.
+17. [SDET] Account graph: Person Account or Business Account + Contact pair so 'initiate appraisal from Account / Vehicle Console / Asset Console' (Epic 1) is testable.
+18. [SDET] Approver graph: at least one Finance Manager user with the Appraisal_Finance_Manager PS so the Approval Process can route. Email enabled.
+19. [SDET] Community user graph (256+): Partner Community user + Customer Community user with Appraisal_External_Community_User PS so Epic 10 (process Appraisal as external user) can be tested.
+20. [SDET] Action Plan Templates for Inspection Visit (Epic 11 / 256): one template with steps for physical inspection, document checklist, and KPI capture.
+21. [SDET] Document Checklist Items: required documents for trade-in (registration, insurance, identity proof, ownership transfer form).
+22. [SDET] Telemetry baseline counters: capture initial counts of Appraisal / Appraisal Item / Appraisal Adjustment / Appraisal Item Provider Valuation records before each test run, so post-run telemetry deltas (per Epic Telemetry section) can be asserted.
+23. [SDET] Test data shape:
+   - Smoke: 1 Vehicle, 1 Lead, 1 Opportunity, 1 Person Account, 1 Asset, 1 approver.
+   - Regression: 10 Vehicles spanning 3 Makes / 5 Models / 3 Years; 5 Leads in different stages; 5 Opportunities; 5 Assets including 1 Battery RT; 2 approvers.
+   - Performance: 1k Appraisals, 5k Appraisal Items, 20k Appraisal Item Provider Valuations (validate Telemetry counters and approval throughput).
+24. [SDET] Idempotency note: every fixture is keyed by stable external ID (VIN for Vehicle, AIN for Asset, Lead.Email for Lead, External_Id__c on test users) so the read-only describe step is repeatable against any sandbox.","Vehicle Definition, Vehicle, Asset, Asset Warranty, ProductRelatedComponent (AccessoryProduct), Lead + Lead Line Item, Opportunity + Opportunity Product, Account (Person + Business), Contact, User, Action Plan Templates, Document Checklist Items, Picklist Value Sets, Telemetry counters","SDET (primary); Implementation Consultant (secondary)","Smoke - P0
+Regression - P1
+Performance - P2
+
+Vehicle-only data graph - P0
+Vehicle + Asset (Battery / Equipment) graph - P1
+Vehicle + Asset + Community user graph - P2","Small,Medium,Large","Once per sandbox refresh; reverified after every release upgrade",P0,"Auto_Appraisal_Config_UJ completed; org-pref ON; permission sets assigned; OmniStudio assets imported.","Read-only data contract is documented and verifiable. Every TUJ step has a named Setup-Data row supplying its inputs. Telemetry baselines are captured so post-run deltas are assertable.","Source providers (read-only): existing Vehicle / Asset / Vehicle Definition data already in sandbox; no live external valuation calls during Setup Data step.","Describe / SOQL of fixture sets < 10s for smoke, < 60s for regression.","auto-journey-architect","Sources: Epic Doc — Appraisal Attributes for Vehicles / Assets, Appraisal Request Attributes, Appraisal Adjustment Attributes, Appraisal Accessories Attributes, Values Attributes (Vehicles/Asset), Telemetry section. Org is read-only per project memory — do not insert. Epic flags Condition and Exterior Colour as 'needs to be a picklist; existing fields are not'; the Setup Data fixture must assume the picklist version is in place after Auto_Appraisal_Config_UJ runs."

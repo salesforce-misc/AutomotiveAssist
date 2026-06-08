@@ -1,0 +1,15 @@
+{
+  "name": "auto",
+  "description": "Automotive Cloud plugins for Claude Code",
+  "owner": {
+    "name": "Subra Vadali"
+  },
+  "plugins": [
+    {
+      "name": "auto",
+      "source": ".",
+      "description": "Salesforce Automotive Cloud — knowledge, skills, commands, agents, and Salesforce org tools for OEM and dealer implementations",
+      "version": "0.1.0"
+    }
+  ]
+}

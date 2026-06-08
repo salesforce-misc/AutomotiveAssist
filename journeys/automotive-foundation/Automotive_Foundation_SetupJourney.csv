@@ -1,0 +1,338 @@
+User Journey,Owner,Reviewer,Business Process,Features,Complexity,Valid Variations,Data Shape,Pre-requisites,Scenarios,Priority,Integration,Integration Component
+"Automotive Foundation - Setup - Configuration (Org Preferences + PSLs + Profiles + Record Types + Page Layouts)",,,"Setup an Automotive Cloud org foundation
+
+
+Personas Involved:
+1. Salesforce System Administrator
+2. OEM Admin
+3. Dealer Admin","Automotive Cloud Foundation, Salesforce GO, Permission Set Licenses, Permission Sets, Profiles, Record Types, Page Layouts, Org Preferences","High","License SKU Names :
+1. Automotive Cloud
+2. Automotive Cloud - HF OZ
+3. Automotive Foundation User
+4. Automotive Foundation User - HF OZ
+5. Vehicle Connected Services
+6. Salesforce Scheduler
+7. Field Service (for Service Territory entities)
+
+
+Setup Method Variations :
+Salesforce GO (Guided Setup) - P0
+Manual Setup - P1
+CI/CD Deployment - P2","","Pre-requisites:
+
+1. System Administrator logs in to Org having Automotive Cloud required licenses (SKU Automotive Cloud)
+2. Person Accounts already enabled (or sandbox-first toggle planned)
+3. Sandbox refreshed from production with no in-flight metadata changes","Complete the following steps to enable Automotive Foundation entities:
+
+Navigate to Setup
+1. Go to Setup in Salesforce.
+2. From the Quick Find box, search for and select Salesforce GO
+
+Access Feature Settings
+1. Within Salesforce GO, navigate to Features.
+2. Locate and select Automotive Cloud Foundation
+
+Complete the guided setup by performing the following:
+
+A. Enable Org Preferences
+1. Enable Person Accounts (irreversible — file support ticket; OWD must allow Contact Controlled By Parent or both Private)
+2. Enable Automotive Cloud
+3. Enable Vehicle Connected Services
+4. Enable Salesforce Scheduler
+5. Enable Field Service (required for ServiceTerritory, ServiceTerritoryLocation, ServiceTerritoryMember, ServiceTerritoryWorkType, OperatingHours, OperatingHoursHoliday, TimeSlot, Location)
+6. Enable Information Authorization Request (for InfoAuthRequestForm, InfoAuthorizationRequest, MultipartyInfoAuthRequest)
+
+B. Assign Permission Set Licenses (PSLs) to user pools
+- Automotive Foundation User
+- Vehicle Connected Services
+- Salesforce Scheduler User
+- Field Service Standard / Dispatcher / Resource
+- Industry Service Excellence (for InfoAuth* objects)
+
+C. Assign Permission Sets per persona
+- OEM Admin: Automotive Cloud Admin, Industry Service Excellence Admin
+- Dealer Admin: Automotive Cloud Admin (scoped to dealer)
+- Service Advisor: Automotive Cloud Service, Field Service Resource
+- Sales Rep / Dealer Sales Executive: Automotive Cloud Sales
+- Field Resource: Field Service Resource, Salesforce Scheduler Resource
+
+D. Configure Record Types & Page Layouts
+1. Account: Business Account, Person Account
+2. Contact: Standard
+3. Product2: Vehicle, Parts (mandatory split)
+4. Asset: Vehicle, Parts (mandatory split)
+5. Asset Account Participant / Asset Contact Participant: Owner, Driver, Co-Driver, Lessee, Insured, Service Contact
+6. AssetWarranty: Manufacturer Warranty, Extended Warranty, Service Contract
+7. AssetMilestone: Service Due, Inspection Due, Warranty Expiry
+8. AssetRelationship: Parent/Child Vehicle, Vehicle/Battery, Vehicle/Trailer
+9. AssetDowntimePeriod: Scheduled Maintenance, Unscheduled, Recall
+10. Vehicle / VehicleDefinition: Make/Model/Year/Trim picklists wired
+11. Appraisal & Appraisal Item: Vehicle Appraisal, Asset Appraisal record types
+12. AppraisalAdjustment / AppraisalItemAddOn / AppraisalItemProviderValuation: standard layouts
+13. Location: Dealership, Warehouse, Service Center, Customer Address
+14. ServiceTerritory: Dealer Territory, Mobile Service Territory, OEM Region
+15. OperatingHours: Standard Hours, Extended Hours, Holiday Schedule
+16. ProductAttribute / ProductAttributeSetProduct: Vehicle Specs (engine, transmission, drivetrain), Color, Trim
+17. ProductMedia / ProductRelatedComponent / ProductRelatedMaterial: Brochures, Accessories, Fluids
+18. ProductRelationshipType: Compatible With, Replaces, Supersedes
+19. QuoteLineItemRelatedObject: Vehicle, Trade-in, Accessory
+20. GeoCountry: standard country picklist (no RT)
+21. InfoAuthRequestForm / InfoAuthorizationRequest / MultipartyInfoAuthRequest: Identity Verification, Service Authorization
+
+E. Configure OWD & Sharing
+- Account, Contact: per dealer / OEM model
+- Asset, Vehicle: Private (sharing inherits from Asset → Vehicle)
+- Appraisal*: Private (inherits from Lead/Opportunity/Account/Asset)
+- ServiceTerritory*: Public Read Only
+
+F. ARC: NOT touched in foundation. ARC graphs come last (step 43) after all relationship objects exist.
+
+Verification:
+1. Run /auto:audit → expect 0 errors against Foundation
+2. Run /auto:health-check → confirm all 37 entities reachable","P0","No",""
+"Automotive Foundation - Setup - Data (Reference + Master Data for Foundation Entities)",,,"Load reference and master data for Automotive Foundation entities
+
+
+Personas Involved:
+1. Salesforce System Administrator
+2. OEM Admin
+3. Dealer Admin
+4. Data Migration Specialist","Automotive Cloud Foundation, Vehicle, VehicleDefinition, Product2, Asset, Account, Contact, ServiceTerritory, OperatingHours, GeoCountry","High","Data Volume Variations :
+Small org : 1 OEM, 5 dealers, 50 vehicles
+Medium org : 1 OEM, 50 dealers, 5,000 vehicles
+Large org : 1 OEM, 500 dealers, 500,000 vehicles
+
+
+Make/Model/Year coverage :
+Single Brand - P0
+Multi-Brand OEM - P1
+Multi-Brand + Multi-Country - P2","Accounts: S=1,000 / M=5,000 / L=50,000
+Person Accounts: S=2,000 / M=10,000 / L=100,000
+Contacts: S=2,500 / M=12,500 / L=125,000
+Product2 (Vehicle RT): S=200 / M=1,000 / L=10,000
+Product2 (Parts RT): S=5,000 / M=25,000 / L=250,000
+VehicleDefinition: S=200 / M=1,000 / L=10,000
+Vehicle: S=500 / M=50,000 / L=500,000
+Asset (Vehicle RT): S=500 / M=50,000 / L=500,000
+Asset (Parts RT): S=1,000 / M=10,000 / L=100,000
+AssetAccountParticipant: S=750 / M=75,000 / L=750,000
+AssetContactParticipant: S=750 / M=75,000 / L=750,000
+AssetWarranty: S=500 / M=50,000 / L=500,000
+AssetMilestone: S=2,000 / M=200,000 / L=2,000,000
+AssetRelationship: S=200 / M=20,000 / L=200,000
+AssetDowntimePeriod: S=500 / M=50,000 / L=500,000
+Appraisal: S=100 / M=5,000 / L=50,000
+AppraisalItem: S=100 / M=5,000 / L=50,000
+AppraisalItemAddOn: S=300 / M=15,000 / L=150,000
+AppraisalItemProviderValuation: S=400 / M=20,000 / L=200,000
+AppraisalAdjustment: S=300 / M=15,000 / L=150,000
+ServiceTerritory: S=10 / M=100 / L=1,000
+ServiceTerritoryMember: S=50 / M=500 / L=5,000
+ServiceTerritoryLocation: S=20 / M=200 / L=2,000
+ServiceTerritoryWorkType: S=30 / M=300 / L=3,000
+Location: S=15 / M=150 / L=1,500
+OperatingHours: S=5 / M=20 / L=50
+OperatingHoursHoliday: S=10 / M=20 / L=50
+TimeSlot: S=35 / M=140 / L=350
+ProductAttribute: S=500 / M=2,500 / L=25,000
+ProductAttributeSetProduct: S=2,000 / M=10,000 / L=100,000
+ProductMedia: S=1,000 / M=5,000 / L=50,000
+ProductRelatedComponent: S=500 / M=2,500 / L=25,000
+ProductRelatedMaterial: S=200 / M=1,000 / L=10,000
+ProductRelationshipType: S=10 / M=10 / L=10
+QuoteLineItemRelatedObject: S=200 / M=2,000 / L=20,000
+GeoCountry: 250 (standard)
+InfoAuthRequestForm: S=5 / M=20 / L=50
+InfoAuthorizationRequest: S=100 / M=10,000 / L=100,000
+MultipartyInfoAuthRequest: S=20 / M=2,000 / L=20,000","Pre-requisites:
+
+1. Automotive Foundation - Setup - Configuration completed
+2. Person Accounts enabled
+3. All record types and page layouts in place
+4. Permission Sets assigned to seed-data user","Load Foundation reference + master data:
+
+A. Geo & Country Reference
+1. GeoCountry: confirm standard 250 country list active. Add ISO codes for OEM target markets.
+
+B. Operating Hours & Holidays (Field Service prerequisite)
+1. Create OperatingHours: 'Standard Dealer Hours' (Mon-Sat 8am-7pm), 'Extended Service Hours' (Mon-Sun 6am-10pm), '24/7 Roadside'
+2. Create OperatingHoursHoliday: regional holidays per OEM market
+3. Create TimeSlot rows for each OperatingHours per day-of-week
+
+C. Location & Service Territory graph
+1. Create Location records for each dealership, warehouse, service center
+2. Create ServiceTerritory: 'OEM West Region', 'Dealer Group North', etc.
+3. Create ServiceTerritoryLocation: link Locations to ServiceTerritories
+4. Create ServiceTerritoryWorkType: link work types (Service, Inspection, Test Drive, Delivery) to territories
+5. Create ServiceTerritoryMember: assign Field Resource users to territories with from/to dates
+
+D. Account & Contact graph
+1. Create Business Accounts: OEM, Dealer Groups, Suppliers, Insurance Providers
+2. Create Person Accounts (or Account+Contact pairs) for vehicle owners, lessees, drivers
+3. Create Contacts under Business Accounts: dealership staff, OEM contacts, service contacts
+
+E. Product graph
+1. Create Product2 (Vehicle RT): one row per VehicleDefinition (Make/Model/Year/Trim)
+2. Create Product2 (Parts RT): SKUs for parts catalog
+3. Create VehicleDefinition: master Make/Model/Year/Trim/Style records
+4. Create ProductAttribute: Engine Type, Transmission, Drivetrain, Fuel Type, Color, Trim
+5. Create ProductAttributeSetProduct: link attributes to Vehicle Products
+6. Create ProductMedia: brochures, hero images, 360 views per Vehicle Product
+7. Create ProductRelationshipType: 'Compatible With', 'Replaces', 'Supersedes', 'Accessory For'
+8. Create ProductRelatedComponent: Vehicle → standard accessories (rooftop, leather seats, sound system)
+9. Create ProductRelatedMaterial: fluids, filters, consumables linked to Vehicle Products
+
+F. Vehicle & Asset graph
+1. Create Vehicle records keyed by VIN, linked to VehicleDefinition (master) and to a Make/Model/Year
+2. Create Asset (Vehicle RT) records per Vehicle, linked to Account (owner) and Contact (driver)
+3. Create Asset (Parts RT) records for inventory parts
+4. Create AssetAccountParticipant: link Asset to multiple Accounts (lienholder, lessor, insurer)
+5. Create AssetContactParticipant: link Asset to multiple Contacts (driver, co-driver, emergency contact)
+6. Create AssetWarranty: one or more warranty records per Vehicle Asset (manufacturer + extended)
+7. Create AssetMilestone: scheduled service dates, inspection dates, warranty expiry milestones
+8. Create AssetRelationship: parent/child between trailer and tow vehicle, between vehicle and removable battery
+9. Create AssetDowntimePeriod: scheduled maintenance windows, recall periods
+
+G. Appraisal graph (Trade-in / Valuation / Sale)
+1. Create Appraisal records linked to Lead/Opportunity/Account
+2. Create AppraisalItem (Vehicle/Asset variants) per Appraisal
+3. Create AppraisalItemAddOn rows for accessories
+4. Create AppraisalItemProviderValuation rows for KBB/JD Power/Black Book/Manheim per AppraisalItem
+5. Create AppraisalAdjustment rows for Markup, Discount, Reconditioning Cost, Dents
+
+H. Quote linkage
+1. Create QuoteLineItemRelatedObject rows linking Vehicles / Trade-in Appraisals / Accessories to Quote Line Items
+
+I. Information Authorization graph
+1. Create InfoAuthRequestForm templates for Identity Verification, Service Authorization, Trade-in Consent
+2. Create InfoAuthorizationRequest records per service interaction
+3. Create MultipartyInfoAuthRequest for joint/lessee scenarios","P0","No",""
+"Automotive Foundation - Setup - Integration (External Systems + APIs)",,,"Configure Foundation integrations (Identity Verification, Telematics, Field Service routing, Valuation Providers, MuleSoft, Document Generation)
+
+
+Personas Involved:
+1. Salesforce System Administrator
+2. Integration Architect
+3. MuleSoft Developer","Named Credentials, External Services, Identity Verification, MuleSoft, Field Service Routing, Document Generation, Audit Trail","Medium","Integration Variations :
+Identity Verification provider (LexisNexis, Onfido, custom) - P0
+Telematics provider (single OEM, multi-OEM aggregator) - P0
+Valuation provider fan-out (1 / 2 / 4 providers) - P0/P1
+Field Service routing engine (OOTB Optimizer, custom) - P1
+Document Generation (OOTB DocGen, Conga, Adobe) - P1
+MuleSoft Anypoint connector (sandbox, production) - P0","","Pre-requisites:
+
+1. Automotive Foundation - Setup - Configuration completed
+2. Automotive Foundation - Setup - Data completed
+3. Named Credentials and External Services enabled at org level
+4. MuleSoft Anypoint org provisioned (if MuleSoft path)","Configure Foundation integrations:
+
+A. Identity Verification (InfoAuthRequestForm / InfoAuthorizationRequest / MultipartyInfoAuthRequest)
+1. Create Named Credential 'IDV_Provider' pointing to identity verification provider
+2. Configure External Service for IDV callout
+3. Map InfoAuthRequestForm template fields to provider request payload
+4. Configure callback handler to update InfoAuthorizationRequest status
+5. Failure injection: provider 5xx → InfoAuthorizationRequest stays Pending; auto-retry with exponential backoff
+
+B. Telematics / Vehicle Connected Services
+1. Create Named Credential 'Telematics_Provider' (per OEM)
+2. Configure event listener for DTC, location, fuel level, tire pressure events
+3. Map telematics events to Asset, Vehicle, AssetMilestone (service-due rollups)
+4. Configure AEO orchestration: event type → subtype → expression set → Record Alert + Case
+5. Failure injection: telematics gateway down → events queue and replay; surface in operations dashboard
+
+C. Field Service / ServiceTerritory routing
+1. Configure Salesforce Field Service Optimizer with ServiceTerritory + ServiceTerritoryMember + OperatingHours + TimeSlot inputs
+2. Configure routing rules per ServiceTerritoryWorkType
+3. Configure mobile metadata cache regeneration trigger on territory data changes
+
+D. Vehicle Valuation Providers (for Appraisal flow)
+1. Create Named Credentials per provider: KBB, JD Power, Black Book, Manheim
+2. Configure OmniStudio Integration Procedure for multi-provider fan-out
+3. Map provider responses to AppraisalItemProviderValuation fields
+4. Failure injection: provider timeout (>30s) or 5xx → drop that provider, persist remaining; UI shows retry affordance
+
+E. MuleSoft Anypoint connector (master integration backbone)
+1. Configure Anypoint sandbox + production endpoints
+2. Configure connector for upstream OEM systems (warranty, recall, parts catalog, financial)
+3. Map MuleSoft canonical model to Salesforce Foundation entities (Vehicle, Asset, AssetWarranty, Product2)
+
+F. Document Generation
+1. Configure OOTB Document Generation for Trade-in agreements, Sales agreements, Service authorizations
+2. Map Appraisal, AssetWarranty, InfoAuthorizationRequest data to document templates
+
+G. Audit Trail & Telemetry hooks
+1. Confirm Setup Audit Trail captures Foundation toggle changes and PSL assignments
+2. Configure Telemetry counters for Foundation entity record counts (per /auto:health-check)
+3. No PII in telemetry; reference fields only","P0","Yes","Identity Verification provider, MuleSoft Anypoint, Telematics gateway (per OEM), KBB/JD Power/Black Book/Manheim valuation APIs, Field Service Optimizer, Document Generation engine, OmniStudio Integration Procedures"
+"Automotive Foundation - Setup - Reporting (Reports + Dashboards + Agentforce + Telemetry + Audit)",,,"Configure post-go-live observability for Automotive Foundation
+
+
+Personas Involved:
+1. Salesforce System Administrator
+2. Reports & Dashboards Owner
+3. Agentforce Owner
+4. Compliance Officer","Reports, Dashboards, CRM Analytics, Agentforce for Automotive, Advanced Account Forecasting, Audit Trail, Telemetry","Medium","Reporting Variations :
+Native Reports only - P0
+Native Reports + CRM Analytics dashboards - P1
+Native + CRM Analytics + Agentforce surfaces - P2
+Add Tableau Unified Analytics (TUA) - P3","","Pre-requisites:
+
+1. Automotive Foundation - Setup - Configuration completed
+2. Automotive Foundation - Setup - Data completed
+3. Automotive Foundation - Setup - Integration completed
+4. CRM Analytics licensed (for P1+)
+5. Agentforce for Automotive licensed (for P2+)","Configure Foundation reporting:
+
+A. Telemetry counters (must increment as transactional flows run)
+1. Number of Vehicles created
+2. Number of Assets (Vehicle / Parts) created
+3. Number of AssetWarranty records created
+4. Number of AssetMilestone records created (service-due / inspection / expiry)
+5. Number of AssetDowntimePeriod records (scheduled / unscheduled / recall)
+6. Number of AssetRelationship records (parent/child)
+7. Number of Asset Account Participants / Asset Contact Participants per Asset
+8. Number of Appraisals / AppraisalItems / AppraisalAdjustments / AppraisalItemAddOns / AppraisalItemProviderValuations
+9. Number of InfoAuthorizationRequests / MultipartyInfoAuthRequests
+10. Number of ServiceTerritory + Member + Location + WorkType records
+11. Number of orgs with each Foundation Org Pref turned on
+
+B. Audit Trail
+1. Person Account enable event captured
+2. Field Service enable event captured
+3. PSL assignments captured
+4. Identity Verification approval/rejection captured
+
+C. Native Reports (P0 — ship in standard report folder 'Automotive Foundation')
+1. Vehicles by Make/Model/Year
+2. Assets by Status (Active / In Service / Retired / Disposed)
+3. AssetWarranty by Status (Active / Expired / Voided)
+4. AssetMilestone upcoming due (next 30 / 60 / 90 days)
+5. AssetDowntimePeriod by reason
+6. Appraisals by Status / Interest Type / Source
+7. ServiceTerritory utilization (Member count / WorkType coverage)
+8. Identity Verification request status (Pending / Approved / Rejected)
+9. Person Account vs Business Account counts
+10. Product2 catalog by RT (Vehicle / Parts) and Brand
+
+D. CRM Analytics dashboards (P1 — Analytics for Automotive)
+1. Foundation Health: total vehicles, active warranties, upcoming milestones, downtime by reason
+2. Dealer Inventory: Asset (Vehicle RT) by Location and ServiceTerritory
+3. Service Operations: ServiceTerritoryMember utilization, OperatingHours coverage gaps
+4. Compliance: InfoAuthorizationRequest cycle time and approval rate
+
+E. Agentforce for Automotive surfaces (P2)
+1. Topic: 'Vehicle 360' — actions: lookup by VIN, summarize warranty + milestones, list participants
+2. Topic: 'Service Territory Coverage' — find available resource for work type at location
+3. Topic: 'Appraisal Helper' — summarize appraisal with provider valuations and adjustments
+4. Einstein Studio prompt templates: 'Owner Communication Drafter', 'Service Reminder Drafter'
+
+F. Tableau Unified Analytics (TUA) — P3, optional
+1. Connect TUA to Foundation entities via Salesforce CDP / Data Cloud
+
+G. Forecasting
+1. Advanced Account Forecasting on Account → Vehicle Asset rollups (forecasted service revenue, parts revenue)
+
+H. Compliance reports
+1. Audit Trail review report (Foundation setup changes)
+2. Identity Verification fair-process report
+3. Multi-party authorization completeness report","P0","Optional","CRM Analytics, Agentforce for Automotive, Einstein Studio, Tableau Unified Analytics (optional), Advanced Account Forecasting, Audit Trail, Telemetry pipeline"

@@ -1,0 +1,18 @@
+{
+  "name": "auto",
+  "version": "0.1.0",
+  "description": "Salesforce Automotive Cloud — knowledge, skills, commands, agents, and Salesforce org tools for OEM and dealer implementations",
+  "author": {
+    "name": "Subra Vadali"
+  },
+  "keywords": [
+    "salesforce",
+    "automotive-cloud",
+    "automotive",
+    "oem",
+    "dealer",
+    "vehicle",
+    "crm"
+  ],
+  "license": "MIT"
+}

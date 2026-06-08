@@ -1,0 +1,63 @@
+Journey_ID,Domain,Journey_Title,Journey_Type,Setup_Subtype,Pre_Requisites,Business_Process,Detailed_Scenarios,Features_Mapped,Personas,Complexity,Data_Shape,Frequency,Priority,Setup_Required,Expected_Outcome,Integration_Points,Performance_Requirements,Author,Notes
+Auto_Appraisal_TUJ_001,Automotive Cloud - Appraisal Management,Vehicle Trade-in Appraisal — Lead → Valuation → Approval → (Inspection / Inventory / Opportunity Line Item),Transactional,Transaction User Journey,"Auto_Appraisal_Config_UJ + Auto_Appraisal_Data_UJ + Auto_Appraisal_Integration_UJ + Auto_Appraisal_Reporting_UJ all completed (or roll-up Setup_All).","Appraisal Interest Capture → VIN search / manual entry → Vehicle Condition + Features capture → External multi-provider valuation → Negotiation & adjustments → Approval → Inspection Visit (256) → Inventory hand-off (256) → Opportunity / Lead Line Item link (256) → Reporting refresh","Scenario Overview: A walk-in customer at a dealership wants to trade in their existing vehicle (VIN known) toward a new car. The Dealer Sales Executive captures the trade-in interest from the open Lead, runs the Appraisal flow end-to-end through valuation, multi-provider price comparison, adjustments, Finance Manager approval, schedules an Inspection Visit (256), updates the appraisal price, gets it approved & communicated, and finally adds the appraised vehicle to inventory and links it to the Opportunity Line Item (256).
+
+This journey mirrors the Process Flow diagram in the Epic ('Appraisal Management High Level Design').
+
+Step-by-Step:
+1. [Dealer Sales Executive] Opens the existing Lead (Person Account with Lead Line Item already captured).
+   - Pre-req row: Setup-Data step 15 (Lead + Lead Line Item).
+   - Action: from Lead page, clicks 'New Appraisal' (custom action exposed by Auto_Appraisal_Config_UJ step 23). FlexCard launches the Appraisal OmniScript (Vehicle flow).
+2. [Dealer Sales Executive] Selects Interest Type = 'Trade-in' (Epic Detailed Description Epic 1 / Epic 3).
+   - System validates Interest Type drives downstream UI: Trade-in shows Customer Asking Price; Valuation hides it; Sales reuses Trade-in path with no Opportunity link.
+3. [Dealer Sales Executive] Selects Asset Type = 'Vehicle' (per Epic 3 — model the Appraisal flexibility from different pages or asset types).
+4. [Dealer Sales Executive] Step 'Search by VIN#' — enters customer-supplied VIN (Process Flow first decision).
+   - [System] Looks up Vehicle table → match found → auto-populates Make, Model, Year, Style/Trim, License Plate + State, last odometer Mileage, Wrranty End Date (from Asset Warranty linkage). Pre-req row: Setup-Data steps 11 + 13.
+   - Negative path: VIN not found → flow branches to 'Manually entry of Vehicle details' per Process Flow (Step 4b below).
+4b. [Dealer Sales Executive] Manual entry path: License Plate + State, Make, Model, Year (picklists wired to Vehicle Definition; pre-req row Setup-Data step 10), Style.
+5. [Dealer Sales Executive] Step 'Vehicle Condition Capture' — selects Condition picklist (Excellent / Good / Average / Rough), Exterior Colour picklist, Mileage + Mileage UoM, Owner / hand-off count, Damage History notes (Appraisal Notes text area), Modifications done (checkbox), Additional equipments on the vehicle (checkbox → expands AccessoryProduct picker).
+   - Pre-req row: Setup-Data steps 4–7 + step 14 (AccessoryProduct).
+6. [Dealer Sales Executive] Step 'Vehicle Features Capture' — picks accessories (rooftop, leather seats, sound system) from AccessoryProduct list. Each selected accessory writes an Appraisal Accessories row (Accessory Name, Accessory Price, Related Product, Related Appraisal).
+7. [Dealer Sales Executive] Step 'Customer Asking Price' — enters the price the customer asked for (currency).
+8. [System] On 'Get Valuation' click, OmniScript Integration Procedure fans out to all configured external valuation providers (per Auto_Appraisal_Integration_UJ step 1).
+   - [System] Persists one Appraisal Item Provider Valuation row per provider per request (Market Source, Market Price Date, Validity, Trade-in Value, Auction Value, Retail Value, Average / Rough / Clean Condition Value).
+   - Telemetry counter 'Number of Appraisal Valuations created' increments by N.
+   - Negative path: provider returns 5xx → row absent for that provider; FlexCard surfaces 'Retry' affordance; dealer can proceed with available providers.
+9. [Dealer Sales Executive] Reviews provider valuations side-by-side on the Vehicle Valuation FlexCard, picks the working baseline (e.g., KBB Average).
+   - System pre-fills Initial Appraisal Price = chosen provider value (or average of providers, per dealer convention).
+10. [Dealer Sales Executive] Negotiation loop — adds Appraisal Adjustment rows:
+    - Adjustment Type = 'Reconditioning Cost' (-$500), 'Dents and Scratches' (-$200), 'Mark-up Profit Margin' (-$300), 'Markup' for accessory premium (+$100).
+    - Each Adjustment Price can be % or absolute (Epic Field doc).
+    - System recalculates Adjusted Appraisal Price = Initial Appraisal Price + sum(Adjustment Price).
+11. [Dealer Sales Executive] Decision diamond 'Negotiation finalised?'.
+    - Path A (Yes — 254 P0 happy path): clicks 'Submit for Approval'.
+    - Path B (No, 256): clicks 'Schedule Visit for Inspection' → opens GV Visit (Inspection Visit) with Action Plan Template + Document Checklist Items (per Auto_Appraisal_Integration_UJ steps 3 + 4); Service Advisor inspects → Step 12.
+12. [Service Advisor] (256 only) Performs physical / remote inspection; uploads results to Action Plan Items + DocumentChecklistItem; updates Appraisal record fields and Adjustment rows; sets Appraisal Status = 'Inspection Complete'.
+13. [Dealer Sales Executive] Path A continues: submits the Appraisal record into the Approval Process (per Auto_Appraisal_Integration_UJ step 2).
+    - Telemetry counter 'Number of edits made to Appraisal' increments per save.
+14. [Finance Manager] Receives approval email; opens Appraisal record; reviews Adjustment trail and Provider Valuations; approves.
+    - [System] Final-step Field Update: Final Appraisal Price = Adjusted Appraisal Price; Status = 'Approved'.
+    - Negative path: Finance Manager rejects → Status = 'Rejected'; Dealer Sales Executive returns to Step 10 to revise adjustments and re-submits.
+15. [Dealer Sales Executive] Communicates the Approved Appraisal Price to the customer (in-person or via Experience Cloud notification if Customer Community is in scope per Epic 10).
+16. [Dealer Sales Executive] Clicks 'Add to Inventory' (Epic 13, R256).
+    - [System] Marks Handover Completed = TRUE on the Appraisal record; creates Vehicle Inventory record per Auto_Appraisal_Integration_UJ step 7.
+    - Telemetry counter 'Number of Appraisals associated with …' rolls up.
+17. [Dealer Sales Executive] Links the appraised vehicle to Opportunity Line Item / Lead Line Item / Quote (Epic 14, R256).
+    - Pre-req row: Setup-Data step 16 (Opportunity + Opportunity Product).
+18. [System] Reporting refresh:
+    - Native 'Appraisals by Status' report reflects 'Approved' (Auto_Appraisal_Reporting_UJ step 3).
+    - CRM Analytics Dealer Performance dashboard 'Appraisal Performance' tab reflects approval count and average final price after next dataflow refresh window (Auto_Appraisal_Reporting_UJ step 4).
+    - Agentforce 'Summarize appraisal' action returns Customer Asking Price, Initial, Adjusted, Final, Adjustment list, Provider Valuations (Auto_Appraisal_Reporting_UJ step 5).
+    - Audit Trail records the Approved transition + Field Update.
+
+Variant scenarios:
+- Variant A (P0, 254): Vehicle Trade-in from a Lead, single provider (KBB only), one approver, no Inspection Visit, no Inventory hand-off (Epics 13/14 hidden in 254).
+- Variant B (P1, 256): same path but with Inspection Visit + Action Plan + Document Checklist + multi-provider valuation (KBB + JD Power) + Add to Inventory + Opportunity Line Item link.
+- Variant C (P1): Asset Trade-in (Battery RT) initiated from Asset Console — uses Asset Appraisal RT, Asset Appraisal Item layout, no License Plate, includes Usage / Usage UoM and Asset Warranty End Date. Pre-req row: Setup-Data step 12.
+- Variant D (P2): Customer / Partner Community user creates Appraisal externally (Epic 10) — sharing rule limits visibility to their own record.
+- Variant E (P2): Approval cycle time ≥ 1 day (overnight approval) — verifies email re-notification and SLA report. ","Appraisal, Appraisal Item, Appraisal Adjustment, Appraisal Accessories, Appraisal Item Add-on, Appraisal Item Provider Valuation, Vehicle, Asset, Asset Warranty, Lead + Lead Line Item, Opportunity + Opportunity Product, Account, OmniScript (Vehicle Appraisal flow), FlexCards (Appraisal + Appraisal Item), Approval Process, External Valuation Adapter (KBB / JD Power / Black Book / Manheim), Generic Visit Framework (256), Action Plan / Document Checklist Item (256), Field Service Inventory (256), Experience Cloud (Epic 10), Telemetry, Audit Trail, CRM Analytics Dealer Performance, Agentforce for Automotive (optional)","Dealer Sales Executive (primary; initiator); Finance Manager (approver); Service Advisor (Inspection Visit, 256); Customer (asks for price; receives communication); Partner Community User (external initiator, Epic 10); System (valuation broker, approval Field Update, telemetry, dashboard refresh)","Vehicle Trade-in from Lead, single provider, no inspection - P0 (R254)
+Vehicle Trade-in from Lead, multi-provider, with Inspection Visit + Inventory + Opportunity LI - P1 (R256)
+Asset Trade-in (Battery / Equipment) from Asset Console - P1
+Customer / Partner Community external initiator - P2
+Approval reject → re-adjust → re-submit loop - P1
+Negative path: VIN not found → manual entry - P0
+Negative path: provider 5xx → fallback to remaining providers - P1","Medium","Daily (per dealership; 1–20 transactions per dealer per day at steady state)",P0,"All four Setup journeys completed; org has at least one Lead with Lead Line Item, one Vehicle with VIN, one Person Account, one Finance Manager approver, one valuation Named Credential active.","Customer trade-in is captured, valued against external providers, adjusted, approved, optionally inspected, optionally added to inventory, and optionally linked to an Opportunity Line Item — all telemetry, audit, and reporting surfaces light up. Approval cycle is closed-loop and observable.","External Valuation Providers (KBB / JD Power / Black Book / Manheim), Approval / Email, Generic Visit framework (256), Action Plan / Document Checklist (256), Field Service Inventory (256), Experience Cloud (Epic 10), Telemetry, Audit Trail, CRM Analytics, Agentforce (optional)","Search by VIN < 2s; multi-provider valuation fan-out (≤4 providers) end-to-end < 60s; OmniScript step transitions < 1s; approval submit < 5s; approver email delivery < 30s; Add to Inventory < 5s; CRM Analytics dashboard delta within next refresh window (≤24h).","auto-journey-architect","Sources: Epic Doc — Process Flow diagram (Appraisal Management High Level Design), Personas table (Dealer Sales Executive, Finance Manager, Service Advisor), Different Types of Appraisals (Trade-in / Valuation / Sale), Factors impacting Trade-in Value, Different Valuation Providers, Calculations (pricing guides + costs), High Level Epics 1/3/4/5/8/9/10/11/12/13/14, Detailed User Stories, Appraisal Attributes for Vehicles + Assets, Values Attributes, Sections Information (page layout reference), Telemetry. Org is read-only — this journey is documentation; SDET / Admin must run the steps manually in a sandbox."

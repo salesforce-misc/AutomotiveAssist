@@ -1,0 +1,162 @@
+{
+  "guideTitle": "Automotive Cloud",
+  "guideSlug": "admin-guide",
+  "pdfFileName": "automotive_cloud_5-4-2026.pdf",
+  "totalPages": 874,
+  "sections": [
+    {
+      "slug": "introduction",
+      "title": "Introduction",
+      "startPage": 1,
+      "endPage": 8,
+      "file": "001-introduction.md"
+    },
+    {
+      "slug": "learn-and-explore",
+      "title": "Learn and Explore",
+      "startPage": 9,
+      "endPage": 9,
+      "file": "002-learn-and-explore.md"
+    },
+    {
+      "slug": "learn-about-automotive-cloud",
+      "title": "Learn About Automotive Cloud",
+      "startPage": 10,
+      "endPage": 43,
+      "file": "003-learn-about-automotive-cloud.md"
+    },
+    {
+      "slug": "set-up-and-configure-automotive-cloud",
+      "title": "Set Up and Configure Automotive Cloud",
+      "startPage": 44,
+      "endPage": 259,
+      "file": "004-set-up-and-configure-automotive-cloud.md"
+    },
+    {
+      "slug": "discover-and-set-up-automotive-cloud-features-with-salesforce-go",
+      "title": "Discover and Set Up Automotive Cloud Features With Salesforce Go",
+      "startPage": 260,
+      "endPage": 262,
+      "file": "005-discover-and-set-up-automotive-cloud-features-with-salesforce-go.md"
+    },
+    {
+      "slug": "agentforce-for-automotive-cloud",
+      "title": "Agentforce for Automotive Cloud",
+      "startPage": 263,
+      "endPage": 322,
+      "file": "006-agentforce-for-automotive-cloud.md"
+    },
+    {
+      "slug": "manage-products-in-automotive-cloud",
+      "title": "Manage Products in Automotive Cloud",
+      "startPage": 323,
+      "endPage": 337,
+      "file": "007-manage-products-in-automotive-cloud.md"
+    },
+    {
+      "slug": "manage-stakeholders-in-automotive-cloud",
+      "title": "Manage Stakeholders in Automotive Cloud",
+      "startPage": 338,
+      "endPage": 362,
+      "file": "008-manage-stakeholders-in-automotive-cloud.md"
+    },
+    {
+      "slug": "manage-leads-and-opportunities-in-automotive-cloud",
+      "title": "Manage Leads and Opportunities in Automotive Cloud",
+      "startPage": 363,
+      "endPage": 382,
+      "file": "009-manage-leads-and-opportunities-in-automotive-cloud.md"
+    },
+    {
+      "slug": "set-up-connected-services-for-vehicles-in-automotive-cloud",
+      "title": "Set Up Connected Services for Vehicles in Automotive Cloud",
+      "startPage": 383,
+      "endPage": 482,
+      "file": "010-set-up-connected-services-for-vehicles-in-automotive-cloud.md"
+    },
+    {
+      "slug": "manage-vehicles-and-assets-in-automotive-cloud",
+      "title": "Manage Vehicles and Assets in Automotive Cloud",
+      "startPage": 483,
+      "endPage": 504,
+      "file": "011-manage-vehicles-and-assets-in-automotive-cloud.md"
+    },
+    {
+      "slug": "manage-vehicle-loans-and-leases",
+      "title": "Manage Vehicle Loans and Leases",
+      "startPage": 505,
+      "endPage": 611,
+      "file": "012-manage-vehicle-loans-and-leases.md"
+    },
+    {
+      "slug": "deliver-proactive-service-for-financial-customers-in-automotive-cloud",
+      "title": "Deliver Proactive Service for Financial Customers in Automotive Cloud",
+      "startPage": 612,
+      "endPage": 635,
+      "file": "013-deliver-proactive-service-for-financial-customers-in-automotive-cloud.md"
+    },
+    {
+      "slug": "schedule-appointments-in-automotive-cloud",
+      "title": "Schedule Appointments in Automotive Cloud",
+      "startPage": 636,
+      "endPage": 671,
+      "file": "014-schedule-appointments-in-automotive-cloud.md"
+    },
+    {
+      "slug": "set-up-service-processes",
+      "title": "Set Up Service Processes",
+      "startPage": 672,
+      "endPage": 708,
+      "file": "015-set-up-service-processes.md"
+    },
+    {
+      "slug": "manage-vehicle-inventory-and-dealers-in-automotive-cloud",
+      "title": "Manage Vehicle Inventory and Dealers in Automotive Cloud",
+      "startPage": 709,
+      "endPage": 749,
+      "file": "016-manage-vehicle-inventory-and-dealers-in-automotive-cloud.md"
+    },
+    {
+      "slug": "manage-dealer-performance-in-automotive-cloud",
+      "title": "Manage Dealer Performance in Automotive Cloud",
+      "startPage": 750,
+      "endPage": 773,
+      "file": "017-manage-dealer-performance-in-automotive-cloud.md"
+    },
+    {
+      "slug": "manage-warranties-and-claims-in-automotive-cloud",
+      "title": "Manage Warranties and Claims in Automotive Cloud",
+      "startPage": 774,
+      "endPage": 821,
+      "file": "018-manage-warranties-and-claims-in-automotive-cloud.md"
+    },
+    {
+      "slug": "manage-appraisals-for-vehicles",
+      "title": "Manage Appraisals for Vehicles",
+      "startPage": 822,
+      "endPage": 840,
+      "file": "019-manage-appraisals-for-vehicles.md"
+    },
+    {
+      "slug": "deliver-proactive-service-in-automotive-cloud",
+      "title": "Deliver Proactive Service in Automotive Cloud",
+      "startPage": 841,
+      "endPage": 854,
+      "file": "020-deliver-proactive-service-in-automotive-cloud.md"
+    },
+    {
+      "slug": "work-with-analytics-dashboards-in-automotive-cloud",
+      "title": "Work with Analytics Dashboards in Automotive Cloud",
+      "startPage": 855,
+      "endPage": 868,
+      "file": "021-work-with-analytics-dashboards-in-automotive-cloud.md"
+    },
+    {
+      "slug": "automotive-cloud-for-dealer",
+      "title": "Automotive Cloud for Dealer",
+      "startPage": 869,
+      "endPage": 874,
+      "file": "022-automotive-cloud-for-dealer.md"
+    }
+  ]
+}

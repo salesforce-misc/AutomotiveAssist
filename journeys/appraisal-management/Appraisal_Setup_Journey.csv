@@ -1,0 +1,149 @@
+User Journey,Owner,Reviewer,Business Process,Features,Complexity,Valid Variations,Data Shape,Pre-requisites,Scenarios,Priority,Integration,Integration Component
+"Appraisal Management - setup - configuration (standalone, no provider valuations, no ARC)","","","Setup an Automotive Cloud Appraisal org
+
+Personas Involved:
+1. Salesforce System Administrator","","License SKU Names :
+1. Automotive Cloud
+2. Automotive Cloud - HF OZ
+3. Automotive Cloud User Add-On
+4. Automotive Cloud User Add-On - HF OZ
+5. Sales Cloud / Service Cloud (host license)","","","Pre-requisites:
+
+1. System Administrator logs in to Org having Automotive Cloud required licenses","Complete the following steps to enable Appraisal Management (standalone) :
+
+Navigate to Setup
+1. Go to Setup in Salesforce.
+2. From the Quick Find box, search for and select Salesforce Go
+
+Access Feature Settings
+1. Within Salesforce Go, navigate to Features.
+2. Locate and select Automotive Cloud
+3. Locate and select Appraisal Management
+
+Complete the guided setup by performing the following:
+1. Enable the ORG Preference - Automotive Cloud + Appraisal Management
+2. Assign required User PSLs (Permission Set Licenses)
+
+Sales Manager -
+Automotive Cloud Admin
+Appraisal Management Admin
+
+Sales Consultant -
+Automotive Cloud User
+Appraisal Management User
+
+Inspector -
+Appraisal Management User (mobile-enabled)
+
+3. Create mandatory record types (with separate page layouts) :
+Product : Vehicle, Parts
+Asset : Vehicle, Parts
+
+4. Create Appraisal record types : Trade-In, Standalone-ICO, Lease-Return, Fleet","P0","No",""
+"Appraisal Management - setup - Data (standalone, no provider valuations)","","","Setup an Automotive Cloud Appraisal org
+
+Personas Involved:
+1. Salesforce System Administrator
+2. Sales Manager","","Create Appraisal record type variations :
+Trade-In
+Standalone-ICO
+Lease-Return
+Fleet
+
+Create Appraisal Item categories :
+Mechanical
+Body
+Interior
+Tires
+Frame
+Recon
+
+Create offer template variations :
+Single-line
+Itemized
+Fleet roll-up","","","Pre-requisites:
+
+1. System Administrator logs in to Org having Appraisal Management - setup - configuration (standalone) - done","1. Create 50 Vehicle Products and price book entries, 4 Business Brands, 10 Business Accounts, 20 Person Accounts
+2. Create 4 Appraisal record types - Trade-In, Standalone-ICO, Lease-Return, Fleet
+3. Create 1 Appraisal Item category set with 30 default condition codes
+4. Create 4 dealer-group accounts, 12 rooftop accounts, 25 dealership users
+5. Create 50 Asset records (Vehicle RT) seeded across rooftops
+6. Create / Upload 40 Appraisal records with status ""Draft / In Review"" - 10 per record type
+7. Create 200 Appraisal Item rows (avg 5 per appraisal)","P0","No",""
+"Appraisal Management - setup - configuration (with Provider Valuations + ARC)","","","Setup an Automotive Cloud Appraisal org with multi-provider valuation and ARC graph
+
+Personas Involved:
+1. Salesforce System Administrator","","License SKU Names :
+1. Automotive Cloud
+2. Automotive Cloud - HF OZ
+3. Automotive Cloud User Add-On
+4. Automotive Cloud User Add-On - HF OZ
+5. MuleSoft Anypoint (Connected Service)
+6. Data Cloud (optional, for activation)
+7. Agentforce for Service / Sales (optional)","","","Pre-requisites:
+
+1. System Administrator logs in to Org having Automotive Cloud + MuleSoft Anypoint required licenses","Complete the following steps to enable Appraisal Management (with Provider Valuations + ARC) :
+
+Navigate to Setup
+1. Go to Setup in Salesforce.
+2. From the Quick Find box, search for and select Salesforce Go
+
+Access Feature Settings
+1. Within Salesforce Go, navigate to Features.
+2. Locate and select Automotive Cloud
+3. Locate and select Appraisal Management
+4. Locate and select Provider Valuation
+5. Locate and select ARC Relationship Graph
+
+Complete the guided setup by performing the following:
+1. Enable the ORG Preference - Automotive Cloud + Appraisal Management + Provider Valuation
+2. Configure External Services for KBB, Black Book, Manheim MMR (named credentials, auth, retry policy)
+3. Configure VIN Decode service (NHTSA fallback, OEM primary)
+4. Assign required User PSLs
+
+Sales Manager -
+Automotive Cloud Admin
+Appraisal Management Admin
+Provider Valuation Admin
+
+Sales Consultant -
+Appraisal Management User
+
+Inspector -
+Appraisal Management User (mobile-enabled)
+
+F&I Manager -
+Appraisal Management User
+Vehicle and Asset Lending User
+
+5. Create record types : Product (Vehicle, Parts), Asset (Vehicle, Parts), Appraisal (Trade-In, Standalone-ICO, Lease-Return, Fleet), Opportunity (New-Vehicle, Used-Vehicle)
+6. Deploy ARC graph definitions on Account, Contact, Vehicle, Asset, Appraisal
+7. Configure Compliant Data Sharing for multi-rooftop
+8. Configure Salesforce Scheduler for inspection appointments
+9. (Optional) Configure Experience Cloud site for self-service ICO","P0","Yes","KBB, Black Book, Manheim MMR, NHTSA VIN decode (via MuleSoft Anypoint)"
+"Appraisal Management - setup - Data (with Provider Valuations + ARC)","","","Setup an Automotive Cloud Appraisal org with multi-provider valuation and ARC
+
+Personas Involved:
+1. Salesforce System Administrator
+2. Sales Manager
+3. F&I Manager","","Provider blend rule variations :
+Lowest of three
+Average of three
+Configurable weighted blend (e.g. KBB 40%, BB 30%, MMR 30%)
+
+ARC graph variations :
+Account -> Asset -> Appraisal
+Account -> Opportunity -> Appraisal -> Asset
+Fleet -> Fleet Asset -> Appraisal","","","Pre-requisites:
+
+1. System Administrator logs in to Org having Appraisal Management - setup - configuration (with Provider Valuations + ARC) - done","1. Create 100 Vehicle Products + 50 Parts Products + price book entries, 8 Business Brands, 20 Business Accounts, 200 Person Accounts
+2. Create 4 dealer-group accounts, 12 rooftop accounts, 50 dealership users
+3. Create 4 Appraisal record types and 1 Provider Blend rule per record type
+4. Create 30 default condition codes per Appraisal Item category
+5. Create 200 Asset records (Vehicle RT, distributed across rooftops)
+6. Create 50 Financial Account records (Vehicle and Asset Lending) for lease-return scenarios
+7. Create / Upload 80 Appraisal records - 20 per record type - across statuses Draft / In Review / Manager Review / Locked / Funded
+8. Create 400 Appraisal Item rows
+9. Create 240 Provider Valuation rows (3 providers x 80 appraisals)
+10. Create 80 OEM program rules (loyalty / conquest)
+11. Seed ARC graph traversal data for Account -> Asset -> Appraisal -> Opportunity -> Asset paths","P0","Yes","KBB, Black Book, Manheim MMR, NHTSA VIN decode"
