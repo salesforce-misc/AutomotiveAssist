@@ -9,7 +9,7 @@ A Claude Code plugin for **Salesforce Automotive Cloud** — knowledge, skills, 
 ```bash
 npm install
 npm run build
-claude --plugin-dir /Users/sgrandhi/Downloads/AutomotiveAssist
+claude --plugin-dir /path/to/AutomotiveAssist
 ```
 
 Then in Claude Code:
