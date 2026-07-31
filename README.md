@@ -35,3 +35,10 @@ Then in Claude Code:
 ## Status
 
 `v0.1.0` — scaffold complete with skills + commands + agents authored. MCP server contains tool stubs to be filled in.
+
+## Open Source Governance
+
+- License: Apache 2.0 (`LICENSE.txt`)
+- Contribution guide: `CONTRIBUTING.md`
+- Code of conduct: `CODE_OF_CONDUCT.md`
+- Security policy: `SECURITY.md`

@@ -1,0 +1,68 @@
+[
+  {
+    "name": "@modelcontextprotocol/sdk",
+    "versionRange": "^1.0.0",
+    "license": "MIT",
+    "repo": "git+https://github.com/modelcontextprotocol/typescript-sdk.git"
+  },
+  {
+    "name": "@types/node",
+    "versionRange": "^20.0.0",
+    "license": "MIT",
+    "repo": "https://github.com/DefinitelyTyped/DefinitelyTyped.git"
+  },
+  {
+    "name": "@typescript-eslint/eslint-plugin",
+    "versionRange": "^7.0.0",
+    "license": "MIT",
+    "repo": "git+https://github.com/typescript-eslint/typescript-eslint.git"
+  },
+  {
+    "name": "@typescript-eslint/parser",
+    "versionRange": "^7.0.0",
+    "license": "MIT",
+    "repo": "git+https://github.com/typescript-eslint/typescript-eslint.git"
+  },
+  {
+    "name": "eslint",
+    "versionRange": "^8.57.0",
+    "license": "MIT",
+    "repo": "git+https://github.com/eslint/eslint.git"
+  },
+  {
+    "name": "prettier",
+    "versionRange": "^3.0.0",
+    "license": "MIT",
+    "repo": "git+https://github.com/prettier/prettier.git"
+  },
+  {
+    "name": "tsx",
+    "versionRange": "^4.7.0",
+    "license": "MIT",
+    "repo": "git+https://github.com/privatenumber/tsx.git"
+  },
+  {
+    "name": "typescript",
+    "versionRange": "^5.4.0",
+    "license": "Apache-2.0",
+    "repo": "git+https://github.com/microsoft/TypeScript.git"
+  },
+  {
+    "name": "vitest",
+    "versionRange": "^1.6.0",
+    "license": "MIT",
+    "repo": "git+https://github.com/vitest-dev/vitest.git"
+  },
+  {
+    "name": "yaml",
+    "versionRange": "^2.4.0",
+    "license": "ISC",
+    "repo": "git+https://github.com/eemeli/yaml.git"
+  },
+  {
+    "name": "zod",
+    "versionRange": "^3.23.0",
+    "license": "MIT",
+    "repo": "git+https://github.com/colinhacks/zod.git"
+  }
+]
