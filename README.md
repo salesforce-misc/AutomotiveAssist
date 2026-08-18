@@ -2,7 +2,17 @@
 
 A Claude Code plugin for **Salesforce Automotive Cloud** — knowledge, skills, slash commands, agents, and Salesforce org tools for OEM and dealer implementations.
 
+## Overview
 
+AutomotiveAssist is an AI-powered assistant that helps implementation teams configure Salesforce Automotive Cloud faster and with fewer mistakes. It provides:
+
+- **Expert guidance** on all 26 Automotive Cloud functional journeys (data model, vehicles, finance, warranties, scheduler, connected services, and more)
+- **Automated health checks and audits** to catch missing permissions, misconfigured settings, or skipped prerequisites
+- **Test data scaffolding** for realistic vehicles, assets, accounts, warranties, and financial records
+- **Persona-driven agents** that adapt to your role — consultant, admin, developer, or SDET
+- **Direct org integration** via SOQL, metadata describe, and configuration export/import
+
+For a full walkthrough of capabilities, installation steps, and available commands, see the **[User Guide](docs/USER_GUIDE.md)**.
 
 ## Quick start
 
@@ -27,6 +37,7 @@ Then in Claude Code:
 
 ## Reference
 
+- [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md) — complete user guide with installation, capabilities, and key concepts
 - `JOURNEY_MAP.md` — the canonical journey + setup-sequence blueprint that drives every skill and command
 - `PERSONA_JOURNEYS.md` — per-persona setup + daily-loop journeys (SDET / Consultant / Admin / Developer / Dealer / Compliance)
 - `CLAUDE.md` — repo-level coding instructions for AI agents
