@@ -8,7 +8,7 @@ Interactive wizard to provision PSLs, clone profiles, and verify OWD against the
 
 ## Steps
 
-1. Run `check_user_config` to assess current state.
+1. Assess the current state: `list_users` (active users by profile) and the OWD query `SELECT QualifiedApiName, InternalSharingModel, ExternalSharingModel FROM EntityDefinition WHERE QualifiedApiName IN ('Account','Contact','Asset','Lead','Opportunity')` via `run_soql`.
 2. List available PSLs via `list_permission_sets` (highlight capacity).
 3. Ask which personas the user wants to provision: internal vs external; OEM vs dealer; SDET test users.
 4. Per persona, recommend the PSL stack (see `auto-user-management` skill).

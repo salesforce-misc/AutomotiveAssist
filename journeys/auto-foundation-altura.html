@@ -660,7 +660,7 @@
   <td>P0</td>
   <td><code>"contact_owd_baseline": "controlled_by_parent", "setup_method": "setup_ui_manual"</code></td>
   <td><code>"contact_owd": "controlled_by_parent"</code></td>
-  <td>Admin logs in &rarr; Navigate to Setup &rarr; Sharing Settings &rarr; Organization-Wide Defaults &rarr; Set Contact to Controlled By Parent &rarr; Save &rarr; Verify list_admin_settings returns OWD Contact = ControlledByParent &rarr; This is the mandatory pre-gate for the Person Accounts toggle &mdash; the Setup UI greys out the Person Accounts enable button if Contact OWD is anything other than Controlled By Parent or both Private</td>
+  <td>Admin logs in &rarr; Navigate to Setup &rarr; Sharing Settings &rarr; Organization-Wide Defaults &rarr; Set Contact to Controlled By Parent &rarr; Save &rarr; Verify run_soql on EntityDefinition returns OWD Contact = ControlledByParent &rarr; This is the mandatory pre-gate for the Person Accounts toggle &mdash; the Setup UI greys out the Person Accounts enable button if Contact OWD is anything other than Controlled By Parent or both Private</td>
 </tr>
 <tr>
   <td>Admin Setup Journey for Person Accounts &amp; Stakeholder Model</td>
@@ -669,7 +669,7 @@
   <td>P0</td>
   <td><code>"contact_owd_baseline": "controlled_by_parent", "person_account_state": "enabled"</code></td>
   <td><code>"person_accounts_state": "enabled", "setup_audit_trail_state": "enabled"</code></td>
-  <td>Sandbox-first dry-run &mdash; Admin logs into THROWAWAY sandbox &rarr; File support ticket to enable Person Accounts &rarr; From Setup &rarr; Person Accounts &rarr; Acknowledge org implications &rarr; Enable &rarr; Verify describe_sobject Account returns IsPersonAccount field &rarr; Verify SOQL <code>SELECT IsPersonAccount FROM Account LIMIT 1</code> succeeds &rarr; Verify SetupAuditTrail row present &rarr; Take post-toggle health_check snapshot &rarr; Only after sandbox-first passes do we repeat in prod-like sandbox</td>
+  <td>Sandbox-first dry-run &mdash; Admin logs into THROWAWAY sandbox &rarr; File support ticket to enable Person Accounts &rarr; From Setup &rarr; Person Accounts &rarr; Acknowledge org implications &rarr; Enable &rarr; Verify describe_sobject Account returns IsPersonAccount field &rarr; Verify SOQL <code>SELECT IsPersonAccount FROM Account LIMIT 1</code> succeeds &rarr; Verify SetupAuditTrail row present &rarr; Take post-toggle /auto:health-check snapshot &rarr; Only after sandbox-first passes do we repeat in prod-like sandbox</td>
 </tr>
 <tr>
   <td>Admin Setup Journey for Person Accounts &amp; Stakeholder Model</td>
@@ -705,7 +705,7 @@
   <td>P0</td>
   <td><code>"relationship_object": "prg", "psl_layering": "foundation_plus_group"</code></td>
   <td><code>"group_membership_state": "enabled"</code></td>
-  <td>Admin logs in &rarr; Confirm Group Membership PSL is assigned to admin user &rarr; Navigate to Setup &rarr; Group Membership Settings &rarr; Enable &rarr; Verify list_admin_settings GroupMembershipSettings.IsEnabled = true &rarr; Navigate to Object Manager &rarr; Party Relationship Group &rarr; Configure page layout for households + dealer groups + supplier groups &rarr; Verify describe_sobject PartyRelationshipGroup is queryable</td>
+  <td>Admin logs in &rarr; Confirm Group Membership PSL is assigned to admin user &rarr; Navigate to Setup &rarr; Group Membership Settings &rarr; Enable &rarr; Verify retrieve_metadata Settings GroupMembershipSettings.IsEnabled = true &rarr; Navigate to Object Manager &rarr; Party Relationship Group &rarr; Configure page layout for households + dealer groups + supplier groups &rarr; Verify describe_sobject PartyRelationshipGroup is queryable</td>
 </tr>
 
 <!-- ___ Journey 3: Setup - Business Profile, IOU & Product RTs ___ -->
@@ -765,7 +765,7 @@
   <td>P0</td>
   <td><code>"contact_owd_baseline": "controlled_by_parent"</code></td>
   <td><code>"contact_owd": "controlled_by_parent"</code></td>
-  <td>Admin logs in &rarr; Navigate to Sharing Settings &rarr; Capture OWD baseline: Contact = ControlledByParent, AccountAccountRelation = Private, PartyRoleRelation = Private, Account = PublicReadWrite &rarr; Cross-check via list_admin_settings &rarr; Document baseline as the Foundation OWD contract &mdash; any future module-tier OWD overlay must layer on top, never downgrade Foundation</td>
+  <td>Admin logs in &rarr; Navigate to Sharing Settings &rarr; Capture OWD baseline: Contact = ControlledByParent, AccountAccountRelation = Private, PartyRoleRelation = Private, Account = PublicReadWrite &rarr; Cross-check via run_soql on EntityDefinition &rarr; Document baseline as the Foundation OWD contract &mdash; any future module-tier OWD overlay must layer on top, never downgrade Foundation</td>
 </tr>
 <tr>
   <td>Admin Setup Journey for Foundation Reporting &amp; Audit Baseline</td>

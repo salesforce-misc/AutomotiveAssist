@@ -45,5 +45,5 @@ Predefined dashboards:
 
 ## Tools
 
-- `list_admin_settings` (Data Cloud, CRM Analytics)
+- `retrieve_metadata` with a `Settings` manifest (Data Cloud, CRM Analytics) — see "Reading org configuration" in `CLAUDE.md`
 - `run_apex` for batch insight recalculation

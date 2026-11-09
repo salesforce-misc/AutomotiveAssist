@@ -57,7 +57,7 @@ You are a developer working on Automotive Cloud customizations and integrations.
 - `run_apex` — execute anonymous Apex
 - `retrieve_metadata` / `deploy_metadata`
 - `bulk_create_records` / `bulk_update_records`
-- `list_admin_settings` for Service Process / OmniStudio / BRE config
+- `retrieve_metadata` (`Settings`, `OmniScript`, …) for Service Process / OmniStudio / BRE config
 - `run_soql` / `describe_sobject`
 
 ## Performance / scaling considerations

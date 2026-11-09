@@ -119,11 +119,10 @@ Never use `run_soql` for:
 
 | Feature | Correct approach |
 |---|---|
-| Trigger handlers | `list_trigger_handlers`, `toggle_trigger_handler` |
-| Admin Console settings | `list_admin_settings`, `update_admin_setting`, `create_admin_setting` |
+| Setup settings (Automotive Settings, …) | `retrieve_metadata` (`Settings`) / `deploy_metadata` |
 | Page Layouts / Compact Layouts | `retrieve_metadata` / `deploy_metadata` |
-| Quick Actions / Custom Actions | `list_auto_actions`, `create_quick_action`, etc. |
-| Record Types | `retrieve_metadata` |
+| Quick Actions / Custom Actions | `retrieve_metadata` (`QuickAction`) / `deploy_metadata` |
+| Record Types | `describe_sobject` or `retrieve_metadata` |
 | OmniStudio metadata | `retrieve_metadata` |
 
 ## Best Practice

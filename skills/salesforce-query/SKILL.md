@@ -47,13 +47,11 @@ FROM Product2 WHERE RecordType.DeveloperName = 'Vehicle'
 
 These are Tooling API / metadata entities and **will fail** in standard SOQL:
 
-- Trigger handlers / Apex triggers as configured records
-- Admin-Console-style settings (use `list_admin_settings`)
+- Setup settings such as Automotive Settings (use `retrieve_metadata` with a `Settings` manifest)
 - Page Layouts, Compact Layouts (use `retrieve_metadata`)
-- Quick Actions / Custom Actions (use `list_auto_actions`)
-- Record Types (describe via `describe_sobject` or `retrieve_metadata`)
+- Quick Actions / Custom Actions (use `retrieve_metadata` with `QuickAction`)
 
-If the user asks for one of these via SOQL, redirect to the right tool.
+Record types (`RecordType`), Apex triggers (`ApexTrigger`) and flows (`FlowDefinitionView`) *can* be queried with `run_soql`. If the user asks for one of the others via SOQL, redirect them using the "Reading org configuration" table in `CLAUDE.md`.
 
 ## Polymorphic fields to remember
 

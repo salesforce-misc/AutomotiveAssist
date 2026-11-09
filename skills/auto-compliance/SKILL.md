@@ -46,6 +46,6 @@ Predefined Identity Verification flows ship with **Service Console for Automotiv
 
 ## Tools
 
-- `list_admin_settings` (Compliant Data Sharing, Service Console for Automotive)
+- `retrieve_metadata` with a `Settings` manifest (Compliant Data Sharing, Service Console for Automotive) — see "Reading org configuration" in `CLAUDE.md`
 - `run_soql` to verify Audit Trail entries
 - `describe_sobject` for compliance objects

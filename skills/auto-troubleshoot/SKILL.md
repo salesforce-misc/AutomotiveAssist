@@ -13,9 +13,9 @@ Diagnose Automotive Cloud issues by checking the most common root causes in depe
    - Confirm `Automotive Foundation User` PSL is assigned. Without it, no Auto objects load.
    - Confirm the feature-specific PSL is assigned (e.g., `Vehicle Connected Services` for telematics).
 2. **Feature toggles**
-   - `list_admin_settings` and confirm Automotive Settings, Service Console for Automotive, Vehicle and Asset Finance, Partner Visit/Lead/Performance Management, Fleet Management, Warranty Lifecycle Management, Automotive Scheduler are enabled as needed.
-3. **Trigger handlers**
-   - `list_trigger_handlers` to see active/inactive. Disabled triggers are a frequent source of "data didn't roll up" symptoms.
+   - Confirm (Setup → Automotive Settings, or `retrieve_metadata` with a `Settings` manifest) that Automotive Settings, Service Console for Automotive, Vehicle and Asset Finance, Partner Visit/Lead/Performance Management, Fleet Management, Warranty Lifecycle Management, Automotive Scheduler are enabled as needed.
+3. **Inactive automation**
+   - `run_soql` on `ApexTrigger` (`Status = 'Inactive'`) and `FlowDefinitionView` (`IsActive = false`). Deactivated triggers or flows are a frequent source of "data didn't roll up" symptoms.
 4. **Record types**
    - Are Product and Asset record types created (`Vehicle`, `Parts`)? Is the user's profile assigned the right RT default?
 5. **Page layouts**
@@ -53,10 +53,10 @@ Diagnose Automotive Cloud issues by checking the most common root causes in depe
 
 ## Tools to use
 
-- `health_check` — runs the full org diagnostic
+- `/auto:health-check` — runs the full org diagnostic
 - `audit_auto_config` — runs validation rules against the org
 - `diagnose_auto_issue <error message>` — keyword search across the validation rule set
-- `list_trigger_handlers`, `list_admin_settings`, `list_db_schema` (mobile)
+- `retrieve_metadata` for Setup toggles, layouts and quick actions
 - `run_soql` to confirm data, `describe_sobject` to confirm fields
 
 ## Output

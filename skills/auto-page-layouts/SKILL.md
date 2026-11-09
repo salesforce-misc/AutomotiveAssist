@@ -112,5 +112,5 @@ Full configuration playbook + recommended related-object sets for Vehicle / Cont
 
 - `retrieve_metadata` for page layouts + record types
 - `deploy_metadata` for batch layout updates
-- `list_auto_actions` to inspect quick / custom actions
-- Tooling SOQL on `TimelineObjectDefinition` to inspect existing timeline configurations (do **not** use `run_soql` — Timeline is Tooling-API metadata; route through `retrieve_metadata` or a direct Tooling query)
+- `retrieve_metadata` with `QuickAction` to inspect quick / custom actions
+- `retrieve_metadata` with `TimelineObjectDefinition` to inspect existing timeline configurations (not `run_soql` — Timeline is metadata)

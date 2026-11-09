@@ -40,7 +40,7 @@ Topics group related actions. Out-of-the-box topics typically:
 
 ## Tools
 
-- `list_admin_settings` (Einstein, Einstein Studio)
+- `retrieve_metadata` with a `Settings` manifest (Einstein, Einstein Studio) — see "Reading org configuration" in `CLAUDE.md`
 - `run_apex` for testing custom action implementations
 
 ## Related skills

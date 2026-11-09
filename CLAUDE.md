@@ -61,7 +61,7 @@ See **`JOURNEY_MAP.md`** for the canonical 26-row journey map and 43-step depend
 
 - **SDET / QA engineers** *(primary persona)*: Test data scaffolding, regression validation, scratch-org templating, mobile + console UI test fixtures, FIT/Playwright integration.
 - **Implementation Consultants**: Multi-cloud rollouts (Sales + Service + Automotive), OEM vs. dealer scoping, go-live readiness.
-- **Administrators**: Day-to-day ops, permission set maintenance, Admin Console toggles, trigger handler control.
+- **Administrators**: Day-to-day ops, permission set maintenance, Setup toggles (Automotive Settings), automation checks.
 - **Developers**: Custom dev, OmniStudio, Apex, MuleSoft connected services, Agentforce extensions.
 
 ## Plugin Components
@@ -152,13 +152,21 @@ See **`JOURNEY_MAP.md`** for the canonical 26-row journey map and 43-step depend
 
 ## Critical conventions for Claude (do not skip)
 
-### Tooling-API entities — never use `run_soql`
+### Reading org configuration — which tool to use
 
-These are Tooling API or metadata entities. The relevant skills must call dedicated tools instead of SOQL:
+The MCP server has **no** dedicated tools for settings, actions, layouts or automation. Use these recipes. Don't invent tool names.
 
-- Trigger handlers, Admin-Console-style settings, page layouts, compact layouts, quick actions, custom actions, record types, OmniStudio metadata.
+| What | How |
+|---|---|
+| **Setup toggles** (Automotive Settings, Knowledge, Digital Experiences, Einstein, Scheduler, Omnistudio, Sharing, …) | `retrieve_metadata` with a `package.xml` for type `Settings` (members `*`), then read the relevant `*.settings-meta.xml`. Needs an sfdx project in the working directory. Otherwise ask the user to check **Setup → Quick Find → Automotive Settings** (or the named settings page). |
+| **Change a toggle** | Confirm with the user (see irreversible toggles below), then either have them flip it in Setup, or deploy an edited `.settings-meta.xml` with `deploy_metadata`, running `dryRun: true` first. |
+| **Is a feature/object enabled?** | `describe_sobject <Object>` or `run_soql SELECT COUNT() FROM <Object>`. An `INVALID_TYPE` error means it's not enabled. Person Accounts are on when `Account` has an `IsPersonAccount` field. |
+| **Page layouts, compact layouts, quick actions, Lightning pages, OmniStudio metadata** | `retrieve_metadata` (`Layout`, `CompactLayout`, `QuickAction`, `FlexiPage`, `OmniScript`, …). These are metadata, not SOQL data. Create or change them by deploying with `deploy_metadata`. |
+| **Record types** | `describe_sobject <Object>` (record types per object) or `run_soql SELECT SobjectType, DeveloperName, IsActive FROM RecordType`. |
+| **Automation that might be switched off** | `run_soql SELECT Name, TableEnumOrId, Status FROM ApexTrigger WHERE Status = 'Inactive'` and `SELECT ApiName, ProcessType FROM FlowDefinitionView WHERE IsActive = false`. Automotive Cloud has no trigger-handler console. |
+| **Org-wide checks** | `/auto:health-check`, `/auto:status`, `/auto:audit` (`audit_auto_config`), `/auto:export-config`, `/auto:import-config`, `/auto:diff-orgs`, `/auto:scaffold-test-data`. These commands are built from the generic tools above. |
 
-If the user asks for one of these via SOQL, redirect to the right tool (e.g., `list_admin_settings`, `retrieve_metadata`, `list_auto_actions`, `list_trigger_handlers`).
+Partner Visits (mobile) has no sync-schema or metadata-cache tool. Follow the admin guide (sections 004 and 017) for its setup.
 
 ### Mandatory record-type splits
 

@@ -187,7 +187,7 @@ For the test-drive routing graph, confirm:
 
 ## Tools
 
-- `list_admin_settings` — Automotive Settings, Salesforce Scheduler Settings, Omnistudio Settings.
+- `retrieve_metadata` with a `Settings` manifest (Automotive Settings, Salesforce Scheduler Settings, Omnistudio Settings) — see "Reading org configuration" in `CLAUDE.md`.
 - `describe_sobject` — for ServiceResource / ServiceTerritory / WorkType / WorkTypeGroup / OperatingHours / ServiceAppointment.
 - `run_soql` — for live-org verification of resource / territory / appointment data.
 - `retrieve_metadata` — for page layouts (Lead, Opportunity, Business Profile, Vehicle), record types, and OmniScript / Integration Procedure metadata.

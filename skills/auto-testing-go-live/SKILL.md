@@ -59,9 +59,8 @@ Use `/auto:scaffold-test-data` to load this fixture into a scratch / sandbox.
 
 Pre-defined validation groups:
 - `pre-deployment` — checks PSLs, profile assignments, page layouts, OWD, irreversible toggles.
-- `mobile-login-check` — Partner Visits app + DB Schema validations.
-- `connected-services-check` — Service Process Studio + AEO + Vehicle Connected Services.
-- `lending-check` — Compliant Data Sharing + Stage Definitions + lending PSLs.
+
+Planned, no rules yet: `mobile-login-check`, `connected-services-check`, `lending-check`, `inventory-check`. Call `list_validation_groups` to see what exists.
 
 Use `audit_auto_config <group>` to run a group; `diagnose_auto_issue <error>` to keyword-search the rule set.
 
@@ -83,8 +82,8 @@ For Service Console for Automotive scratch orgs, assign both `Automotive_Foundat
 
 Before promoting to production:
 
-- [ ] All trigger handlers active for in-scope features (`list_trigger_handlers`).
-- [ ] PSLs assigned per role (`check_user_config`).
+- [ ] Triggers and flows active for in-scope features (`run_soql` on `ApexTrigger` / `FlowDefinitionView`).
+- [ ] PSLs assigned per role (`list_permission_sets`, `list_users`).
 - [ ] OWD model matches the recommendations table (`audit_auto_config pre-deployment`).
 - [ ] **Person Accounts validated in sandbox first** (irreversible in production).
 - [ ] **Lightning Knowledge enabled in sandbox first** (irreversible in production).
@@ -95,7 +94,7 @@ Before promoting to production:
 - [ ] Vehicle Searchable Field DPE run after data load.
 - [ ] Compliant Data Sharing stages defined for lending.
 - [ ] AEO Expression Sets defined for connected services.
-- [ ] Mobile metadata regenerated (Partner Visits app).
+- [ ] Partner Visits app set up and re-synced (admin guide sections 004 and 017).
 - [ ] Experience Cloud sharing sets verified per external persona.
 - [ ] CRM Analytics dataflows refreshed.
 
@@ -110,8 +109,8 @@ Before promoting to production:
 
 ## Tools (MCP)
 
-- `scaffold_test_data` — load the standard fixture
-- `health_check` / `audit_auto_config` — pre-flight checks
+- `/auto:scaffold-test-data` — load the standard fixture
+- `/auto:health-check` / `audit_auto_config` — pre-flight checks
 - `run_apex` — invoke @future / batch / Service Process / OmniScript test code
 - `bulk_create_records` / `bulk_update_records` — large-volume data setup
-- `list_trigger_handlers`, `list_admin_settings`, `list_db_schema` (mobile)
+- `retrieve_metadata` for Setup toggles (see "Reading org configuration" in `CLAUDE.md`)

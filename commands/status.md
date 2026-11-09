@@ -4,18 +4,15 @@ description: View a dashboard of the connected Automotive Cloud org
 
 # Automotive Cloud Org Status
 
-Show a single dashboard view of the connected Automotive Cloud org.
+Show a single dashboard view of the connected Automotive Cloud org, built from the generic org tools.
 
 ## Steps
 
-Call `get_org_status` and render:
+1. Org info: `run_soql` `SELECT Name, OrganizationType, InstanceName, IsSandbox, NamespacePrefix FROM Organization`. The target org alias is shown at the top of every org-tool response.
+2. Licenses: `list_permission_sets`. Show Automotive PSL capacity (Total / Used), including the Automotive Foundation User PSL.
+3. Key object counts: one `run_soql` `SELECT COUNT() FROM <Object>` per object: Account, Contact, Vehicle, Asset, VehicleDefinition, Lead, Opportunity, FinancialAccount, Claim, Visit, Fleet.
+   An `INVALID_TYPE` error means the object isn't enabled in this org. Show it as "not enabled", which doubles as the feature-flag view.
+4. Person Accounts: `describe_sobject Account`. It's enabled if there is an `IsPersonAccount` field.
+5. Active territory model: `run_soql` `SELECT Name, State FROM Territory2Model WHERE State = 'Active'` (`INVALID_TYPE` means Territory Management is off).
 
-- Org info (instance, edition, namespace, API version, last refresh)
-- Automotive Cloud package version
-- Enabled feature flags (Automotive, Service Console for Automotive, Vehicle Connected Services, Vehicle and Asset Finance, Partner Lead/Visit/Performance Management, Fleet Management, Warranty Lifecycle Management, Automotive Scheduler, Person Accounts, Lightning Knowledge, Timeline)
-- Active user count + license usage (Automotive Foundation User PSL capacity)
-- Counts of key objects: Account, Contact, Vehicle, Asset, Vehicle Definition, Lead, Opportunity, Financial Account, Claim, Visit, Fleet
-- Active territory model (if any) — name, hierarchy depth, count of territories
-- Latest mobile metadata cache timestamp (if Partner Visits app deployed)
-
-Present as a compact ASCII dashboard.
+Present it as a compact ASCII dashboard. Say plainly which items couldn't be read.

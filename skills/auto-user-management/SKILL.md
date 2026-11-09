@@ -84,7 +84,7 @@ Apply this minimum baseline (full table in `JOURNEY_MAP.md` §3):
 - `list_users` — filter by profile, PSL, territory; find users without territories or PSLs
 - `list_permission_sets` — PSL capacity + assignment counts
 - `assign_permission_set` / `unassign_permission_set`
-- `check_user_config` — run the user-management portion of `health_check`
+- `/auto:health-check` — includes the user and PSL checks
 
 ## Common pitfalls
 

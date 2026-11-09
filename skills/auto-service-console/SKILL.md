@@ -44,7 +44,7 @@ If creating a scratch org with `Service Console for Automotive` enabled, also as
 
 ## Tools
 
-- `list_admin_settings` (Service Console for Automotive)
+- `retrieve_metadata` with a `Settings` manifest (Service Console for Automotive) — see "Reading org configuration" in `CLAUDE.md`
 - `run_soql` for case + alert reporting
 - `retrieve_metadata` to verify Lightning page configuration
 

@@ -2,35 +2,22 @@
 /**
  * MCP server for Salesforce Automotive Cloud (`auto`).
  *
- * This is a *stub* implementation. Tool *names* are stable and match what
- * skills + commands expect. Tool *implementations* return placeholder
- * responses for now — to be filled in against the Automotive Cloud object
- * model and admin settings.
+ * Tool *names* are stable and match what skills + commands expect. Only tools
+ * with a handler are registered; org-config checks (health, status, export,
+ * import, diff, test data) are slash commands built from these generic tools.
  *
- * Tool catalog scoped to Automotive:
- *   - Knowledge tools:           list_auto_modules, get_auto_module_docs, search_auto_knowledge,
- *                                explain_auto_concept, get_auto_help_doc, list_auto_help_docs,
- *                                get_auto_guide, get_auto_troubleshooting, get_auto_exercise
- *   - Salesforce org tools:      check_auto_setup, install_sf_cli, list_sf_orgs, set_target_org,
- *                                open_org, run_soql, describe_sobject, get_record, create_record,
- *                                update_record, delete_record, run_apex, bulk_create_records,
- *                                bulk_update_records, deploy_metadata, retrieve_metadata
- *   - Trigger handler tools:     list_trigger_handlers, toggle_trigger_handler
- *   - Admin Console tools:       list_admin_settings, update_admin_setting, create_admin_setting
- *   - Action tools:              list_auto_actions, create_quick_action, create_custom_action,
- *                                update_auto_action, delete_auto_action
- *   - Mobile tools:              check_mobile_metadata_cache_status, generate_mobile_metadata_cache,
- *                                list_db_schema, get_db_schema, create_db_schema, update_db_schema,
- *                                toggle_db_schema
- *   - Health / audit tools:      health_check, audit_auto_config, list_validation_groups,
- *                                diagnose_auto_issue, get_org_status, export_config, import_config,
- *                                get_release_notes, diff_orgs
- *   - User mgmt tools:           list_users, list_permission_sets, assign_permission_set,
- *                                unassign_permission_set, check_user_config
- *   - Per-feature config check:  check_visit_config, check_sample_config (n/a here),
- *                                check_account_config, check_activity_plan_config (n/a),
- *                                check_territory_config (Auto uses different territory)
- *   - SDET tools:                scaffold_test_data
+ * Tool catalog:
+ *   - Knowledge tools:      list_auto_modules, get_auto_module_docs, search_auto_knowledge,
+ *                           explain_auto_concept, get_auto_help_doc, list_auto_help_docs,
+ *                           get_auto_guide, get_auto_troubleshooting, get_auto_exercise,
+ *                           get_release_notes
+ *   - Salesforce org tools: check_auto_setup, install_sf_cli, list_sf_orgs, set_target_org,
+ *                           open_org, run_soql, describe_sobject, get_record, create_record,
+ *                           update_record, delete_record, run_apex, bulk_create_records,
+ *                           bulk_update_records, deploy_metadata, retrieve_metadata
+ *   - Audit tools:          audit_auto_config, list_validation_groups, diagnose_auto_issue
+ *   - User mgmt tools:      list_users, list_permission_sets, assign_permission_set,
+ *                           unassign_permission_set
  */
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
@@ -40,6 +27,26 @@ import {
   ListToolsRequestSchema,
   type Tool,
 } from "@modelcontextprotocol/sdk/types.js";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { AutoKnowledgeLoader } from "./knowledge-loader.js";
+import {
+  checkSetup,
+  deployMetadata,
+  describeSObject,
+  getTargetOrg,
+  installCli,
+  listOrgs,
+  openOrg,
+  rest,
+  retrieveMetadata,
+  runApex,
+  runSoql,
+  setTargetOrg,
+  sf,
+  SfCliMissingError,
+} from "./salesforce/index.js";
+import { executeRules, loadRules } from "./validation/index.js";
 
 const SERVER_NAME = "auto";
 const SERVER_VERSION = "0.1.0";
@@ -154,7 +161,7 @@ const tools: Tool[] = [
   },
   {
     name: "run_soql",
-    description: "Execute a SOQL query against the connected Automotive Cloud org. NEVER use for Tooling-API entities (page layouts, quick actions, admin settings, record types) — use the dedicated tools instead.",
+    description: "Execute a SOQL query against the connected Automotive Cloud org. Not for metadata (Setup settings, page layouts, quick actions) — use retrieve_metadata for those.",
     inputSchema: {
       type: "object",
       properties: { query: { type: "string" } },
@@ -238,7 +245,7 @@ const tools: Tool[] = [
     description: "Deploy metadata from a local source directory to the target org.",
     inputSchema: {
       type: "object",
-      properties: { sourceDir: { type: "string" }, testLevel: { type: "string" } },
+      properties: { sourceDir: { type: "string" }, testLevel: { type: "string" }, dryRun: { type: "boolean", description: "Validate only (sf --dry-run); nothing is saved to the org" } },
       required: ["sourceDir"],
     },
   },
@@ -250,156 +257,13 @@ const tools: Tool[] = [
       properties: { manifest: { type: "string" }, targetDir: { type: "string" } },
     },
   },
-  // ───────── Trigger handler / admin setting tools ─────────
-  {
-    name: "list_trigger_handlers",
-    description: "List trigger handlers and their active/inactive status.",
-    inputSchema: { type: "object", properties: {} },
-  },
-  {
-    name: "toggle_trigger_handler",
-    description: "Enable or disable a trigger handler by DeveloperName.",
-    inputSchema: {
-      type: "object",
-      properties: { developerName: { type: "string" }, active: { type: "boolean" } },
-      required: ["developerName", "active"],
-    },
-  },
-  {
-    name: "list_admin_settings",
-    description: "List Admin Console settings by category with field values. Uses Tooling API — never use run_soql for these.",
-    inputSchema: {
-      type: "object",
-      properties: { category: { type: "string" } },
-    },
-  },
-  {
-    name: "update_admin_setting",
-    description: "Update an existing Admin Console setting or field value.",
-    inputSchema: {
-      type: "object",
-      properties: { id: { type: "string" }, fields: { type: "object" } },
-      required: ["id", "fields"],
-    },
-  },
-  {
-    name: "create_admin_setting",
-    description: "Create a new Admin Console setting with field values.",
-    inputSchema: {
-      type: "object",
-      properties: { category: { type: "string" }, name: { type: "string" }, fields: { type: "object" } },
-      required: ["category", "name", "fields"],
-    },
-  },
-  // ───────── Action tools ─────────
-  {
-    name: "list_auto_actions",
-    description: "List Quick Actions and Custom Actions configured in the org.",
-    inputSchema: { type: "object", properties: {} },
-  },
-  {
-    name: "create_quick_action",
-    description: "Create a Quick Action.",
-    inputSchema: {
-      type: "object",
-      properties: { type: { type: "string" }, label: { type: "string" }, fields: { type: "object" } },
-      required: ["type", "label"],
-    },
-  },
-  {
-    name: "create_custom_action",
-    description: "Create a Custom Action (URL, App, Utterance).",
-    inputSchema: {
-      type: "object",
-      properties: { type: { type: "string" }, label: { type: "string" }, fields: { type: "object" } },
-      required: ["type", "label"],
-    },
-  },
-  {
-    name: "update_auto_action",
-    description: "Update a Quick or Custom Action.",
-    inputSchema: {
-      type: "object",
-      properties: { id: { type: "string" }, fields: { type: "object" } },
-      required: ["id", "fields"],
-    },
-  },
-  {
-    name: "delete_auto_action",
-    description: "Delete a Quick or Custom Action.",
-    inputSchema: {
-      type: "object",
-      properties: { id: { type: "string" } },
-      required: ["id"],
-    },
-  },
-  // ───────── Mobile / Partner Visits tools ─────────
-  {
-    name: "check_mobile_metadata_cache_status",
-    description: "Check mobile metadata cache status (Partner Visits app).",
-    inputSchema: { type: "object", properties: {} },
-  },
-  {
-    name: "generate_mobile_metadata_cache",
-    description: "Generate mobile metadata cache for specified profiles.",
-    inputSchema: {
-      type: "object",
-      properties: { profiles: { type: "array", items: { type: "string" } } },
-    },
-  },
-  {
-    name: "list_db_schema",
-    description: "List DB Schema records (mobile object sync configuration).",
-    inputSchema: { type: "object", properties: {} },
-  },
-  {
-    name: "get_db_schema",
-    description: "Get full details of a DB Schema record.",
-    inputSchema: {
-      type: "object",
-      properties: { id: { type: "string" } },
-      required: ["id"],
-    },
-  },
-  {
-    name: "create_db_schema",
-    description: "Create a new DB Schema record.",
-    inputSchema: {
-      type: "object",
-      properties: { object: { type: "string" }, type: { type: "string" }, fields: { type: "object" } },
-      required: ["object", "type"],
-    },
-  },
-  {
-    name: "update_db_schema",
-    description: "Update a DB Schema record's fields.",
-    inputSchema: {
-      type: "object",
-      properties: { id: { type: "string" }, fields: { type: "object" } },
-      required: ["id", "fields"],
-    },
-  },
-  {
-    name: "toggle_db_schema",
-    description: "Enable or disable a DB Schema record.",
-    inputSchema: {
-      type: "object",
-      properties: { id: { type: "string" }, active: { type: "boolean" } },
-      required: ["id", "active"],
-    },
-  },
-  // ───────── Health / audit / status tools ─────────
-  {
-    name: "health_check",
-    description: "Run a comprehensive Automotive Cloud org health check.",
-    inputSchema: { type: "object", properties: {} },
-  },
+  // ───────── Audit tools ─────────
   {
     name: "audit_auto_config",
     description: "Run validation rules against the connected org.",
     inputSchema: {
       type: "object",
-      properties: { group: { type: "string", description: "Validation group: pre-deployment | mobile-login-check | connected-services-check | lending-check | inventory-check" } },
+      properties: { group: { type: "string", description: "Validation group (see list_validation_groups); omit to run all" } },
     },
   },
   {
@@ -417,43 +281,12 @@ const tools: Tool[] = [
     },
   },
   {
-    name: "get_org_status",
-    description: "Get a single dashboard view of the connected Automotive Cloud org.",
-    inputSchema: { type: "object", properties: {} },
-  },
-  {
-    name: "export_config",
-    description: "Export Automotive Cloud configuration as JSON.",
-    inputSchema: {
-      type: "object",
-      properties: { outPath: { type: "string" } },
-    },
-  },
-  {
-    name: "import_config",
-    description: "Import Automotive Cloud configuration from a JSON export (preview by default).",
-    inputSchema: {
-      type: "object",
-      properties: { path: { type: "string" }, apply: { type: "boolean", default: false } },
-      required: ["path"],
-    },
-  },
-  {
     name: "get_release_notes",
     description: "Get Automotive Cloud release notes for a specific Salesforce release.",
     inputSchema: {
       type: "object",
       properties: { release: { type: "string" } },
       required: ["release"],
-    },
-  },
-  {
-    name: "diff_orgs",
-    description: "Compare configuration between two Automotive Cloud orgs.",
-    inputSchema: {
-      type: "object",
-      properties: { source: { type: "string" }, target: { type: "string" } },
-      required: ["source", "target"],
     },
   },
   // ───────── User mgmt tools ─────────
@@ -488,79 +321,198 @@ const tools: Tool[] = [
       required: ["permSet", "userIds"],
     },
   },
-  {
-    name: "check_user_config",
-    description: "Check user-management configuration (PSL capacity, profile setup, territory associations).",
-    inputSchema: { type: "object", properties: {} },
-  },
-  // ───────── Feature config check tools ─────────
-  {
-    name: "check_account_config",
-    description: "Check Account Management configuration (Person Account, RTs, ACR/AAR, Asset Participants).",
-    inputSchema: { type: "object", properties: {} },
-  },
-  {
-    name: "check_visit_config",
-    description: "Check Partner Visit Management configuration.",
-    inputSchema: { type: "object", properties: {} },
-  },
-  {
-    name: "check_finance_config",
-    description: "Check Captive Finance + Vehicle and Asset Lending configuration.",
-    inputSchema: { type: "object", properties: {} },
-  },
-  {
-    name: "check_warranty_config",
-    description: "Check Warranty Lifecycle / Claims / Supplier Recovery configuration.",
-    inputSchema: { type: "object", properties: {} },
-  },
-  {
-    name: "check_inventory_config",
-    description: "Check vehicle inventory + Criteria-Based Search configuration.",
-    inputSchema: { type: "object", properties: {} },
-  },
-  {
-    name: "check_connected_services_config",
-    description: "Check Vehicle Connected Services + Actionable Event Orchestration configuration.",
-    inputSchema: { type: "object", properties: {} },
-  },
-  // ───────── SDET-focused tools ─────────
-  {
-    name: "scaffold_test_data",
-    description: "SDET — load a sample Automotive Cloud test fixture (Person Account + Vehicle + Asset + Financial Account + Claim graph).",
-    inputSchema: {
-      type: "object",
-      properties: {
-        profile: {
-          type: "string",
-          enum: ["default", "lead-only", "finance-only", "warranty-only"],
-          default: "default",
-          description: "Which fixture profile to load",
-        },
-        teardownId: { type: "string", description: "Optional fixture id to tear down (removes previously loaded records)" },
-      },
-    },
-  },
 ];
 
-function notImplemented(toolName: string): {
-  content: { type: "text"; text: string }[];
-  isError: boolean;
-} {
-  return {
-    content: [
-      {
-        type: "text",
-        text:
-          `[auto MCP server stub] Tool "${toolName}" is registered but not yet implemented.\n\n` +
-          `This is a v0.1.0 scaffold. The implementation should target the Automotive Cloud\n` +
-          `object model and admin settings.\n` +
-          `See JOURNEY_MAP.md and skills/auto-data-model/SKILL.md for the canonical Automotive object list.`,
-      },
-    ],
-    isError: false,
-  };
+const knowledgeRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "knowledge");
+const knowledge = new AutoKnowledgeLoader(knowledgeRoot);
+const rulesRoot = join(knowledgeRoot, "validation-rules");
+
+type Args = Record<string, any>;
+type Handler = (args: Args) => Promise<unknown>;
+
+const KNOWLEDGE_TOOLS = new Set([
+  "list_auto_modules", "get_auto_module_docs", "search_auto_knowledge", "explain_auto_concept", "list_auto_help_docs",
+  "get_auto_help_doc", "get_auto_guide", "get_auto_troubleshooting", "get_auto_exercise", "get_release_notes",
+  "list_validation_groups", "diagnose_auto_issue",
+]);
+
+// Values below are interpolated into REST paths and SOQL, so validate them at the boundary.
+function apiName(v: unknown, label = "object"): string {
+  if (typeof v !== "string" || !/^[A-Za-z]\w*$/.test(v)) throw new Error(`Invalid ${label} API name: ${JSON.stringify(v)}`);
+  return v;
 }
+function recordId(v: unknown): string {
+  if (typeof v !== "string" || !/^[A-Za-z0-9]{15}([A-Za-z0-9]{3})?$/.test(v)) throw new Error(`Invalid record Id: ${JSON.stringify(v)}`);
+  return v;
+}
+const soqlString = (s: string) => `'${String(s).replace(/\\/g, "\\\\").replace(/'/g, "\\'")}'`;
+
+function chunks<T>(items: T[], size = 200): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
+  return out;
+}
+
+/** sObject Collections results; partial failures surface as a tool error with the full per-record detail. */
+function batchResult(results: { id?: string; success: boolean; errors?: unknown[] }[]) {
+  const failed = results.filter((r) => !r.success).length;
+  if (failed) throw new Error(`${failed} of ${results.length} records failed (allOrNone=false, the rest were saved):\n${JSON.stringify(results, null, 2)}`);
+  return { count: results.length, results };
+}
+
+async function collection(method: "POST" | "PATCH", type: string, records: Args[]) {
+  if (!Array.isArray(records) || !records.length) throw new Error("records must be a non-empty array");
+  const results = [];
+  for (const batch of chunks(records)) {
+    results.push(...(await rest(method, "composite/sobjects", { allOrNone: false, records: batch.map((r) => ({ attributes: { type }, ...r })) })));
+  }
+  return batchResult(results);
+}
+
+async function permissionSetId(permSet: string): Promise<string> {
+  const ps = await runSoql(`SELECT Id, Name, Label FROM PermissionSet WHERE IsOwnedByProfile = false AND (Name = ${soqlString(permSet)} OR Label = ${soqlString(permSet)})`);
+  if (ps.totalSize !== 1) throw new Error(ps.totalSize ? `"${permSet}" matches several permission sets: ${ps.records.map((r) => r.Name).join(", ")}` : `Permission set "${permSet}" not found`);
+  return ps.records[0].Id;
+}
+
+const handlers: Record<string, Handler> = {
+  // ───────── Knowledge ─────────
+  list_auto_modules: () => knowledge.listModules(),
+  get_auto_module_docs: ({ module }) => knowledge.getModuleDocs(module),
+  search_auto_knowledge: ({ query, limit }) => knowledge.searchKnowledge(query, limit ?? 10),
+  explain_auto_concept: ({ concept }) => knowledge.searchKnowledge(concept, 5),
+  list_auto_help_docs: async () => {
+    const grouped: Record<string, string[]> = {};
+    for (const doc of await knowledge.listDocs()) (grouped[doc.split("/")[0]] ??= []).push(doc);
+    return grouped;
+  },
+  get_auto_help_doc: ({ topic }) => knowledge.getDoc("help", topic),
+  get_auto_guide: ({ guide }) => knowledge.getDoc("guides", guide),
+  get_auto_troubleshooting: ({ issue }) => knowledge.getDoc("troubleshooting", issue),
+  get_auto_exercise: ({ exercise }) => knowledge.getDoc("exercises", exercise),
+  get_release_notes: ({ release }) => knowledge.getDoc("release-notes", release),
+
+  // ───────── Org connection ─────────
+  check_auto_setup: () => checkSetup(),
+  install_sf_cli: async () => {
+    try {
+      return `Salesforce CLI already installed: ${(await sf(["--version"])).trim()}`;
+    } catch (err) {
+      if (!(err instanceof SfCliMissingError)) throw err;
+    }
+    return installCli();
+  },
+  list_sf_orgs: async () => ({ targetOrg: getTargetOrg(), orgs: await listOrgs() }),
+  set_target_org: async ({ alias }) => ({ targetOrg: await setTargetOrg(alias), note: "Used for every org tool for the rest of this session." }),
+  open_org: async ({ path }) => {
+    await openOrg(path);
+    return `Opened the org in the browser${path ? ` at ${path}` : ""}.`;
+  },
+
+  // ───────── Data ─────────
+  run_soql: ({ query }) => runSoql(query),
+  describe_sobject: async ({ object }) => {
+    const d = await describeSObject(apiName(object));
+    // Raw describe runs to hundreds of KB; keep what callers actually use.
+    return {
+      name: d.name,
+      label: d.label,
+      keyPrefix: d.keyPrefix,
+      custom: d.custom,
+      recordTypes: (d.recordTypeInfos ?? []).map((rt: any) => ({ name: rt.name, developerName: rt.developerName, id: rt.recordTypeId, active: rt.active })),
+      fields: (d.fields ?? []).map((f: any) => ({
+        name: f.name,
+        label: f.label,
+        type: f.type,
+        ...(f.length ? { length: f.length } : {}),
+        ...(f.referenceTo?.length ? { referenceTo: f.referenceTo } : {}),
+        ...(f.picklistValues?.length ? { picklistValues: f.picklistValues.filter((p: any) => p.active).map((p: any) => p.value) } : {}),
+        nillable: f.nillable,
+        custom: f.custom,
+      })),
+      childRelationships: (d.childRelationships ?? []).filter((c: any) => c.relationshipName).map((c: any) => ({ childSObject: c.childSObject, field: c.field, relationshipName: c.relationshipName })),
+    };
+  },
+  get_record: ({ object, id, fields }) => {
+    const query = Array.isArray(fields) && fields.length ? `?fields=${fields.map((f: unknown) => apiName(f, "field")).join(",")}` : "";
+    return rest("GET", `sobjects/${apiName(object)}/${recordId(id)}${query}`);
+  },
+  create_record: ({ object, fields }) => rest("POST", `sobjects/${apiName(object)}`, fields),
+  update_record: async ({ object, id, fields }) => {
+    await rest("PATCH", `sobjects/${apiName(object)}/${recordId(id)}`, fields);
+    return { id, updated: true };
+  },
+  delete_record: async ({ object, id }) => {
+    await rest("DELETE", `sobjects/${apiName(object)}/${recordId(id)}`);
+    return { id, deleted: true };
+  },
+  bulk_create_records: ({ object, records }) => collection("POST", apiName(object), records),
+  bulk_update_records: ({ object, records }) => {
+    if (Array.isArray(records)) records.forEach((r: Args) => recordId(r.Id));
+    return collection("PATCH", apiName(object), records);
+  },
+  run_apex: async ({ code }) => {
+    const r = await runApex(code);
+    if (!r.success) throw new Error(r.compiled ? `Runtime exception: ${r.exceptionMessage}\n${r.exceptionStackTrace ?? ""}\n\n${r.logs ?? ""}` : `Compile error: ${r.compileProblem}`);
+    return r;
+  },
+
+  // ───────── Metadata ─────────
+  deploy_metadata: ({ sourceDir, testLevel, dryRun }) => deployMetadata(sourceDir, testLevel, dryRun === true),
+  retrieve_metadata: ({ manifest, targetDir }) => {
+    if (!manifest) throw new Error("manifest (path to a package.xml) is required");
+    return retrieveMetadata(manifest, targetDir);
+  },
+
+  // ───────── Validation ─────────
+  list_validation_groups: async () => {
+    const counts: Record<string, number> = {};
+    for (const r of await loadRules(rulesRoot)) counts[r.group] = (counts[r.group] ?? 0) + 1;
+    return counts;
+  },
+  audit_auto_config: async ({ group }) => {
+    const results = await executeRules(await loadRules(rulesRoot), group);
+    if (!results.length) throw new Error(`No validation rules${group ? ` in group "${group}"` : ""}`);
+    const summary: Record<string, number> = {};
+    for (const r of results) summary[r.status] = (summary[r.status] ?? 0) + 1;
+    return {
+      summary,
+      results: results.map((r) => ({ id: r.rule.id, severity: r.rule.severity, status: r.status, message: r.message, remediation: r.rule.remediation, docs: r.rule.docs })),
+    };
+  },
+  diagnose_auto_issue: async ({ query }) => {
+    const terms = String(query).toLowerCase().split(/\s+/).filter(Boolean);
+    const rules = (await loadRules(rulesRoot)).filter((r) => terms.some((t) => `${r.id} ${r.description} ${r.remediation ?? ""}`.toLowerCase().includes(t)));
+    return { matchingRules: rules, knowledgeHits: await knowledge.searchKnowledge(query, 5) };
+  },
+
+  // ───────── Users / permission sets ─────────
+  list_users: ({ profile, permissionSet, territory }) => {
+    const where = ["IsActive = true"];
+    if (profile) where.push(`Profile.Name = ${soqlString(profile)}`);
+    if (permissionSet) where.push(`Id IN (SELECT AssigneeId FROM PermissionSetAssignment WHERE PermissionSet.Name = ${soqlString(permissionSet)} OR PermissionSet.Label = ${soqlString(permissionSet)})`);
+    if (territory) where.push(`Id IN (SELECT UserId FROM UserTerritory2Association WHERE Territory2.Name = ${soqlString(territory)})`);
+    return runSoql(`SELECT Id, Name, Username, Email, Profile.Name, UserType FROM User WHERE ${where.join(" AND ")} ORDER BY Name LIMIT 200`);
+  },
+  list_permission_sets: async () => ({
+    permissionSetLicenses: (await runSoql("SELECT MasterLabel, DeveloperName, Status, TotalLicenses, UsedLicenses, ExpirationDate FROM PermissionSetLicense ORDER BY MasterLabel")).records,
+    permissionSetAssignmentCounts: (await runSoql("SELECT PermissionSet.Name name, PermissionSet.Label label, COUNT(Id) assigned FROM PermissionSetAssignment WHERE PermissionSet.IsOwnedByProfile = false GROUP BY PermissionSet.Name, PermissionSet.Label ORDER BY PermissionSet.Label")).records,
+  }),
+  assign_permission_set: async ({ permSet, userIds }) => {
+    const psId = await permissionSetId(permSet);
+    return collection("POST", "PermissionSetAssignment", (userIds ?? []).map((u: unknown) => ({ AssigneeId: recordId(u), PermissionSetId: psId })));
+  },
+  unassign_permission_set: async ({ permSet, userIds }) => {
+    const psId = await permissionSetId(permSet);
+    const ids = (userIds ?? []).map((u: unknown) => `'${recordId(u)}'`);
+    if (!ids.length) throw new Error("userIds must be a non-empty array");
+    const psa = await runSoql(`SELECT Id FROM PermissionSetAssignment WHERE PermissionSetId = '${psId}' AND AssigneeId IN (${ids.join(",")})`);
+    if (!psa.totalSize) return "None of these users have that permission set assigned.";
+    const results = [];
+    for (const batch of chunks(psa.records.map((r) => r.Id))) results.push(...(await rest("DELETE", `composite/sobjects?ids=${batch.join(",")}&allOrNone=false`)));
+    return batchResult(results);
+  },
+};
 
 async function main() {
   const server = new Server(
@@ -572,14 +524,17 @@ async function main() {
 
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const toolName = request.params.name;
-    const known = tools.find((t) => t.name === toolName);
-    if (!known) {
-      return {
-        content: [{ type: "text", text: `Unknown tool: ${toolName}` }],
-        isError: true,
-      };
+    const handler = handlers[toolName];
+    if (!handler) return { content: [{ type: "text", text: `Unknown tool: ${toolName}` }], isError: true };
+    try {
+      const result = await handler((request.params.arguments ?? {}) as Args);
+      let text = typeof result === "string" ? result : JSON.stringify(result, null, 2);
+      const target = getTargetOrg();
+      if (!KNOWLEDGE_TOOLS.has(toolName) && target) text = `[org: ${target.org} — ${target.source}]\n\n${text}`;
+      return { content: [{ type: "text", text }] };
+    } catch (err) {
+      return { content: [{ type: "text", text: `${toolName} failed: ${(err as Error).message}` }], isError: true };
     }
-    return notImplemented(toolName);
   });
 
   const transport = new StdioServerTransport();

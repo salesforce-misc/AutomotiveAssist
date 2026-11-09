@@ -66,11 +66,11 @@ Follow the 43-step sequence in `JOURNEY_MAP.md` Part 2. High-level phasing:
 
 Use all Automotive Cloud MCP tools. Key ones:
 - `search_auto_knowledge` / `get_auto_module_docs`
-- `health_check` / `get_org_status`
-- `audit_auto_config` (validation groups: pre-deployment, mobile-login-check, connected-services-check, lending-check, inventory-check)
-- `list_admin_settings` / `list_trigger_handlers`
-- `export_config` / `import_config` for sandbox-to-prod migration
-- `diff_orgs` to surface drift between sandbox and production
+- `/auto:health-check` / `/auto:status`
+- `audit_auto_config` (offer the groups `list_validation_groups` returns)
+- `retrieve_metadata` for Setup toggles (see "Reading org configuration" in `CLAUDE.md`)
+- `/auto:export-config` / `/auto:import-config` for sandbox-to-prod migration
+- `/auto:diff-orgs` to surface drift between sandbox and production
 
 ## Common pitfalls to flag early
 

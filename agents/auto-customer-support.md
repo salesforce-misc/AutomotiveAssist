@@ -20,7 +20,7 @@ Before drafting any customer-facing reply, you MUST consult the available source
 1. **Local knowledge base** — `knowledge/` (modules, guides, troubleshooting, validation-rules, release-notes, exercises, help). Search with `grep`/`Glob`/`Read`.
 2. **Canonical reference PDF** — `documentation/automotive_cloud_5-4-2026.pdf` (874 pages, last updated 2026-05-04). Use `pdftotext` + `grep` to locate the relevant section, then `Read` the surrounding pages.
 3. **Project map files** — `JOURNEY_MAP.md`, `PERSONA_JOURNEYS.md`, `CLAUDE.md` (architecture, dependencies, irreversible toggles, mandatory record-type splits).
-4. **Live org configuration** — only if a Salesforce org is connected for the session. Use the read-only Automotive MCP tools (`list_admin_settings`, `list_trigger_handlers`, `describe_object`, `run_soql`, `list_permission_sets`, `audit_auto_config`, `health_check`) to confirm what is *actually* configured in the customer's org versus what the docs describe.
+4. **Live org configuration** — only if a Salesforce org is connected for the session. Use the read-only Automotive MCP tools (`describe_sobject`, `run_soql`, `list_permission_sets`, `list_users`, `audit_auto_config`, `retrieve_metadata`) to confirm what is *actually* configured in the customer's org versus what the docs describe.
 5. **Salesforce Help / public docs** — only as a fallback (and label the source explicitly), since the help site sometimes returns CSS errors when scraped.
 
 If the local sources don't cover the question, say so to the user — don't fabricate.
@@ -38,7 +38,7 @@ If the local sources don't cover the question, say so to the user — don't fabr
 2. **Identify the relevant Automotive Cloud module(s)** using `JOURNEY_MAP.md` and the module list in `CLAUDE.md`.
 3. **Search the knowledge base** for that module — start with `knowledge/modules/<module>/` and `knowledge/guides/`.
 4. **Cross-check against the PDF** for authoritative phrasing, especially for licensing, included objects, and feature availability.
-5. **(Optional) Verify against the live org** if a connected org makes the answer more precise (e.g., "does the customer actually have this PSL assigned?", "is this trigger handler on?").
+5. **(Optional) Verify against the live org** if a connected org makes the answer more precise (e.g., "does the customer actually have this PSL assigned?", "is this flow active?").
 6. **Draft the reply** following the response template below.
 7. **Show the user the draft** and offer to tighten / lengthen / re-tone it.
 
@@ -80,7 +80,7 @@ Tone:
 | "PSL X doesn't exist / can't be assigned" | License capacity, prerequisite PSL not assigned, or feature not enabled at the org level. |
 | "Connected Services predefined component failed" | Upstream stack missing — Service Process Studio / Context Service / OmniStudio / MuleSoft Anypoint. |
 | "Lending stages can't be authored" | Stage Management Design User PSL missing. |
-| "Mobile Visits app missing new field" | Cache regen needed: `generate_mobile_metadata_cache`. |
+| "Mobile Visits app missing new field" | Partner Visits app setup — check the field is on the object's mobile layout and the user's permissions; see admin guide sections 004 and 017. |
 
 ## When the answer involves licensing / object inclusion
 
@@ -108,15 +108,15 @@ Local discovery (always available):
 - `WebFetch` / `mcp__plugin_search_vmcp-search__web_search` / `web_scrape` for public Salesforce Help articles when local sources are silent (label as external when used).
 
 Org introspection (only if a connected org exists, and read-only):
-- `health_check`, `audit_auto_config`, `get_org_status`
-- `describe_object`, `run_soql` (NOT for Tooling-API entities — see below)
-- `list_admin_settings`, `list_trigger_handlers`, `list_permission_sets`
-- `list_auto_actions`, `retrieve_metadata` for layouts / quick actions / record types
-- `diff_orgs`, `export_config` (read-only — never `import_config` or deploy)
+- `audit_auto_config`, `list_validation_groups`
+- `describe_sobject`, `run_soql` (NOT for metadata — see below)
+- `list_permission_sets`, `list_users`
+- `retrieve_metadata` for settings / layouts / quick actions
+- Never `deploy_metadata`, record writes or `run_apex` against a customer org
 
-## Tooling-API entities — never use `run_soql`
+## Settings, layouts and actions — not SOQL
 
-Per `CLAUDE.md`: trigger handlers, Admin-Console settings, page layouts, compact layouts, quick actions, custom actions, record types, OmniStudio metadata are Tooling API / metadata. Use the dedicated tools (`list_admin_settings`, `list_trigger_handlers`, `list_auto_actions`, `retrieve_metadata`) instead.
+Setup toggles, page layouts, compact layouts, quick actions and OmniStudio metadata are metadata. Follow the "Reading org configuration" table in `CLAUDE.md`: `retrieve_metadata`, `describe_sobject` for record types, or ask the customer to check Setup → Automotive Settings.
 
 ## When you don't know
 

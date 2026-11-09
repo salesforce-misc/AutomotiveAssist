@@ -14,4 +14,4 @@ Interactive wizard for the Stakeholder Management journey (see `auto-stakeholder
 4. Verify Account Contact Relationship usage; check ACR record types if customers belong to multiple households.
 5. Walk through Account Account Relationship setup (e.g., household ↔ preferred dealership).
 6. Walk through Asset Account / Contact Participant config.
-7. Run `check_account_config` and report any gaps.
+7. Check for gaps and report them: `audit_auto_config` with group `pre-deployment`, which includes the Account record type rule. Also run `describe_sobject` on `Account` (an `IsPersonAccount` field means Person Accounts are on), `AccountContactRelation`, `AssetAccountParticipant` and `AssetContactParticipant`. A describe error means that object isn't enabled.

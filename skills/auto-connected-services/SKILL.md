@@ -48,7 +48,7 @@ Telemetry Definitions and Telemetry Action Definitions let you bulk-perform remo
 
 ## Tools
 
-- `list_admin_settings` (Automotive, Connected Services categories)
+- `retrieve_metadata` with a `Settings` manifest (Automotive Settings, Connected Services) — see "Reading org configuration" in `CLAUDE.md`
 - `run_apex` to send test telematics events through AEO
 - `retrieve_metadata` to inspect Service Process definitions
 

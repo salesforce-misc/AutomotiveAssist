@@ -58,5 +58,5 @@ Sharing sets / sharing rules grant additional visibility above the OWD baseline.
 
 ## Tools
 
-- `list_admin_settings` (Digital Experiences)
+- `retrieve_metadata` with a `Settings` manifest (Digital Experiences) — see "Reading org configuration" in `CLAUDE.md`
 - `describe_sobject` to verify external object visibility

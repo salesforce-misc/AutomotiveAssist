@@ -99,7 +99,7 @@ For every Automotive feature, the default suite is **four Setup journeys + one T
 
 | Sub-type | Purpose | Examples of content |
 |---|---|---|
-| **Configuration Journey** | Org Preferences | PSLs, Profiles, Admin Console toggles, Record Types, Page Layouts, wizards, ARC last, irreversibility gates (Person Accounts / Lightning Knowledge / Timeline) |
+| **Configuration Journey** | Org Preferences | PSLs, Profiles, Setup toggles (Automotive Settings), Record Types, Page Layouts, wizards, ARC last, irreversibility gates (Person Accounts / Lightning Knowledge / Timeline) |
 | **Setup Data Journey** | Metadata + Setup Entities | Business Brands, Catalogs, Vehicle Definitions, Code Sets, Warranty Terms, Action Plan Templates, KPIs, fixture data |
 | **Integration Journey** | External + internal integrations | **BRE** (expression set must exist, decision tables wired), **pricing procedure availability** (Revenue/CPQ pricing procedure deployed), MuleSoft connected services, telematics, AEO, Experian/Equifax, Data Cloud, CRM Analytics dataflows, Identity Verification, Document Generation, Experience Cloud sharing sets |
 | **Reporting Journey** | Post-go-live observability | **Agentforce** (topics, actions, Einstein Studio, Einstein Summary), **TUA** / Tableau Unified Analytics, **CRM Analytics** dashboards, native Reports, Forecasting (Advanced Account Forecasting), Audit Trail / Compliant Data Sharing, Data Cloud insights, KPI rollups |

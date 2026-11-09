@@ -15,4 +15,4 @@ Interactive wizard for the data load journey. Order matters.
    - Identify which `External Id` fields will key cross-object references.
    - Recommend the right tool: `bulk_create_records`, `sf data import`, Data Loader, or MuleSoft.
 4. After Vehicle load → recommend running the **Update Vehicle Searchable Field Values** DPE.
-5. After all loads → run `health_check` and `audit_auto_config pre-deployment`.
+5. After all loads → run `/auto:health-check` and `audit_auto_config` with group `pre-deployment`.

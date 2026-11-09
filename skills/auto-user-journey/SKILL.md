@@ -70,7 +70,7 @@ When the cloud is Automotive (the default), prefer this project's canonical refe
 - **Product** must split into `Vehicle` and `Parts` record types. **Asset** must split into `Vehicle` and `Parts` record types. Asset sharing controls Vehicle sharing.
 - Vehicle inventory is built on the **Field Service Inventory** data model. Vehicle Definition sharing inherits from Product; Vehicle sharing inherits from Asset.
 - OmniStudio is **web-only** — never recommend it for the Partner Visits **mobile** app (which uses the standard mobile framework).
-- Tooling-API entities (trigger handlers, page layouts, compact layouts, quick actions, custom actions, record types, OmniStudio metadata, Admin-Console-style settings) are **never** queried via SOQL — flag those as setup-only and reference the appropriate dedicated tool in the Notes field.
+- Metadata (Setup settings, page layouts, compact layouts, quick actions, OmniStudio metadata) is **never** queried via SOQL — flag those as setup-only and reference the recipe from "Reading org configuration" in `CLAUDE.md` in the Notes field.
 - This project's org is **read-only** (per user memory). Journeys are documentation only — do not instruct the user (or any agent) to insert/update/delete/deploy as part of generating journeys.
 
 When the user explicitly chooses another cloud, fall back to the generic Salesforce knowledge below.
@@ -194,7 +194,7 @@ Numbered steps that mirror `JOURNEY_MAP.md` Part 2 (1 → 43). Always include:
 
 1. **Permission Set Licenses** — list the exact PSLs (e.g., `Automotive Foundation User`, `Vehicle Connected Services`, `Group Membership`, `ARC Access`).
 2. **Profiles** — clone source, app visibility (Automotive / Service Console for Automotive / Partner Visits / Warranty Lifecycle Management).
-3. **Org Preferences / Toggles** — Admin Console toggles, trigger handler enables, sharing settings, OWD recommendations.
+3. **Org Preferences / Toggles** — Setup toggles (Automotive Settings), active triggers/flows, sharing settings, OWD recommendations.
 4. **Irreversible toggles** — Person Accounts, Lightning Knowledge, Timeline (sandbox-first gate; clearly labeled in `Notes`).
 5. **Record types & layouts** — Account (Business + Person), **Product (Vehicle + Parts)**, **Asset (Vehicle + Parts)**, plus feature-specific RTs.
 6. **Org settings & wizards** — `/auto:configure-*` wizards in dependency order.

@@ -237,14 +237,12 @@ You stop at the scenario table + journey docs. Hand off to `auto-sdet` for fixtu
 Read-only against the connected org:
 - `run_soql` — count, profile, and verify reference data exists.
 - `describe_sobject` — confirm fields and record types referenced by scenarios.
-- `list_admin_settings` — confirm toggles for the Configuration Journey are flippable.
-- `list_trigger_handlers` — confirm async surfaces.
-- `list_db_schema` — mobile object set for Partner Visits scenarios.
-- `health_check` / `audit_auto_config` — pre-flight reads.
-- `retrieve_metadata` — page layouts, record types, OmniStudio metadata.
+- `retrieve_metadata` — `Settings` (Configuration Journey toggles), page layouts, OmniStudio metadata.
+- `run_soql` on `ApexTrigger` / `FlowDefinitionView` — confirm automation surfaces are active.
+- `audit_auto_config` and `/auto:health-check` — pre-flight reads.
 
 Forbidden in this project (would mutate the org):
-- `bulk_create_records`, `bulk_update_records`, `scaffold_test_data`, `run_apex`, `update_admin_setting`, `toggle_trigger_handler`, `assign_permission_set`, `deploy_metadata`, any `sf data create/update/delete/import`, `sf project deploy`.
+- `create_record`, `update_record`, `delete_record`, `bulk_create_records`, `bulk_update_records`, `/auto:scaffold-test-data`, `run_apex`, `assign_permission_set`, `unassign_permission_set`, `deploy_metadata`, any `sf data create/update/delete/import`, `sf project deploy`.
 
 If a workflow needs writes, you produce the journey/plan and explicitly hand off to an SDET running against a non-read-only sandbox.
 

@@ -1,27 +1,32 @@
 /**
- * Org detection + selection skeleton — to be implemented.
- *
- * Provides:
- *   - checkSetup() — returns SF CLI install status + authenticated orgs + current target
- *   - autoSelectOrg() — if exactly 1 authenticated org, return its alias; else null
+ * Setup status: SF CLI install + authenticated orgs + the org this session will use.
  */
 
-import { listOrgs } from "./cli.js";
+import { getTargetOrg, listOrgs, resolveTargetOrg, sf, SfCliMissingError, type OrgInfo } from "./cli.js";
 
 export interface SetupStatus {
   cliInstalled: boolean;
   cliVersion?: string;
-  authenticatedOrgs: { alias: string; username: string; instanceUrl: string }[];
+  authenticatedOrgs: OrgInfo[];
   targetOrg?: string;
+  targetOrgSource?: string;
+  targetOrgNote?: string;
 }
 
 export async function checkSetup(): Promise<SetupStatus> {
-  // TODO: execFile sf --version; on ENOENT return { cliInstalled: false }
-  // TODO: parse listOrgs() into authenticatedOrgs
-  // TODO: read sf config get target-org for current target
-  const _orgs = await listOrgs();
-  return {
-    cliInstalled: true,
-    authenticatedOrgs: [],
-  };
+  let cliVersion: string;
+  try {
+    cliVersion = (await sf(["--version"])).trim();
+  } catch (err) {
+    if (err instanceof SfCliMissingError) return { cliInstalled: false, authenticatedOrgs: [], targetOrgNote: err.message };
+    throw err;
+  }
+  const authenticatedOrgs = await listOrgs();
+  try {
+    await resolveTargetOrg();
+  } catch (err) {
+    return { cliInstalled: true, cliVersion, authenticatedOrgs, targetOrgNote: (err as Error).message };
+  }
+  const target = getTargetOrg()!;
+  return { cliInstalled: true, cliVersion, authenticatedOrgs, targetOrg: target.org, targetOrgSource: target.source };
 }

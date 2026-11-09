@@ -62,6 +62,6 @@ Fields to add: Business Partner Type, External Reference Number, Business Partne
 
 ## Tools
 
-- `check_account_config` — run the stakeholder section of health-check
+- `/auto:configure-stakeholders` — its checks cover Person Accounts, ACR, AAR and households
 - `run_soql` to verify Account / Contact / ACR / AAR data
 - `describe_sobject` to confirm field API names per release
