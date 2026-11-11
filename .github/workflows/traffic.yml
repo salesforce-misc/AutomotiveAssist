@@ -1,0 +1,42 @@
+name: Archive traffic stats
+
+# GitHub keeps traffic data for only 14 days; copy it to the `metrics` branch weekly.
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: metrics
+          fetch-depth: 1
+        continue-on-error: true # first run: branch does not exist yet
+      - name: Fetch stats
+        env:
+          # Needs a token with push access to the repo; the default GITHUB_TOKEN cannot read /traffic.
+          GH_TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          day=$(date -u +%F)
+          mkdir -p "traffic/$day"
+          for p in views clones popular/referrers popular/paths; do
+            gh api "repos/$REPO/traffic/$p" > "traffic/$day/$(basename "$p").json"
+          done
+          gh api --paginate "repos/$REPO/stargazers" --jq '[.[].login]' > "traffic/$day/stargazers.json"
+          gh api --paginate "repos/$REPO/forks" --jq '[.[].full_name]' > "traffic/$day/forks.json"
+      - name: Commit to metrics branch
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git checkout -B metrics
+          git add traffic
+          git commit -m "traffic: $(date -u +%F)" || exit 0
+          git push origin metrics
