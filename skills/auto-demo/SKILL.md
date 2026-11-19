@@ -32,7 +32,9 @@ This run is a live demo and a QA pass over the plugin's own commands. Every step
    Dev Hubs with `sf org list --json` and ask the user once.
 4. Alias: `auto-demo`. If an org with that alias already exists, ask whether to reuse it (the baseline in step 2 won't be clean) or
    use `auto-demo-2`, `auto-demo-3`, and so on.
-5. `sf org create scratch -f <scratch-def.json> -a <alias> -v <devhub> -d 1 -w 15 --json`, then `set_target_org <alias>`.
+5. `sf org create scratch --definition-file <scratch-def.json> --alias <alias> --target-dev-hub <devhub> --duration-days 1 --wait 15 --json`,
+   then `set_target_org <alias>`. Use the long flags: `-d` is `--set-default`, not the duration. The CLI may warn that the
+   Automotive feature names are invalid input; its local schema doesn't know them, and the org still gets them.
 
 **Pass when** the create result has status 0 and `/auto:setup-plugin` shows the new org as the target.
 
@@ -63,7 +65,9 @@ No command turns this on. The presenter does it by hand.
 
 ## 5. Mandatory record types (Product + Asset → Vehicle / Parts)
 
-1. Run `/auto:configure-record-types`.
+1. Run `/auto:configure-record-types`. `deploy_metadata` needs an sfdx project in the MCP server's working directory. If it
+   fails with `InvalidProjectWorkspaceError`, record the `FAIL`, then offer to retry with the server started from a temporary
+   sfdx project (as if the user ran Claude inside one) and record that result in Notes.
 2. Open `/lightning/setup/ObjectManager/Product2/RecordTypes/view`, then `/lightning/setup/ObjectManager/Asset/RecordTypes/view`.
 
 **Pass when** `run_soql` `SELECT SobjectType, DeveloperName, IsActive FROM RecordType WHERE SobjectType IN ('Product2','Asset')`
@@ -74,8 +78,9 @@ returns all four record types as active.
 1. Run `/auto:scaffold-test-data` with the `default` profile.
 2. Open the new Vehicle at `/lightning/r/Vehicle/<Id>/view` (or the Asset, if Vehicle was skipped).
 
-**Pass when** the command returns created Ids for at least a Person Account, VehicleDefinition, Asset and Vehicle. Objects it
-skips as not enabled are expected. List them, but they don't fail the step.
+**Pass when** the command returns created Ids for at least a customer (a Person Account if they're enabled), VehicleDefinition,
+Asset and Vehicle. Objects it skips as not enabled are expected; the bundled scratch definition has no Person Accounts. List
+them, but they don't fail the step.
 
 ## 7. Audit
 
