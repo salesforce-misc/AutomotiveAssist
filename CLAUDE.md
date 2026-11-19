@@ -98,6 +98,7 @@ See **`JOURNEY_MAP.md`** for the canonical 26-row journey map and 43-step depend
 | `auto-testing-go-live` | **SDET-focused** — test data scaffolding, regression patterns, scratch-org templates, FIT/Playwright |
 | `auto-arc` | ARC Relationship Graph (always last in setup sequence) |
 | `auto-page-layouts` | Per-record-type page layouts; record types for Product (Vehicle / Parts) and Asset (Vehicle / Parts) are mandatory |
+| `auto-demo` | **User-invoked only** (`/auto:auto-demo [qa]`) — creates a scratch org, shows it unconfigured, runs the basic setup features opening the org after each, and ends with a QA table |
 
 ### Commands (User-invoked with `/auto:command`)
 
