@@ -494,10 +494,16 @@ const handlers: Record<string, Handler> = {
     if (territory) where.push(`Id IN (SELECT UserId FROM UserTerritory2Association WHERE Territory2.Name = ${soqlString(territory)})`);
     return runSoql(`SELECT Id, Name, Username, Email, Profile.Name, UserType FROM User WHERE ${where.join(" AND ")} ORDER BY Name LIMIT 200`);
   },
-  list_permission_sets: async () => ({
-    permissionSetLicenses: (await runSoql("SELECT MasterLabel, DeveloperName, Status, TotalLicenses, UsedLicenses, ExpirationDate FROM PermissionSetLicense ORDER BY MasterLabel")).records,
-    permissionSetAssignmentCounts: (await runSoql("SELECT PermissionSet.Name name, PermissionSet.Label label, COUNT(Id) assigned FROM PermissionSetAssignment WHERE PermissionSet.IsOwnedByProfile = false GROUP BY PermissionSet.Name, PermissionSet.Label ORDER BY PermissionSet.Label")).records,
-  }),
+  list_permission_sets: async () => {
+    // Grouping by PermissionSet.Name silently drops license-backed sets (e.g. Automotive Foundation User), so count by Id and look up names.
+    const counts = (await runSoql("SELECT PermissionSetId id, COUNT(Id) assigned FROM PermissionSetAssignment WHERE PermissionSet.IsOwnedByProfile = false GROUP BY PermissionSetId")).records;
+    const sets = counts.length ? (await runSoql(`SELECT Id, Name, Label FROM PermissionSet WHERE Id IN (${counts.map((c) => `'${c.id}'`).join(",")}) ORDER BY Label`)).records : [];
+    const assigned = new Map(counts.map((c) => [c.id, c.assigned]));
+    return {
+      permissionSetLicenses: (await runSoql("SELECT MasterLabel, DeveloperName, Status, TotalLicenses, UsedLicenses, ExpirationDate FROM PermissionSetLicense ORDER BY MasterLabel")).records,
+      permissionSetAssignmentCounts: sets.map((s) => ({ name: s.Name, label: s.Label, assigned: assigned.get(s.Id) })),
+    };
+  },
   assign_permission_set: async ({ permSet, userIds }) => {
     const psId = await permissionSetId(permSet);
     return collection("POST", "PermissionSetAssignment", (userIds ?? []).map((u: unknown) => ({ AssigneeId: recordId(u), PermissionSetId: psId })));
