@@ -1,8 +1,0 @@
-{
-  "orgName": "Automotive Cloud Demo",
-  "edition": "Developer",
-  "features": ["IndustriesAutomotive", "PersonAccounts"],
-  "settings": {
-    "lightningExperienceSettings": { "enableS1DesktopEnabled": true }
-  }
-}
