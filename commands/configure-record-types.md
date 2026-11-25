@@ -18,4 +18,6 @@ Mandatory record-type splits for Automotive Cloud.
    - Per-RT page layouts with the right field set (see `auto-vehicle-asset-fleet`).
 3. Make each record type available to the relevant profiles.
 4. Configure default record type per profile.
-5. Use `retrieve_metadata` / `deploy_metadata` for batch operations.
+5. Use `retrieve_metadata` / `deploy_metadata` for batch operations. Write the source inside an sfdx project (a folder with
+   `sfdx-project.json`, source under `force-app/main/default/`). If the user isn't in one, create a temporary project. Run
+   `deploy_metadata` with `dryRun: true` first.

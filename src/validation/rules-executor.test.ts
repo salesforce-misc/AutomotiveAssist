@@ -6,6 +6,7 @@ vi.mock("../salesforce/cli.js", () => ({
 }));
 
 const { executeRules } = await import("./rules-executor.js");
+const { runSoql } = await import("../salesforce/cli.js");
 
 const rule = (id: string, severity: "error" | "warning", check: Record<string, unknown>) => ({ id, group: "g", description: id, severity, check });
 
@@ -25,5 +26,6 @@ describe("executeRules", () => {
     ]);
     expect(results[1].message).toContain("Parts");
     expect(results[2].message).toContain("3 active");
+    expect(vi.mocked(runSoql).mock.calls.some(([q]) => q.includes("FROM User") && q.includes("!= 'INSIGHTS_INTEGRATION_USER'"))).toBe(true);
   });
 });

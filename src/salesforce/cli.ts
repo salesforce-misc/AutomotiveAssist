@@ -8,9 +8,10 @@
  */
 
 import { execFile } from "node:child_process";
+import { existsSync } from "node:fs";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
@@ -35,9 +36,10 @@ function errorMessage(stdout?: string): string | undefined {
   }
 }
 
-export async function sf(args: string[]): Promise<string> {
+export async function sf(args: string[], cwd?: string): Promise<string> {
   try {
     const { stdout } = await execFileAsync("sf", args, {
+      cwd,
       maxBuffer: 50 * 1024 * 1024,
       env: { ...process.env, SF_AUTOUPDATE_DISABLE: "true" },
     });
@@ -50,10 +52,21 @@ export async function sf(args: string[]): Promise<string> {
 }
 
 /** Run `sf <args> --json` and return its `result`. */
-export async function sfJson<T = any>(args: string[]): Promise<T> {
-  const parsed = JSON.parse(await sf([...args, "--json"]));
+export async function sfJson<T = any>(args: string[], cwd?: string): Promise<T> {
+  const parsed = JSON.parse(await sf([...args, "--json"], cwd));
   if (parsed.status !== 0) throw new Error(parsed.message ?? JSON.stringify(parsed));
   return parsed.result as T;
+}
+
+/** `sf project` commands must run inside an sfdx project: use the one containing `path`, else the one containing the server's cwd. */
+export function projectRoot(path: string): string {
+  for (const start of [resolve(path), process.cwd()]) {
+    for (let dir = start; ; dir = dirname(dir)) {
+      if (existsSync(join(dir, "sfdx-project.json"))) return dir;
+      if (dirname(dir) === dir) break;
+    }
+  }
+  throw new Error(`${path} is not inside a Salesforce DX project (no sfdx-project.json in it, any parent folder, or the server's working directory)`);
 }
 
 export interface OrgInfo {
@@ -164,16 +177,16 @@ export async function rest(method: "GET" | "POST" | "PATCH" | "DELETE", path: st
 }
 
 export async function deployMetadata(sourceDir: string, testLevel?: string, dryRun = false): Promise<any> {
-  const args = ["project", "deploy", "start", "--source-dir", sourceDir, "--wait", "30", ...(await orgArgs())];
+  const args = ["project", "deploy", "start", "--source-dir", resolve(sourceDir), "--wait", "30", ...(await orgArgs())];
   if (testLevel) args.push("--test-level", testLevel);
   if (dryRun) args.push("--dry-run");
-  return sfJson(args);
+  return sfJson(args, projectRoot(sourceDir));
 }
 
 export async function retrieveMetadata(manifest: string, targetDir?: string): Promise<any> {
-  const args = ["project", "retrieve", "start", "--manifest", manifest, "--wait", "30", ...(await orgArgs())];
-  if (targetDir) args.push("--output-dir", targetDir);
-  return sfJson(args);
+  const args = ["project", "retrieve", "start", "--manifest", resolve(manifest), "--wait", "30", ...(await orgArgs())];
+  if (targetDir) args.push("--output-dir", resolve(targetDir));
+  return sfJson(args, projectRoot(manifest));
 }
 
 export async function installCli(): Promise<string> {

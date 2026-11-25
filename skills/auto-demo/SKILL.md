@@ -65,9 +65,7 @@ No command turns this on. The presenter does it by hand.
 
 ## 5. Mandatory record types (Product + Asset → Vehicle / Parts)
 
-1. Run `/auto:configure-record-types`. `deploy_metadata` needs an sfdx project in the MCP server's working directory. If it
-   fails with `InvalidProjectWorkspaceError`, record the `FAIL`, then offer to retry with the server started from a temporary
-   sfdx project (as if the user ran Claude inside one) and record that result in Notes.
+1. Run `/auto:configure-record-types`.
 2. Open `/lightning/setup/ObjectManager/Product2/RecordTypes/view`, then `/lightning/setup/ObjectManager/Asset/RecordTypes/view`.
 
 **Pass when** `run_soql` `SELECT SobjectType, DeveloperName, IsActive FROM RecordType WHERE SobjectType IN ('Product2','Asset')`

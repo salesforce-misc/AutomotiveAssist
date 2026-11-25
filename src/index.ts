@@ -428,6 +428,9 @@ const handlers: Record<string, Handler> = {
         ...(f.referenceTo?.length ? { referenceTo: f.referenceTo } : {}),
         ...(f.picklistValues?.length ? { picklistValues: f.picklistValues.filter((p: any) => p.active).map((p: any) => p.value) } : {}),
         nillable: f.nillable,
+        // Required to set on create = !nillable && createable && !defaultedOnCreate (auto-numbers and formulas aren't createable).
+        ...(f.createable ? {} : { createable: false }),
+        ...(f.defaultedOnCreate ? { defaultedOnCreate: true } : {}),
         custom: f.custom,
       })),
       childRelationships: (d.childRelationships ?? []).filter((c: any) => c.relationshipName).map((c: any) => ({ childSObject: c.childSObject, field: c.field, relationshipName: c.relationshipName })),

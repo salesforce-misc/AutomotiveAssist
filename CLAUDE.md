@@ -159,7 +159,7 @@ The MCP server has **no** dedicated tools for settings, actions, layouts or auto
 
 | What | How |
 |---|---|
-| **Setup toggles** (Automotive Settings, Knowledge, Digital Experiences, Einstein, Scheduler, Omnistudio, Sharing, …) | `retrieve_metadata` with a `package.xml` for type `Settings` (members `*`), then read the relevant `*.settings-meta.xml`. Needs an sfdx project in the working directory. Otherwise ask the user to check **Setup → Quick Find → Automotive Settings** (or the named settings page). |
+| **Setup toggles** (Automotive Settings, Knowledge, Digital Experiences, Einstein, Scheduler, Omnistudio, Sharing, …) | `retrieve_metadata` with a `package.xml` for type `Settings` (members `*`), then read the relevant `*.settings-meta.xml`. The `package.xml` must sit inside an sfdx project (or the server's working directory must be one). Otherwise ask the user to check **Setup → Quick Find → Automotive Settings** (or the named settings page). |
 | **Change a toggle** | Confirm with the user (see irreversible toggles below), then either have them flip it in Setup, or deploy an edited `.settings-meta.xml` with `deploy_metadata`, running `dryRun: true` first. |
 | **Is a feature/object enabled?** | `describe_sobject <Object>` or `run_soql SELECT COUNT() FROM <Object>`. An `INVALID_TYPE` error means it's not enabled. Person Accounts are on when `Account` has an `IsPersonAccount` field. |
 | **Page layouts, compact layouts, quick actions, Lightning pages, OmniStudio metadata** | `retrieve_metadata` (`Layout`, `CompactLayout`, `QuickAction`, `FlexiPage`, `OmniScript`, …). These are metadata, not SOQL data. Create or change them by deploying with `deploy_metadata`. |
