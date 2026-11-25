@@ -8,7 +8,7 @@
  */
 
 import { execFile } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, realpathSync } from "node:fs";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -58,9 +58,12 @@ export async function sfJson<T = any>(args: string[], cwd?: string): Promise<T> 
   return parsed.result as T;
 }
 
+/** sf resolves its cwd through symlinks (macOS /var → /private/var); paths must match it, or sf rejects them as climbing out with "../". */
+const realPath = (path: string) => (existsSync(path) ? realpathSync(path) : resolve(path));
+
 /** `sf project` commands must run inside an sfdx project: use the one containing `path`, else the one containing the server's cwd. */
 export function projectRoot(path: string): string {
-  for (const start of [resolve(path), process.cwd()]) {
+  for (const start of [realPath(path), realPath(process.cwd())]) {
     for (let dir = start; ; dir = dirname(dir)) {
       if (existsSync(join(dir, "sfdx-project.json"))) return dir;
       if (dirname(dir) === dir) break;
@@ -177,15 +180,15 @@ export async function rest(method: "GET" | "POST" | "PATCH" | "DELETE", path: st
 }
 
 export async function deployMetadata(sourceDir: string, testLevel?: string, dryRun = false): Promise<any> {
-  const args = ["project", "deploy", "start", "--source-dir", resolve(sourceDir), "--wait", "30", ...(await orgArgs())];
+  const args = ["project", "deploy", "start", "--source-dir", realPath(sourceDir), "--wait", "30", ...(await orgArgs())];
   if (testLevel) args.push("--test-level", testLevel);
   if (dryRun) args.push("--dry-run");
   return sfJson(args, projectRoot(sourceDir));
 }
 
 export async function retrieveMetadata(manifest: string, targetDir?: string): Promise<any> {
-  const args = ["project", "retrieve", "start", "--manifest", resolve(manifest), "--wait", "30", ...(await orgArgs())];
-  if (targetDir) args.push("--output-dir", resolve(targetDir));
+  const args = ["project", "retrieve", "start", "--manifest", realPath(manifest), "--wait", "30", ...(await orgArgs())];
+  if (targetDir) args.push("--output-dir", realPath(targetDir));
   return sfJson(args, projectRoot(manifest));
 }
 

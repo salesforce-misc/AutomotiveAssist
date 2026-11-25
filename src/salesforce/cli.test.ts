@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, realpathSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, realpathSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
@@ -16,6 +16,12 @@ describe("projectRoot", () => {
   it("finds the project that contains the path", () => {
     expect(projectRoot(source)).toBe(project);
     expect(projectRoot(join(project, "package.xml"))).toBe(project);
+  });
+
+  it("returns the real path when the source is reached through a symlink", () => {
+    const link = join(tmp, "link");
+    symlinkSync(project, link);
+    expect(projectRoot(join(link, "force-app"))).toBe(project);
   });
 
   it("falls back to the project containing the server cwd", () => {
