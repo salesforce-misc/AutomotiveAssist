@@ -15,7 +15,8 @@
     "OmnistudioDesigner",
     "BusinessRulesEngine",
     "DataProcessingEngine",
-    "DocumentChecklist"
+    "DocumentChecklist",
+    "PersonAccounts"
   ],
   "settings": {
     "communitiesSettings": { "enableNetworksEnabled": true }

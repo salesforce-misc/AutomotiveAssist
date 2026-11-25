@@ -113,6 +113,7 @@ See **`JOURNEY_MAP.md`** for the canonical 26-row journey map and 43-step depend
 | `/auto:getting-started` | Interactive onboarding |
 | `/auto:configure-permissions` | Wizard — PSLs, profiles, OWD recommendations |
 | `/auto:configure-stakeholders` | Wizard — Person Account, ACR, AAR, household, asset participants |
+| `/auto:configure-person-accounts` | Wizard — enable Person Accounts + `Business_Account` / `PersonAccount` record types (irreversible) |
 | `/auto:configure-products` | Wizard — Business Brand, Catalog, Vehicle Definition, Product RTs |
 | `/auto:configure-vehicles` | Wizard — Vehicle / Asset record types and page layouts |
 | `/auto:configure-fleets` | Wizard — Fleet, Fleet Asset, Fleet Participant |

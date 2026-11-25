@@ -8,8 +8,8 @@ Interactive wizard for the Stakeholder Management journey (see `auto-stakeholder
 
 ## Steps
 
-1. Verify Person Account is enabled. If not → confirm OWD prerequisite, then guide the user through the support-ticket flow (irreversible — do not enable in production without dry-run).
-2. Confirm Account record types exist (Business, Person, plus dealer/household RTs as needed).
+1. Verify Person Account is enabled and Account has the `Business_Account` and `PersonAccount` record types. If not, run `/auto:configure-person-accounts` (irreversible; it confirms with the user first).
+2. Add dealer / household Account record types as needed.
 3. Verify Group Membership Settings is enabled.
 4. Verify Account Contact Relationship usage; check ACR record types if customers belong to multiple households.
 5. Walk through Account Account Relationship setup (e.g., household ↔ preferred dealership).

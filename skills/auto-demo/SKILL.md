@@ -54,7 +54,8 @@ No command turns this on. The presenter does it by hand.
    Pause until they confirm, in `qa` mode too.
 2. Run `/auto:status` again.
 
-**Pass when** Vehicle and VehicleDefinition no longer show as "not enabled".
+**Pass when** Vehicle and VehicleDefinition no longer show as "not enabled". If they still do, the toggle usually didn't save,
+or it was changed in another org: ask the presenter to check the org's username and retry once before marking it `FAIL`.
 
 ## 4. Permissions
 
@@ -71,20 +72,30 @@ No command turns this on. The presenter does it by hand.
 **Pass when** `run_soql` `SELECT SobjectType, DeveloperName, IsActive FROM RecordType WHERE SobjectType IN ('Product2','Asset')`
 returns all four record types as active.
 
+## 5b. Person Accounts
+
+1. Run `/auto:configure-person-accounts`. The bundled scratch definition has the `PersonAccounts` feature, so the command should
+   only verify. If they're off (a custom definition file), it creates `Business_Account`, and enabling then means a new scratch
+   org: record a finding and carry on with a business-Account customer. This is a scratch org the presenter asked for, so
+   don't ask before enabling.
+2. Open `/lightning/setup/ObjectManager/Account/RecordTypes/view`.
+
+**Pass when** Account has an `IsPersonAccount` field and active `Business_Account` and `PersonAccount` record types.
+
 ## 6. Test data
 
 1. Run `/auto:scaffold-test-data` with the `default` profile.
 2. Open the new Vehicle at `/lightning/r/Vehicle/<Id>/view` (or the Asset, if Vehicle was skipped).
 
-**Pass when** the command returns created Ids for at least a customer (a Person Account if they're enabled), VehicleDefinition,
-Asset and Vehicle. Objects it skips as not enabled are expected; the bundled scratch definition has no Person Accounts. List
-them, but they don't fail the step.
+**Pass when** the command returns created Ids for at least a Person Account customer (a business Account + Contact if step 5b
+failed), VehicleDefinition, Asset and Vehicle. Objects it skips as not enabled are expected. List them, but they don't fail
+the step.
 
 ## 7. Audit
 
 1. Run `/auto:audit pre-deployment`.
 
-**Pass when** the audit runs to the end. Report its pass / fail / skip counts.
+**Pass when** the audit runs to the end and `account-record-types-exist` passes. Report its pass / fail / skip counts.
 
 ## 8. Health check: before vs. after
 

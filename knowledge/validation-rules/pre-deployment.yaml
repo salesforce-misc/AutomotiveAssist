@@ -20,7 +20,7 @@ check:
   hasRecordTypes:
     - Business_Account
     - PersonAccount
-remediation: Create Account record types before enabling Person Accounts
+remediation: Run /auto:configure-person-accounts (creates Business_Account before enabling Person Accounts)
 docs: skills/auto-stakeholder-management/SKILL.md
 ---
 id: product-record-types-split
