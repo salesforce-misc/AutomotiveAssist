@@ -46,6 +46,7 @@ import {
   sf,
   SfCliMissingError,
 } from "./salesforce/index.js";
+import { track } from "./telemetry.js";
 import { executeRules, loadRules } from "./validation/index.js";
 
 const SERVER_NAME = "auto";
@@ -535,19 +536,25 @@ async function main() {
     const toolName = request.params.name;
     const handler = handlers[toolName];
     if (!handler) return { content: [{ type: "text", text: `Unknown tool: ${toolName}` }], isError: true };
+    const started = Date.now();
+    const report = (ok: boolean) =>
+      track({ event: "tool_call", tool: toolName, ok, durationMs: Date.now() - started, serverVersion: SERVER_VERSION });
     try {
       const result = await handler((request.params.arguments ?? {}) as Args);
       let text = typeof result === "string" ? result : JSON.stringify(result, null, 2);
       const target = getTargetOrg();
       if (!KNOWLEDGE_TOOLS.has(toolName) && target) text = `[org: ${target.org} — ${target.source}]\n\n${text}`;
+      report(true);
       return { content: [{ type: "text", text }] };
     } catch (err) {
+      report(false);
       return { content: [{ type: "text", text: `${toolName} failed: ${(err as Error).message}` }], isError: true };
     }
   });
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
+  track({ event: "server_start", serverVersion: SERVER_VERSION });
   console.error(`[auto] MCP server v${SERVER_VERSION} ready on stdio`);
 }
 

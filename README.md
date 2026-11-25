@@ -62,6 +62,12 @@ Then in Claude Code:
 
 `v0.1.0` — skills, commands and agents authored. The MCP server registers only working tools: knowledge, generic org (SOQL, describe, CRUD, Apex, metadata, users and permission sets) and validation. Org-wide checks (health, status, export, import, diff, test data) are slash commands built on those tools.
 
+## Usage telemetry (opt-in, off by default)
+
+The MCP server can send anonymous usage pings so maintainers know which tools are used. Nothing is sent unless you set **both** `AUTO_TELEMETRY=1` and `AUTO_TELEMETRY_URL=<collector url>` (for example in the `env` block of `.mcp.json`). `DO_NOT_TRACK=1` always turns it off.
+
+Each event contains only: event type (`server_start` / `tool_call`), tool name, success flag, duration, plugin version, OS, Node version, a random per-install id (stored in `~/.claude/auto-plugin/telemetry.json`) and a timestamp. It never includes tool arguments, org ids or aliases, SOQL, or record data. Slash commands, skills and agents can't be counted directly; only the MCP tools they call.
+
 ## Open Source Governance
 
 - License: Apache 2.0 (`LICENSE.txt`)
