@@ -46,6 +46,7 @@ import {
   sf,
   SfCliMissingError,
 } from "./salesforce/index.js";
+import { track } from "./telemetry.js";
 import { executeRules, loadRules } from "./validation/index.js";
 
 const SERVER_NAME = "auto";
@@ -428,6 +429,9 @@ const handlers: Record<string, Handler> = {
         ...(f.referenceTo?.length ? { referenceTo: f.referenceTo } : {}),
         ...(f.picklistValues?.length ? { picklistValues: f.picklistValues.filter((p: any) => p.active).map((p: any) => p.value) } : {}),
         nillable: f.nillable,
+        // Required to set on create = !nillable && createable && !defaultedOnCreate (auto-numbers and formulas aren't createable).
+        ...(f.createable ? {} : { createable: false }),
+        ...(f.defaultedOnCreate ? { defaultedOnCreate: true } : {}),
         custom: f.custom,
       })),
       childRelationships: (d.childRelationships ?? []).filter((c: any) => c.relationshipName).map((c: any) => ({ childSObject: c.childSObject, field: c.field, relationshipName: c.relationshipName })),
@@ -494,10 +498,16 @@ const handlers: Record<string, Handler> = {
     if (territory) where.push(`Id IN (SELECT UserId FROM UserTerritory2Association WHERE Territory2.Name = ${soqlString(territory)})`);
     return runSoql(`SELECT Id, Name, Username, Email, Profile.Name, UserType FROM User WHERE ${where.join(" AND ")} ORDER BY Name LIMIT 200`);
   },
-  list_permission_sets: async () => ({
-    permissionSetLicenses: (await runSoql("SELECT MasterLabel, DeveloperName, Status, TotalLicenses, UsedLicenses, ExpirationDate FROM PermissionSetLicense ORDER BY MasterLabel")).records,
-    permissionSetAssignmentCounts: (await runSoql("SELECT PermissionSet.Name name, PermissionSet.Label label, COUNT(Id) assigned FROM PermissionSetAssignment WHERE PermissionSet.IsOwnedByProfile = false GROUP BY PermissionSet.Name, PermissionSet.Label ORDER BY PermissionSet.Label")).records,
-  }),
+  list_permission_sets: async () => {
+    // Grouping by PermissionSet.Name silently drops license-backed sets (e.g. Automotive Foundation User), so count by Id and look up names.
+    const counts = (await runSoql("SELECT PermissionSetId id, COUNT(Id) assigned FROM PermissionSetAssignment WHERE PermissionSet.IsOwnedByProfile = false GROUP BY PermissionSetId")).records;
+    const sets = counts.length ? (await runSoql(`SELECT Id, Name, Label FROM PermissionSet WHERE Id IN (${counts.map((c) => `'${c.id}'`).join(",")}) ORDER BY Label`)).records : [];
+    const assigned = new Map(counts.map((c) => [c.id, c.assigned]));
+    return {
+      permissionSetLicenses: (await runSoql("SELECT MasterLabel, DeveloperName, Status, TotalLicenses, UsedLicenses, ExpirationDate FROM PermissionSetLicense ORDER BY MasterLabel")).records,
+      permissionSetAssignmentCounts: sets.map((s) => ({ name: s.Name, label: s.Label, assigned: assigned.get(s.Id) })),
+    };
+  },
   assign_permission_set: async ({ permSet, userIds }) => {
     const psId = await permissionSetId(permSet);
     return collection("POST", "PermissionSetAssignment", (userIds ?? []).map((u: unknown) => ({ AssigneeId: recordId(u), PermissionSetId: psId })));
@@ -526,19 +536,25 @@ async function main() {
     const toolName = request.params.name;
     const handler = handlers[toolName];
     if (!handler) return { content: [{ type: "text", text: `Unknown tool: ${toolName}` }], isError: true };
+    const started = Date.now();
+    const report = (ok: boolean) =>
+      track({ event: "tool_call", tool: toolName, ok, durationMs: Date.now() - started, serverVersion: SERVER_VERSION });
     try {
       const result = await handler((request.params.arguments ?? {}) as Args);
       let text = typeof result === "string" ? result : JSON.stringify(result, null, 2);
       const target = getTargetOrg();
       if (!KNOWLEDGE_TOOLS.has(toolName) && target) text = `[org: ${target.org} — ${target.source}]\n\n${text}`;
+      report(true);
       return { content: [{ type: "text", text }] };
     } catch (err) {
+      report(false);
       return { content: [{ type: "text", text: `${toolName} failed: ${(err as Error).message}` }], isError: true };
     }
   });
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
+  track({ event: "server_start", serverVersion: SERVER_VERSION });
   console.error(`[auto] MCP server v${SERVER_VERSION} ready on stdio`);
 }
 

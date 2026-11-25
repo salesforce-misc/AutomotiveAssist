@@ -1,0 +1,24 @@
+{
+  "orgName": "Automotive Cloud Dev",
+  "edition": "Enterprise",
+  "features": [
+    "IndustriesAutomotive",
+    "AutomotiveDealerEssentials",
+    "IndustriesSchedulerForAutomotive",
+    "SalesUser",
+    "ServiceUser",
+    "FieldService:5",
+    "Communities",
+    "EnablePRM",
+    "LightningScheduler",
+    "OmnistudioRuntime",
+    "OmnistudioDesigner",
+    "BusinessRulesEngine",
+    "DataProcessingEngine",
+    "DocumentChecklist",
+    "PersonAccounts"
+  ],
+  "settings": {
+    "communitiesSettings": { "enableNetworksEnabled": true }
+  }
+}

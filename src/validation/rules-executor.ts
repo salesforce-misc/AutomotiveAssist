@@ -36,7 +36,8 @@ async function runCheck(check: Record<string, any>): Promise<CheckOutcome> {
       const psl = await runSoql(`SELECT Id FROM PermissionSetLicense WHERE MasterLabel = ${label} OR DeveloperName = ${label}`);
       if (psl.totalSize === 0) return { ok: false, message: `Permission set license "${check.psl}" is not provisioned in this org` };
       const missing = await runSoql(
-        `SELECT COUNT() FROM User WHERE IsActive = true AND UserType = 'Standard' AND Id NOT IN ` +
+        // Analytics Cloud Integration/Security users are platform system users with their own license; they never get Automotive PSLs.
+        `SELECT COUNT() FROM User WHERE IsActive = true AND UserType = 'Standard' AND Profile.UserLicense.LicenseDefinitionKey != 'INSIGHTS_INTEGRATION_USER' AND Id NOT IN ` +
           `(SELECT AssigneeId FROM PermissionSetLicenseAssign WHERE PermissionSetLicenseId = '${psl.records[0].Id}')`
       );
       return missing.totalSize

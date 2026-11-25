@@ -98,6 +98,7 @@ See **`JOURNEY_MAP.md`** for the canonical 26-row journey map and 43-step depend
 | `auto-testing-go-live` | **SDET-focused** — test data scaffolding, regression patterns, scratch-org templates, FIT/Playwright |
 | `auto-arc` | ARC Relationship Graph (always last in setup sequence) |
 | `auto-page-layouts` | Per-record-type page layouts; record types for Product (Vehicle / Parts) and Asset (Vehicle / Parts) are mandatory |
+| `auto-demo` | **User-invoked only** (`/auto:auto-demo [qa]`) — creates a scratch org from `skills/auto-demo/scratch-def.json`, shows it unconfigured, runs the basic `/auto:*` commands opening the org after each, and ends with a QA table |
 
 ### Commands (User-invoked with `/auto:command`)
 
@@ -112,6 +113,7 @@ See **`JOURNEY_MAP.md`** for the canonical 26-row journey map and 43-step depend
 | `/auto:getting-started` | Interactive onboarding |
 | `/auto:configure-permissions` | Wizard — PSLs, profiles, OWD recommendations |
 | `/auto:configure-stakeholders` | Wizard — Person Account, ACR, AAR, household, asset participants |
+| `/auto:configure-person-accounts` | Wizard — enable Person Accounts + `Business_Account` / `PersonAccount` record types (irreversible) |
 | `/auto:configure-products` | Wizard — Business Brand, Catalog, Vehicle Definition, Product RTs |
 | `/auto:configure-vehicles` | Wizard — Vehicle / Asset record types and page layouts |
 | `/auto:configure-fleets` | Wizard — Fleet, Fleet Asset, Fleet Participant |
@@ -158,7 +160,7 @@ The MCP server has **no** dedicated tools for settings, actions, layouts or auto
 
 | What | How |
 |---|---|
-| **Setup toggles** (Automotive Settings, Knowledge, Digital Experiences, Einstein, Scheduler, Omnistudio, Sharing, …) | `retrieve_metadata` with a `package.xml` for type `Settings` (members `*`), then read the relevant `*.settings-meta.xml`. Needs an sfdx project in the working directory. Otherwise ask the user to check **Setup → Quick Find → Automotive Settings** (or the named settings page). |
+| **Setup toggles** (Automotive Settings, Knowledge, Digital Experiences, Einstein, Scheduler, Omnistudio, Sharing, …) | `retrieve_metadata` with a `package.xml` for type `Settings` (members `*`), then read the relevant `*.settings-meta.xml`. The `package.xml` must sit inside an sfdx project (or the server's working directory must be one). Otherwise ask the user to check **Setup → Quick Find → Automotive Settings** (or the named settings page). |
 | **Change a toggle** | Confirm with the user (see irreversible toggles below), then either have them flip it in Setup, or deploy an edited `.settings-meta.xml` with `deploy_metadata`, running `dryRun: true` first. |
 | **Is a feature/object enabled?** | `describe_sobject <Object>` or `run_soql SELECT COUNT() FROM <Object>`. An `INVALID_TYPE` error means it's not enabled. Person Accounts are on when `Account` has an `IsPersonAccount` field. |
 | **Page layouts, compact layouts, quick actions, Lightning pages, OmniStudio metadata** | `retrieve_metadata` (`Layout`, `CompactLayout`, `QuickAction`, `FlexiPage`, `OmniScript`, …). These are metadata, not SOQL data. Create or change them by deploying with `deploy_metadata`. |
